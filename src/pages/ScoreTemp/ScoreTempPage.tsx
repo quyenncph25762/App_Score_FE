@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, message, Popconfirm, Space, Table, Tooltip } from 'antd';
+import { Badge, Button, message, Popconfirm, Space, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
@@ -47,7 +47,7 @@ const ScoreTempPage = () => {
         },
 
         {
-            title: 'Chinese Score',
+            title: 'Loại đối tượng',
             dataIndex: 'chinese',
             sorter: {
                 compare: (a, b) => a.chinese - b.chinese,
@@ -55,12 +55,19 @@ const ScoreTempPage = () => {
             },
         },
         {
-            title: 'Math Score',
+            title: 'Năm',
             dataIndex: 'math',
             sorter: {
                 compare: (a, b) => a.math - b.math,
                 multiple: 2,
             },
+        },
+        {
+            title: 'Áp dụng',
+            dataIndex: 'isActive',
+            render: (_, value: any) => (
+                <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
+            )
         },
         {
             title: 'Hành động',

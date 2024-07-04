@@ -5,7 +5,7 @@
       "code": "DIAKNX",
       "username": "USER915956",
       "isActive": true,
-      "name": "Nguyen Cong Q",
+      "name": "Nguyễn Công Quyền",
       "ProvinceId": "1",
       "DistrictId": "1",
       "WardId": "1",
@@ -19,23 +19,25 @@
       "code": "HKZBCI",
       "username": "PH25762",
       "isActive": true,
-      "name": "Nguyen Cong Toann",
+      "name": "Nguyễn Công Toàn",
       "ProvinceId": "2",
       "DistrictId": "2",
       "WardId": "2",
       "address": "Duong Loi",
       "email": "nguyencongtoan@gmail.com",
-      "isDeleted": 0
+      "isDeleted": 0,
+      "DepartmentId": "c39c"
     },
     {
       "id": "68df",
       "code": "IDHIIA",
       "username": "USER217333",
       "isActive": 1,
-      "name": "Nguyễn Công Tiến 123",
+      "name": "Nguyễn Công Tiến ",
       "Department": "4200",
       "email": "tien@gmail.com",
-      "isDeleted": 0
+      "isDeleted": 0,
+      "DepartmentId": "1fa0"
     },
     {
       "id": "9c06",
@@ -53,7 +55,8 @@
       "username": "USER044526",
       "isActive": 1,
       "name": "Vũ Đình Đại",
-      "email": "daivd@gmail.com"
+      "email": "daivd@gmail.com",
+      "DepartmentId": "1fa0"
     }
   ],
   "department": [

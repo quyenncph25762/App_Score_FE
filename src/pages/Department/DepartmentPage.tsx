@@ -10,7 +10,7 @@ import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAddDepartmentMutation, useFetchAllDepartmentQuery, useFetchOneDepartmentQuery, useRemoveDepartmentMutation, useUpdateDepartmentMutation } from '../../store/department/department.service';
 import { RootState } from '../../store';
-import { fetchAllDepartment } from '../../store/department/departmentSlice';
+import { fetchAllDepartment, searchDepartmentSlice } from '../../store/department/departmentSlice';
 import { IDepartment, IIsDeleted } from '../../store/department/department.interface';
 import TextArea from 'antd/es/input/TextArea';
 import Error500 from '../Error500';
@@ -100,7 +100,6 @@ const DepartmentPage = () => {
     // neu co listDepartmentApi thi dispatch vao trong reducer
     useEffect(() => {
         if (listDepartmentApi) {
-
             dispatch(fetchAllDepartment(listDepartmentApi))
         }
     }, [isSuccessDepartment, listDepartmentApi])
@@ -246,8 +245,15 @@ const DepartmentPage = () => {
         }
     }
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
-        console.log(value)
+        if (value) {
+            dispatch(searchDepartmentSlice({ searchTerm: value, departments: listDepartmentApi }))
+        } else {
+            dispatch(fetchAllDepartment(listDepartmentApi))
+        }
     };
+    const handleReset = () => {
+        dispatch(fetchAllDepartment(listDepartmentApi))
+    }
     // submit add phòng ban
     const onFinish = async (values: IDepartment) => {
         try {
@@ -435,6 +441,7 @@ const DepartmentPage = () => {
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listDepartment)}>Xóa tất cả</Button>
                     <Search placeholder="Tìm kiếm tên phòng ban ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>
             </div>

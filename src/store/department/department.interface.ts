@@ -13,3 +13,8 @@ export interface IIsDeleted {
 export interface IDepartmentState {
     departments: IDepartment[]
 }
+
+export interface IDepartmentSearchState {
+    searchTerm: string
+    departments: IDepartment[]
+}

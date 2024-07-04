@@ -252,6 +252,9 @@ const ObjectPage = () => {
             dispatch(getAllObjectSlice(listObjectApi))
         }
     };
+    const handleReset = () => {
+        dispatch(getAllObjectSlice(listObjectApi))
+    }
     // submit add phòng ban
     const onFinish = async (values: IObject) => {
         try {
@@ -440,6 +443,7 @@ const ObjectPage = () => {
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listObject)}>Xóa tất cả</Button>
                     <Search placeholder="Tìm kiếm đối tượng ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>
             </div>
