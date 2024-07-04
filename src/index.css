@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.text-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.iconDelete-title {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: red;
+  cursor: pointer;
+}
