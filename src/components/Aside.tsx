@@ -79,8 +79,8 @@ const Aside = () => {
     // item nav
     const sideBaritems: MenuItem[] = [
         getItem(<Link to={"/"}>Dashboard</Link >, '1', <PieChartOutlined />),
-        getItem('Phòng ban', 'sub3', <PartitionOutlined />, [
-            getItem(<Link to={"/department"}>Quản lý phòng ban</Link >, '6'),
+        getItem('Lĩnh vực', 'sub3', <PartitionOutlined />, [
+            getItem(<Link to={"/department"}>Quản lý lĩnh vực</Link >, '6'),
         ]),
         getItem('Đối tượng', 'sub4', <SolutionOutlined />, [
             getItem(<Link to={"/object"}>Quản lý đối tượng</Link >, '7'),

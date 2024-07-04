@@ -12,7 +12,8 @@
       "address": "Yên lã 2 , tân hồng , hehe",
       "email": "quyennc1610203@gmail.com",
       "isDeleted": 0,
-      "DepartmentId": "5f5d"
+      "DepartmentId": "5f5d",
+      "ObjectId": "2"
     },
     {
       "id": "42e0",
@@ -26,7 +27,8 @@
       "address": "Duong Loi",
       "email": "nguyencongtoan@gmail.com",
       "isDeleted": 0,
-      "DepartmentId": "c39c"
+      "DepartmentId": "c39c",
+      "ObjectId": "f7de"
     },
     {
       "id": "68df",
@@ -37,7 +39,11 @@
       "Department": "4200",
       "email": "tien@gmail.com",
       "isDeleted": 0,
-      "DepartmentId": "1fa0"
+      "DepartmentId": "1fa0",
+      "ObjectId": "60cb",
+      "ProvinceId": "1",
+      "DistrictId": "2",
+      "WardId": "1"
     },
     {
       "id": "9c06",
@@ -46,7 +52,7 @@
       "isActive": 1,
       "name": "123",
       "email": "a@gmail.com",
-      "isDeleted": 1
+      "isDeleted": 0
     },
     {
       "id": "a83c",
@@ -56,32 +62,53 @@
       "isActive": 1,
       "name": "Vũ Đình Đại",
       "email": "daivd@gmail.com",
-      "DepartmentId": "1fa0"
+      "DepartmentId": "1fa0",
+      "ObjectId": "1",
+      "ProvinceId": "2",
+      "DistrictId": "1",
+      "WardId": "2",
+      "address": "Hải Dương"
+    },
+    {
+      "id": "b31d",
+      "isDeleted": 0,
+      "code": "CMGOZN",
+      "username": "USER472568",
+      "isActive": true,
+      "name": "Nguyễn Công Giang",
+      "email": "giangnc@gmail.com",
+      "Department": "c39c",
+      "ObjectId": "f7de",
+      "ProvinceId": "2",
+      "DistrictId": "2",
+      "WardId": "2",
+      "DepartmentId": "c39c",
+      "address": "Đố biết ở đâu"
     }
   ],
   "department": [
     {
       "id": "5f5d",
-      "name": "Phòng doanh nghiệp",
+      "name": "Xây Dựng",
       "isActive": true,
       "isDeleted": 0
     },
     {
       "id": "4200",
-      "name": "Phòng IT",
+      "name": "Giao Thông Vận Tải",
       "isActive": 1,
       "isDeleted": 0
     },
     {
       "id": "c39c",
-      "name": "Phòng tư vấn",
+      "name": "Nông Nghiệp và Phát Triển Nông Thôn",
       "isActive": 1,
       "isDeleted": 0
     },
     {
       "id": "1fa0",
-      "name": "Phòng kinh doanh",
-      "isActive": 1,
+      "name": "Công Thương",
+      "isActive": false,
       "isDeleted": 0
     }
   ],
@@ -134,25 +161,31 @@
       "id": "2",
       "name": "Xã nông thôn mới kiểu mẫu",
       "isDeleted": 0,
-      "isActive": 1
+      "isActive": true
     },
     {
       "id": "f7de",
-      "name": "Xã nông thôn mới nâng cao update",
-      "isActive": 1,
+      "name": "Xã nông thôn mới nâng cao",
+      "isActive": true,
       "isDeleted": 0
     },
     {
       "id": "60cb",
       "name": "Huyện nông thôn mới",
       "isDeleted": 0,
-      "isActive": 1
+      "isActive": true
     },
     {
       "id": "9ff8",
       "name": "Huyện nông thôn mới nâng cao",
       "isDeleted": 0,
-      "isActive": 1
+      "isActive": true
+    },
+    {
+      "id": "2424",
+      "name": "Huyện nông thôn mới kiểu mẫu",
+      "isDeleted": 0,
+      "isActive": false
     }
   ]
 }

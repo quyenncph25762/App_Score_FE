@@ -17,7 +17,9 @@ import { useFetchAllWardQuery } from '../../store/wards/ward.service';
 import { useFetchAllDistrictQuery } from '../../store/districts/district.service';
 import { useFetchAllProvinceQuery } from '../../store/province/province.service';
 import { useFetchAllDepartmentQuery } from '../../store/department/department.service';
-import { fetchAllDepartment } from '../../store/department/departmentSlice';
+import { fetchAllDepartmentSlice } from '../../store/department/departmentSlice';
+import { useFetchAllObjectQuery } from '../../store/object/object.service';
+import { getAllObjectSlice } from '../../store/object/objectSlice';
 const { Option } = Select;
 const { Search } = Input;
 
@@ -102,13 +104,15 @@ const UsersPage = () => {
     const { data: ListUserAPI, isError: isErrorListUser, isFetching, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
     // goi list phong ban tu redux-toolkit
     const { data: ListDepartmentAPI, isError: isErrorListDepartment, isFetching: isFetchingDepartment, isLoading: isLoadingDepartmentAPI, isSuccess: isSuccessDepartmentApi } = useFetchAllDepartmentQuery()
+    // goi object API 
+    const { data: ListObjectAPI, isError: isErrorListObject, isFetching: isFetchingObject, isLoading: isLoadingObjectAPI, isSuccess: isSuccessObjectApi } = useFetchAllObjectQuery()
     // goi list department tu redux-toolkit
     // goi list ward 
     const { data: wards, isError: isErrorWards } = useFetchAllWardQuery()
     const { data: districts, isError: isErrorDistricts } = useFetchAllDistrictQuery()
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     useEffect(() => {
-        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListDepartment) {
+        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListDepartment || isErrorListObject) {
             navigate("/err500")
             return
         }
@@ -131,17 +135,26 @@ const UsersPage = () => {
     const listUserReducer = useSelector((state: RootState) => state.userSlice?.users)
     // danh sach list phong ban tu redux
     const listDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
+    //  list object trong reducer
+    const listObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
     // neu ma goi thanh cong thi dispatch vao redux
     useEffect(() => {
         if (ListUserAPI?.length > 0) {
             dispatch(listUsersSlice(ListUserAPI))
         }
     }, [isSuccessUserApi, ListUserAPI])
+    // dispatch department
     useEffect(() => {
         if (ListDepartmentAPI?.length > 0) {
-            dispatch(fetchAllDepartment(ListDepartmentAPI))
+            dispatch(fetchAllDepartmentSlice(ListDepartmentAPI))
         }
     }, [isSuccessDepartmentApi, ListDepartmentAPI])
+    // dispatch object
+    useEffect(() => {
+        if (ListObjectAPI) {
+            dispatch(getAllObjectSlice(ListObjectAPI))
+        }
+    }, [isSuccessObjectApi, ListObjectAPI])
     // form add
     const [form] = Form.useForm();
     // form user update
@@ -159,6 +172,7 @@ const UsersPage = () => {
                 ProvinceId: getOneUser.ProvinceId,
                 DistrictId: getOneUser.DistrictId,
                 DepartmentId: getOneUser.DepartmentId,
+                ObjectId: getOneUser.ObjectId,
                 WardId: getOneUser.WardId,
                 isActive: getOneUser.isActive,
                 address: getOneUser.address,
@@ -200,7 +214,7 @@ const UsersPage = () => {
         form.setFieldsValue({
             code: randomCode(),
             username: randomUserName(),
-            isActive: 1,
+            isActive: true,
             isDeleted: 0
         })
         setOpen(true);
@@ -319,6 +333,7 @@ const UsersPage = () => {
     // nút xóa tất cả
     const handleDeleteAll = async (listCriteria: IUser[]) => {
         if (listCriteria.length > 0) {
+            const listCriteriaId = listCriteria.map((criteria) => criteria.id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -326,8 +341,14 @@ const UsersPage = () => {
                 confirmButtonText: "Xác nhận",
                 cancelButtonText: "Hủy",
                 icon: "question",
-            }).then((results) => {
+            }).then(async (results) => {
                 if (results.isConfirmed) {
+                    const form: IIsDeletedUser = {
+                        isDeleted: 1
+                    }
+                    for (const id of listCriteriaId) {
+                        await onDeleteUser({ id: id, ...form })
+                    }
                     toast.success("Xóa thành công!")
                 }
             })
@@ -396,10 +417,7 @@ const UsersPage = () => {
     return (
         <div className=''>
 
-            {/* {isFetching && <div>Updating User data...</div>}
-            {isLoadingUserAPI && <div>loading User data...</div>}
-            {isLoadingDepartmentAPI && <div>Updating Department data...</div>}
-            {isFetchingDepartment && <div>loading Department data...</div>} */}
+            {isLoadingUserAPI || isLoadingDepartmentAPI || isLoadingObjectAPI ? <div>loading data...</div> : ""}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí người dùng</h3>
                 <div className="iconDelete-title">
@@ -431,7 +449,7 @@ const UsersPage = () => {
                     className="mx-auto"
                 >
                     {/* thong tin nguoi dung */}
-                    <Row gutter={30}>
+                    <Row gutter={12}>
                         <Col span={8} className='flex justify-center text-center'>
                             {/* Upload Images */}
                             <Form.Item name="avatar">
@@ -518,35 +536,59 @@ const UsersPage = () => {
                                         <Input />
                                     </Form.Item>
                                 </Col>
-                                {/* phong ban */}
+                                {/* email */}
                                 <Col span={12}>
                                     <Form.Item
-                                        name="Department"
-                                        label="Phòng ban"
+                                        name="email"
+                                        label="Email"
+                                        rules={[
+                                            { required: true, message: '* Không được để trống' },
+                                            { type: 'email', message: 'Địa chỉ email không hợp lệ' },
+                                            {
+                                                validator: (_, value) => {
+                                                    if (value && value.trim() === '') {
+                                                        return Promise.reject('Không được để khoảng trắng');
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                            { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                                        ]}
                                     >
-                                        <Select
-                                            showSearch
-                                            placeholder="Tìm kiếm phòng ban"
-                                            optionFilterProp="children"
-                                        >
-                                            {listDepartmentReducer?.map((item, index) => (
-                                                <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
-                                            ))}
-                                        </Select>
+                                        <Input />
                                     </Form.Item>
                                 </Col>
+
                             </Row>
                         </Col>
                     </Row>
-                    {/* email */}
-                    <Row>
-                        <Col span={24}>
+
+                    <Row gutter={12}>
+                        {/* phong ban */}
+                        <Col span={12}>
                             <Form.Item
-                                name="email"
-                                label="Email"
+                                name="DepartmentId"
+                                label="Lĩnh vực"
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Tìm kiếm lĩnh vực"
+                                    optionFilterProp="children"
+                                >
+                                    {listDepartmentReducer?.map((item, index) => (
+                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        {/* đối tượng */}
+                        <Col span={12}>
+                            <Form.Item
+                                name="ObjectId"
+                                label="Đối tượng"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
-                                    { type: 'email', message: 'Địa chỉ email không hợp lệ' },
                                     {
                                         validator: (_, value) => {
                                             if (value && value.trim() === '') {
@@ -555,16 +597,23 @@ const UsersPage = () => {
                                             return Promise.resolve();
                                         },
                                     },
-                                    { min: 3, message: 'Tối thiểu 3 kí tự' },
-
                                 ]}
                             >
-                                <Input />
+                                <Select
+                                    showSearch
+                                    placeholder="Tìm kiếm đối tượng"
+                                    optionFilterProp="children"
+
+                                >
+                                    {listObjectReducer?.map((item, index) => (
+                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
+                                    ))}
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>
                     {/* address */}
-                    <Row gutter={30}>
+                    <Row gutter={12}>
                         {/* province */}
                         <Col span={8}>
                             <Form.Item name="ProvinceId" label="Tỉnh">
@@ -735,35 +784,57 @@ const UsersPage = () => {
                                         <Input />
                                     </Form.Item>
                                 </Col>
-                                {/* phong ban */}
+                                {/* email */}
                                 <Col span={12}>
                                     <Form.Item
-                                        name="DepartmentId"
-                                        label="Phòng ban"
+                                        name="email"
+                                        label="Email"
+                                        rules={[
+                                            { required: true, message: '* Không được để trống' },
+                                            { type: 'email', message: 'Địa chỉ email không hợp lệ' },
+                                            {
+                                                validator: (_, value) => {
+                                                    if (value && value.trim() === '') {
+                                                        return Promise.reject('Không được để khoảng trắng');
+                                                    }
+                                                    return Promise.resolve();
+                                                },
+                                            },
+                                            { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                                        ]}
                                     >
-                                        <Select
-                                            showSearch
-                                            placeholder="Tìm kiếm phòng ban"
-                                            optionFilterProp="children"
-                                        >
-                                            {listDepartmentReducer?.map((item, index) => (
-                                                <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
-                                            ))}
-                                        </Select>
+                                        <Input />
                                     </Form.Item>
                                 </Col>
                             </Row>
                         </Col>
                     </Row>
-                    {/* email */}
-                    <Row>
-                        <Col span={24}>
+                    <Row gutter={12}>
+                        {/* phong ban */}
+                        <Col span={12}>
                             <Form.Item
-                                name="email"
-                                label="Email"
+                                name="DepartmentId"
+                                label="Lĩnh vực"
+                            >
+                                <Select
+                                    showSearch
+                                    placeholder="Tìm kiếm Lĩnh vực"
+                                    optionFilterProp="children"
+                                >
+                                    {listDepartmentReducer?.map((item, index) => (
+                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        {/* đối tượng */}
+                        <Col span={12}>
+                            <Form.Item
+                                name="ObjectId"
+                                label="Đối tượng"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
-                                    { type: 'email', message: 'Địa chỉ email không hợp lệ' },
                                     {
                                         validator: (_, value) => {
                                             if (value && value.trim() === '') {
@@ -772,16 +843,23 @@ const UsersPage = () => {
                                             return Promise.resolve();
                                         },
                                     },
-                                    { min: 3, message: 'Tối thiểu 3 kí tự' },
-
                                 ]}
                             >
-                                <Input />
+                                <Select
+                                    showSearch
+                                    placeholder="Tìm kiếm đối tượng"
+                                    optionFilterProp="children"
+
+                                >
+                                    {listObjectReducer?.map((item, index) => (
+                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
+                                    ))}
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>
                     {/* địa chỉ */}
-                    <Row gutter={30}>
+                    <Row gutter={12}>
                         {/* province */}
                         <Col span={8}>
                             <Form.Item name="ProvinceId" label="Tỉnh">

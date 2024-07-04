@@ -127,6 +127,7 @@ const ObjectPageTrash = () => {
     // nút xóa tất cả
     const handleRevertAll = async (listObject: IObject[]) => {
         if (listObject.length > 0) {
+            const listObjectId = listObject.map((object) => object.id)
             Swal.fire({
                 title: "Xác nhận khôi phục mục đã chọn ?",
                 showCancelButton: true,
@@ -134,8 +135,14 @@ const ObjectPageTrash = () => {
                 confirmButtonText: "Xác nhận",
                 cancelButtonText: "Hủy",
                 icon: "question",
-            }).then((results) => {
+            }).then(async (results) => {
                 if (results.isConfirmed) {
+                    const form: IIsDeleted = {
+                        isDeleted: 0
+                    }
+                    for (const id of listObjectId) {
+                        await onRevert({ id: id, ...form })
+                    }
                     toast.success("khôi phục thành công!")
                 }
             })

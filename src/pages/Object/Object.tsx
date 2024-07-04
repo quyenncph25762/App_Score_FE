@@ -115,7 +115,7 @@ const ObjectPage = () => {
     // show modal them
     const showModal = () => {
         form.setFieldsValue({
-            isActive: 1,
+            isActive: true,
             isDeleted: 0
         })
         setOpen(true);
@@ -230,6 +230,7 @@ const ObjectPage = () => {
     // nút xóa tất cả
     const handleDeleteAll = async (listObject: IObject[]) => {
         if (listObject.length > 0) {
+            const listObjectId = listObject.map((object) => object.id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -237,8 +238,14 @@ const ObjectPage = () => {
                 confirmButtonText: "Xác nhận",
                 cancelButtonText: "Hủy",
                 icon: "question",
-            }).then((results) => {
+            }).then(async (results) => {
                 if (results.isConfirmed) {
+                    const form: IIsDeleted = {
+                        isDeleted: 1
+                    }
+                    for (const id of listObjectId) {
+                        await onDelete({ id: id, ...form })
+                    }
                     toast.success("Xóa thành công!")
                 }
             })

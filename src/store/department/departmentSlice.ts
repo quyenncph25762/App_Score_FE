@@ -14,7 +14,7 @@ const departmentSlice = createSlice({
     name: "departmentSlice",
     initialState: initalDepartmentState || initialDepartmentSearchState,
     reducers: ({
-        fetchAllDepartment: (state: IDepartmentState, actions: PayloadAction<IDepartment[]>) => {
+        fetchAllDepartmentSlice: (state: IDepartmentState, actions: PayloadAction<IDepartment[]>) => {
             state.departments = actions.payload.filter((department) => department.isDeleted === 0)
         },
         fetchAllDepartmentTrash: (state: IDepartmentState, actions: PayloadAction<IDepartment[]>) => {
@@ -29,5 +29,5 @@ const departmentSlice = createSlice({
 })
 
 
-export const { fetchAllDepartment, fetchAllDepartmentTrash, searchDepartmentSlice } = departmentSlice.actions
+export const { fetchAllDepartmentSlice, fetchAllDepartmentTrash, searchDepartmentSlice } = departmentSlice.actions
 export default departmentSlice.reducer

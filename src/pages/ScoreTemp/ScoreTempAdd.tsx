@@ -2,8 +2,14 @@ import { CloseOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-desi
 import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Switch, Tooltip, Typography } from 'antd'
 import TextArea from 'antd/es/input/TextArea';
 import { Option } from 'antd/es/mentions';
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { Dispatch, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useFetchAllObjectQuery } from '../../store/object/object.service';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { getAllObjectSlice } from '../../store/object/objectSlice';
+import { useFetchAllDepartmentQuery } from '../../store/department/department.service';
+import { fetchAllDepartmentSlice } from '../../store/department/departmentSlice';
 
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
@@ -28,10 +34,37 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
     );
 };
 const ScoreTempAdd = () => {
+    const dispatch: Dispatch<any> = useDispatch()
     const [form] = Form.useForm();
+    // scoretemptdetail
     const [checkedPercent, setCheckedPercent] = useState(true);
     const [checkedTotal, setCheckedTotal] = useState(true);
     const [checkedCurrentStatus, setCheckedCurrentStatus] = useState(true);
+    const navigate = useNavigate()
+    // api object
+    const { data: fetchAllObject, isSuccess: isSuccessObject, isLoading: isLoadingObject, isError: isErrorObject } = useFetchAllObjectQuery()
+    // api phòng ban
+    const { data: fetchAllDepartment, isSuccess: isSuccessDepartment, isLoading: isLoadingDepartment, isError: isErrorDepartment } = useFetchAllDepartmentQuery()
+    // reducer object
+    const fetchAllObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
+    const fetchAllDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
+    if (isErrorObject || isErrorDepartment) {
+        navigate("/err500")
+        return
+    }
+    // useEffect khi lay du lieu object thanh cong dispatch vao redux
+    useEffect(() => {
+        if (fetchAllObject) {
+            dispatch(getAllObjectSlice(fetchAllObject))
+        }
+    }, [isSuccessObject, fetchAllObject])
+    // useEffect khi lay du lieu department thanh cong dispatch vao redux
+    useEffect(() => {
+        if (fetchAllDepartment) {
+            dispatch(fetchAllDepartmentSlice(fetchAllDepartment))
+        }
+    }, [isSuccessDepartment, fetchAllDepartment])
+    // form scoretemp
     form.setFieldsValue({
         isActive: true
     })
@@ -65,6 +98,8 @@ const ScoreTempAdd = () => {
     }
     return (
         <div>
+            {isLoadingObject && <p> loading object....</p>}
+            {isLoadingDepartment && <p> loading deparment....</p>}
             <div className="flex items-center justify-between gap-2">
                 <h3 className='text-title mb-0'>Thêm mới phiếu chấm</h3>
 
@@ -119,8 +154,6 @@ const ScoreTempAdd = () => {
                                         return Promise.resolve();
                                     },
                                 },
-                                { min: 3, message: 'Tối thiểu 6 kí tự' },
-
                             ]}
                         >
                             <Select
@@ -128,7 +161,9 @@ const ScoreTempAdd = () => {
                                 placeholder="--"
                                 optionFilterProp="children"
                             >
-                                <Option value="Nông thôn mới" >Nông thôn mới</Option>
+                                {fetchAllObjectReducer?.map((object, index) => (
+                                    <Option value={`${object.id}`} key={`${index}`} disabled={!object.isActive}>{object.name}</Option>
+                                ))}
                             </Select>
                         </Form.Item>
                     </Col>
@@ -219,7 +254,7 @@ const ScoreTempAdd = () => {
                                         {/* Tên sở */}
                                         <Col span={6}>
                                             <Form.Item
-                                                label="Phòng ban"
+                                                label="Lĩnh vực"
                                                 name={[field.name, 'DepartmentId']}
                                                 rules={[
                                                     { required: true, message: '* Không được để trống' },
@@ -239,8 +274,9 @@ const ScoreTempAdd = () => {
                                                     placeholder="Tìm kiếm phòng ban"
                                                     optionFilterProp="children"
                                                 >
-
-                                                    <Option value={"Sở xây dụng"}>Sở xây dựng</Option>
+                                                    {fetchAllDepartmentReducer?.map((department, index) => (
+                                                        <Option value={department.id} key={`${index}`} disabled={!department.isActive}>{department.name}</Option>
+                                                    ))}
                                                 </Select>
                                             </Form.Item>
                                         </Col>
@@ -316,7 +352,6 @@ const ScoreTempAdd = () => {
                         </div>
                     )}
                 </Form.List>
-
                 <Space style={{
                     marginTop: "10px",
                     display: "flex",

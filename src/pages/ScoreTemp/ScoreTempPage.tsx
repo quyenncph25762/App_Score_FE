@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Badge, Button, message, Popconfirm, Space, Table, Tooltip } from 'antd';
+import { Badge, Button, message, Modal, Popconfirm, Space, Table, TableColumnsType, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { DeleteFilled, EditFilled } from '@ant-design/icons';
+import { DeleteFilled, EditFilled, EyeFilled, EyeOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -12,13 +12,38 @@ interface DataType {
     key: React.Key;
     _id?: number;
     name: string;
-    chinese: number;
-    math: number;
-    english: number;
+    object: string
+    isActive: boolean
+    year: number
+    scoretempDetail?: DataTypePreview[]
+}
+
+interface DataTypePreview {
+    key: React.Key,
+    _id?: number,
+    name: string,
+    target?: string;
+    isPercentType?: string;
+    isTotalType?: number;
+    isCurrentState?: string;
+    isPassed?: boolean
 }
 const ScoreTempPage = () => {
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listCriteria, setCriteria] = useState<DataType[]>([])
+    // modal xem chi tiet
+    const [open, setOpen] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<boolean>(true);
+
+    const showLoading = () => {
+        setOpen(true);
+        setLoading(true);
+
+        // Simple loading mock. You should add cleanup logic in real world.
+        setTimeout(() => {
+            setLoading(false);
+        }, 2000);
+    };
     // nút checkbox
     const rowSelection: TableRowSelection<DataType> = {
         onChange: (selectedRowKeys, selectedRows) => {
@@ -48,19 +73,11 @@ const ScoreTempPage = () => {
 
         {
             title: 'Loại đối tượng',
-            dataIndex: 'chinese',
-            sorter: {
-                compare: (a, b) => a.chinese - b.chinese,
-                multiple: 3,
-            },
+            dataIndex: 'object',
         },
         {
             title: 'Năm',
-            dataIndex: 'math',
-            sorter: {
-                compare: (a, b) => a.math - b.math,
-                multiple: 2,
-            },
+            dataIndex: 'year',
         },
         {
             title: 'Áp dụng',
@@ -91,6 +108,9 @@ const ScoreTempPage = () => {
                             <DeleteFilled className='text-xl text-red-500' />
                         </Tooltip>
                     </Popconfirm>
+                    <Tooltip title="Xem chi tiết" color={"green"}>
+                        <EyeFilled className='text-xl text-green-400 cursor-pointer' onClick={showLoading} />
+                    </Tooltip>
                 </Space>
             )
         },
@@ -103,28 +123,11 @@ const ScoreTempPage = () => {
         {
             key: '1',
             _id: 1,
-            name: 'John Brown',
-            chinese: 98,
-            math: 60,
-            english: 70,
-        },
-        {
-            key: '2',
-            _id: 3,
-            name: 'John Brown',
-            chinese: 98,
-            math: 60,
-            english: 70,
-        },
-        {
-            key: '3',
-            _id: 4,
-            name: 'John Brown',
-            chinese: 98,
-            math: 60,
-            english: 70,
-        },
-
+            name: 'Phiếu chấm xã nông thôn mới',
+            object: "Nông thon mới",
+            year: 98,
+            isActive: true,
+        }
     ];
     // nút filter
     const onChange: TableProps<DataType>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -150,8 +153,83 @@ const ScoreTempPage = () => {
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
         console.log(value)
     };
+
+    // Table
+    const columnsPrewView: TableColumnsType<DataTypePreview> = [
+        {
+            title: 'STT',
+            dataIndex: 'key',
+        },
+        {
+            title: 'Tên tiêu chí',
+            dataIndex: 'name',
+            onCell: () => {
+                return {
+                    style: {
+                        maxWidth: 200
+                    }
+                }
+            },
+            width: 400
+        },
+        {
+            title: 'Chỉ tiêu',
+            dataIndex: 'target',
+        },
+        {
+            title: 'Tỷ lệ %',
+            dataIndex: 'isPercentType',
+        },
+        {
+            title: 'Tổng số',
+            dataIndex: 'isTotalType',
+        },
+        {
+            title: 'Hiện trạng',
+            dataIndex: 'isCurrentState',
+        },
+        {
+            title: 'Đạt chuẩn',
+            dataIndex: 'isPassed',
+            render: (_, value: DataTypePreview) => (
+                // Nếu isPasswed mà bằng undefine thì sẽ không hiện đạt hay không
+                <strong>{value.isPassed === false ? <p className='text-red-500'>Không đạt</p> : "Đạt"}</strong>
+            )
+        },
+    ];
+
+    const dataPreviews: DataTypePreview[] = [
+        {
+            key: 1,
+            name: 'Quy hoạch'
+        },
+        {
+            key: 2,
+            name: 'Có quy hoạch chung xây dựng xã còn thời hạn hoặc đã được rà soát, điều chỉnh theo quy định của pháp luật về quy hoạch',
+            target: "Đạt",
+            isPercentType: "60 %",
+            isTotalType: 700,
+            isCurrentState: "Đạt",
+            isPassed: false
+        },
+    ];
+
     return (
         <div>
+            <Modal
+                title={<p>Chi tiết phiếu chấm</p>}
+                footer={
+                    <Button type="primary" onClick={showLoading}>
+                        Reload
+                    </Button>
+                }
+                width={1200}
+                loading={loading}
+                open={open}
+                onCancel={() => setOpen(false)}
+            >
+                <Table columns={columnsPrewView} dataSource={dataPreviews} bordered pagination={false} />
+            </Modal>
             <h3 className='text-title'>Quản lí phiếu chấm</h3>
             <div className="flex justify-between">
                 <Space className='mb-3'>

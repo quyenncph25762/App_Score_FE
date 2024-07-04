@@ -6,7 +6,7 @@ import { ColumnsType, TableProps } from 'antd/es/table';
 import { useFetchAllDepartmentQuery, useRevertDepartmentMutation } from '../../store/department/department.service';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { fetchAllDepartment, fetchAllDepartmentTrash } from '../../store/department/departmentSlice';
+import { fetchAllDepartmentSlice, fetchAllDepartmentTrash } from '../../store/department/departmentSlice';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
@@ -55,7 +55,7 @@ const DepartmentTrash = () => {
     const columns: ColumnsType<IDepartment> = [
 
         {
-            title: 'Tên phòng ban',
+            title: 'Tên lĩnh vực',
             dataIndex: 'name',
         },
         {
@@ -64,7 +64,7 @@ const DepartmentTrash = () => {
             render: (value: IDepartment) => (
                 <Space size="middle" className='flex justify-start'>
                     <Popconfirm
-                        title="Khôi phục phòng ban"
+                        title="Khôi phục lĩnh vực"
                         description={`Bạn muốn khôi phục: ${value.name}?`}
                         onConfirm={() => confirmRevert(value.id!)}
                         okText="Yes"
@@ -109,6 +109,7 @@ const DepartmentTrash = () => {
     const handleRevertAll = async (listDepartment: IDepartment[]) => {
         try {
             if (listDepartment.length > 0) {
+                const listDepartmentId = listDepartment.map((department) => department.id)
                 Swal.fire({
                     title: "Xác nhận Khôi phục mục đã chọn ?",
                     showCancelButton: true,
@@ -116,8 +117,15 @@ const DepartmentTrash = () => {
                     confirmButtonText: "Xác nhận",
                     cancelButtonText: "Hủy",
                     icon: "question",
-                }).then((results) => {
+                }).then(async (results) => {
                     if (results.isConfirmed) {
+                        const form: IIsDeletedUser = {
+                            isDeleted: 0
+                        }
+                        for (const id of listDepartmentId) {
+                            await onRevert({ id: id, ...form })
+                        }
+                        toast.success("Xóa thành công!")
                         toast.success("Khôi phục thành công!")
                     }
                 })
@@ -145,12 +153,12 @@ const DepartmentTrash = () => {
                         }} />
                     </Link>
                 </Tooltip>
-                <h3 className='text-title mb-0'>Khôi phục phòng ban</h3>
+                <h3 className='text-title mb-0'>Khôi phục lĩnh vực</h3>
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
                     <Button type='primary' onClick={() => handleRevertAll(listDepartment)}>Khôi phục tất cả</Button>
-                    <Search placeholder="Tìm kiếm tên phòng ban ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Search placeholder="Tìm kiếm tên lĩnh vực ..." className='w-[300px]' onSearch={onSearch} enterButton />
                 </Space>
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />

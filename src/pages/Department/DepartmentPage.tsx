@@ -10,7 +10,7 @@ import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAddDepartmentMutation, useFetchAllDepartmentQuery, useFetchOneDepartmentQuery, useRemoveDepartmentMutation, useUpdateDepartmentMutation } from '../../store/department/department.service';
 import { RootState } from '../../store';
-import { fetchAllDepartment, searchDepartmentSlice } from '../../store/department/departmentSlice';
+import { fetchAllDepartmentSlice, searchDepartmentSlice } from '../../store/department/departmentSlice';
 import { IDepartment, IIsDeleted } from '../../store/department/department.interface';
 import TextArea from 'antd/es/input/TextArea';
 import Error500 from '../Error500';
@@ -100,7 +100,7 @@ const DepartmentPage = () => {
     // neu co listDepartmentApi thi dispatch vao trong reducer
     useEffect(() => {
         if (listDepartmentApi) {
-            dispatch(fetchAllDepartment(listDepartmentApi))
+            dispatch(fetchAllDepartmentSlice(listDepartmentApi))
         }
     }, [isSuccessDepartment, listDepartmentApi])
     // useEffect khi co getOneDeparrtment
@@ -116,7 +116,7 @@ const DepartmentPage = () => {
     // show modal them
     const showModal = () => {
         form.setFieldsValue({
-            isActive: 1,
+            isActive: true,
             isDeleted: 0
         })
         setOpen(true);
@@ -166,7 +166,7 @@ const DepartmentPage = () => {
     const columns: ColumnsType<IDepartment> = [
 
         {
-            title: 'Tên phòng ban',
+            title: 'Tên lĩnh vực',
             dataIndex: 'name',
         },
         {
@@ -185,7 +185,7 @@ const DepartmentPage = () => {
                         <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value.id!)} />
                     </Tooltip>
                     <Popconfirm
-                        title="Xóa phòng ban"
+                        title="Xóa lĩnh vực"
                         description={`Bạn có chắc muốn xóa: ${value.name}`}
                         onConfirm={() => confirmDelete(value.id!)}
                         okText="Yes"
@@ -230,6 +230,8 @@ const DepartmentPage = () => {
     // nút xóa tất cả
     const handleDeleteAll = async (listDepartment: IDepartment[]) => {
         if (listDepartment.length > 0) {
+            // lấy ra những id của phòng ban
+            const listDepartmentId = listDepartment.map((department) => department.id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -237,8 +239,14 @@ const DepartmentPage = () => {
                 confirmButtonText: "Xác nhận",
                 cancelButtonText: "Hủy",
                 icon: "question",
-            }).then((results) => {
+            }).then(async (results) => {
                 if (results.isConfirmed) {
+                    const form: IIsDeleted = {
+                        isDeleted: 1
+                    }
+                    for (const id of listDepartmentId) {
+                        await onDelete({ id: id, ...form })
+                    }
                     toast.success("Xóa thành công!")
                 }
             })
@@ -248,11 +256,11 @@ const DepartmentPage = () => {
         if (value) {
             dispatch(searchDepartmentSlice({ searchTerm: value, departments: listDepartmentApi }))
         } else {
-            dispatch(fetchAllDepartment(listDepartmentApi))
+            dispatch(fetchAllDepartmentSlice(listDepartmentApi))
         }
     };
     const handleReset = () => {
-        dispatch(fetchAllDepartment(listDepartmentApi))
+        dispatch(fetchAllDepartmentSlice(listDepartmentApi))
     }
     // submit add phòng ban
     const onFinish = async (values: IDepartment) => {
@@ -292,7 +300,7 @@ const DepartmentPage = () => {
             {isLoadingDepartment && <div>loading data...</div>}
             {/* modal them */}
             <Modal
-                title="Thêm phòng ban"
+                title="Thêm lĩnh vực"
                 open={open}
                 width={800}
                 onOk={handleOk}
@@ -316,7 +324,7 @@ const DepartmentPage = () => {
                         <Col span={20}>
                             <Form.Item
                                 name="name"
-                                label="Tên phòng ban"
+                                label="Tên lĩnh vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -362,7 +370,7 @@ const DepartmentPage = () => {
             </Modal>
             {/* modal update */}
             <Modal
-                title="Cập nhật phòng ban"
+                title="Cập nhật lĩnh vực"
                 open={openUpdate}
                 width={800}
                 onOk={handleOkUpdate}
@@ -386,7 +394,7 @@ const DepartmentPage = () => {
                         <Col span={20}>
                             <Form.Item
                                 name="name"
-                                label="Tên phòng ban"
+                                label="Tên lĩnh vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -430,7 +438,7 @@ const DepartmentPage = () => {
                 </Form>
             </Modal>
             <div className="flex items-center gap-2">
-                <h3 className='text-title mb-0'>Quản lí phòng ban</h3>
+                <h3 className='text-title mb-0'>Quản lí lĩnh vực</h3>
                 <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
                         <Link to={`/department/trash`}><DeleteOutlined color='red' /></Link>
@@ -440,7 +448,7 @@ const DepartmentPage = () => {
             <div className="flex justify-between">
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listDepartment)}>Xóa tất cả</Button>
-                    <Search placeholder="Tìm kiếm tên phòng ban ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Search placeholder="Tìm kiếm tên lĩnh vực ..." className='w-[300px]' onSearch={onSearch} enterButton />
                     <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>

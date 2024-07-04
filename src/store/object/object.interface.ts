@@ -1,7 +1,7 @@
 export interface IObject {
     id: string
     name: string
-    isActive: number
+    isActive: boolean
     description: string
     isDeleted: number
 }

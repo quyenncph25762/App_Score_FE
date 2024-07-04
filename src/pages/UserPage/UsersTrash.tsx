@@ -141,6 +141,7 @@ const UsersTrash = () => {
     const handleRevertAll = async (listUser: IUser[]) => {
         try {
             if (listUser.length > 0) {
+                const listUserId = listUser.map((user) => user.id)
                 Swal.fire({
                     title: "Xác nhận Khôi phục mục đã chọn ?",
                     showCancelButton: true,
@@ -148,8 +149,14 @@ const UsersTrash = () => {
                     confirmButtonText: "Xác nhận",
                     cancelButtonText: "Hủy",
                     icon: "question",
-                }).then((results) => {
+                }).then(async (results) => {
                     if (results.isConfirmed) {
+                        const form: IIsDeletedUser = {
+                            isDeleted: 0
+                        }
+                        for (const id of listUserId) {
+                            await onRevert({ id: id, ...form })
+                        }
                         toast.success("Khôi phục thành công!")
                     }
                 })

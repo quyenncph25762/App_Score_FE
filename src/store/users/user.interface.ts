@@ -2,12 +2,13 @@ export interface IUser {
     id: string
     name: string
     code: string
-    isActive: number
+    isActive: boolean
     username: string
     email: string
     address: string
     avatar: string
     WardId?: number
+    ObjectId?: number
     DepartmentId?: number
     DistrictId?: number
     ProvinceId?: number
