@@ -7,6 +7,7 @@ import {
     PartitionOutlined,
     PieChartOutlined,
     PlusOutlined,
+    SlidersOutlined,
     SolutionOutlined,
     UploadOutlined,
     UserOutlined,
@@ -91,6 +92,9 @@ const Aside = () => {
         ]),
         getItem('Cán bộ', 'sub2', <UserOutlined />, [
             getItem(<Link to={"/users"}>Quản lý tài khoản</Link >, '4'),
+        ]),
+        getItem('Vai trò', 'sub5', <SlidersOutlined />, [
+            getItem(<Link to={"/roles"}>Quản lý vai trò</Link >, '5'),
         ]),
     ];
     const {

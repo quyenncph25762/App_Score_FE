@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IObject } from "./object.interface";
-import { IIsDeleted } from "../department/department.interface";
+import { BASE_URL } from "../../config/configApi";
+import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 
 const objectApi = createApi({
     reducerPath: "objects",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:3000"
+        baseUrl: BASE_URL
     }),
     tagTypes: ["objects"],
     endpoints: (builer) => ({
@@ -54,5 +55,5 @@ const objectApi = createApi({
     })
 })
 
-export const { useFetchAllObjectQuery, useRemoveObjectMutation, useUpdateObjectMutation, useAddObjectMutation, useFetchOneObjectQuery, useRevertObjectMutation } = objectApi
+export const { useFetchAllObjectQuery, useRemoveObjectMutation, useUpdateObjectMutation, useAddObjectMutation, useLazyFetchOneObjectQuery, useRevertObjectMutation } = objectApi
 export default objectApi

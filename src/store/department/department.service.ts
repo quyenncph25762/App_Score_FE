@@ -1,10 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IDepartment, IIsDeleted } from "./department.interface";
+import { IDepartment } from "./department.interface";
+import { BASE_URL } from "../../config/configApi";
+import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 
 const departmentApi = createApi({
     reducerPath: "departments",
     baseQuery: fetchBaseQuery({
-        baseUrl: "http://localhost:3000"
+        baseUrl: BASE_URL
     }),
     tagTypes: ["departments"],
     endpoints: (builder) => ({
@@ -54,5 +56,5 @@ const departmentApi = createApi({
     })
 })
 
-export const { useFetchAllDepartmentQuery, useAddDepartmentMutation, useRemoveDepartmentMutation, useUpdateDepartmentMutation, useFetchOneDepartmentQuery, useRevertDepartmentMutation } = departmentApi
+export const { useFetchAllDepartmentQuery, useAddDepartmentMutation, useRemoveDepartmentMutation, useUpdateDepartmentMutation, useLazyFetchOneDepartmentQuery, useRevertDepartmentMutation } = departmentApi
 export default departmentApi

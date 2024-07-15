@@ -1,20 +1,21 @@
 import React, { Dispatch, useEffect, useState } from 'react'
-import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { DeleteFilled, DeleteOutlined, EditFilled } from '@ant-design/icons';
+import { DeleteFilled, DeleteOutlined, EditFilled, LoadingOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
-import { useAddDepartmentMutation, useFetchAllDepartmentQuery, useFetchOneDepartmentQuery, useRemoveDepartmentMutation, useUpdateDepartmentMutation } from '../../store/department/department.service';
+import { useAddDepartmentMutation, useFetchAllDepartmentQuery, useLazyFetchOneDepartmentQuery, useRemoveDepartmentMutation, useUpdateDepartmentMutation } from '../../store/department/department.service';
 import { RootState } from '../../store';
 import { fetchAllDepartmentSlice, searchDepartmentSlice } from '../../store/department/departmentSlice';
-import { IDepartment, IIsDeleted } from '../../store/department/department.interface';
+import { IDepartment } from '../../store/department/department.interface';
 import TextArea from 'antd/es/input/TextArea';
 import Error500 from '../Error500';
 import { useRemoveUserMutation } from '../../store/users/user.service';
+import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -69,8 +70,6 @@ const DepartmentPage = () => {
     const [checkStrictly, setCheckStrictly] = useState(false);
     // listDeparment
     const [listDepartment, setDepartment] = useState<IDepartment[]>([])
-    // id department
-    const [idDepartment, setIdDepartment] = useState<string>("")
     // form
     const [form] = Form.useForm()
     // form update
@@ -86,10 +85,9 @@ const DepartmentPage = () => {
     // department api & slice
     const { data: listDepartmentApi, isLoading: isLoadingDepartment, isFetching: isFetchingDepartment, isError: isErrorDepartment, isSuccess: isSuccessDepartment } = useFetchAllDepartmentQuery()
     // lay 1 department
-    const { data: getOneDepartment, isSuccess: isSuccessFetchOneDepartment, isError: isErrorFetchOneDepartment } = useFetchOneDepartmentQuery(idDepartment ? idDepartment : "")
-
+    // trigger: nhan vao thi moi goi api
+    const [trigger, { data: getOneDepartment, isSuccess: isSuccessFetchOneDepartment, isError: isErrorFetchOneDepartment }] = useLazyFetchOneDepartmentQuery()
     const listDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
-
     // useEffect khi co loi
     useEffect(() => {
         if (isErrorDepartment || isErrorFetchOneDepartment) {
@@ -111,13 +109,13 @@ const DepartmentPage = () => {
                 name: getOneDepartment.name
             })
         }
-    }, [idDepartment, isSuccessFetchOneDepartment, getOneDepartment, openUpdate])
+    }, [isSuccessFetchOneDepartment, getOneDepartment])
     // modal
     // show modal them
     const showModal = () => {
         form.setFieldsValue({
             isActive: true,
-            isDeleted: 0
+            IsDeleted: false
         })
         setOpen(true);
     };
@@ -131,7 +129,7 @@ const DepartmentPage = () => {
     // show modal cap nhat
     const showModalUpdate = (id: string) => {
         if (id) {
-            setIdDepartment(id)
+            trigger(id)
         }
         setOpenUpdate(true);
     };
@@ -164,7 +162,6 @@ const DepartmentPage = () => {
     };
     // column
     const columns: ColumnsType<IDepartment> = [
-
         {
             title: 'Tên lĩnh vực',
             dataIndex: 'name',
@@ -203,7 +200,7 @@ const DepartmentPage = () => {
     const confirmDelete = async (id?: string) => {
         try {
             const form: IIsDeleted = {
-                isDeleted: 1
+                IsDeleted: true
             }
             const results = await onDelete({ id: id, ...form })
             if (results.error) {
@@ -221,7 +218,7 @@ const DepartmentPage = () => {
         id: item.id,
         name: item.name,
         isActive: item.isActive,
-        isDeleted: item.isDeleted
+        IsDeleted: item.IsDeleted
     }))
     // nút filter
     const onChange: TableProps<IDepartment>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -242,7 +239,7 @@ const DepartmentPage = () => {
             }).then(async (results) => {
                 if (results.isConfirmed) {
                     const form: IIsDeleted = {
-                        isDeleted: 1
+                        IsDeleted: true
                     }
                     for (const id of listDepartmentId) {
                         await onDelete({ id: id, ...form })
@@ -280,8 +277,8 @@ const DepartmentPage = () => {
     // submit update phòng ban
     const onFinishUpdate = async (values: IDepartment) => {
         try {
-            if (idDepartment) {
-                const results = await onUpdate({ id: idDepartment, ...values })
+            if (getOneDepartment) {
+                const results = await onUpdate({ id: getOneDepartment.id, ...values })
                 if (results.error) {
                     message.error(`Thêm thất bại , vui lòng thử lại!`);
                     return
@@ -296,7 +293,7 @@ const DepartmentPage = () => {
     }
     return (
         <div>
-            {isFetchingDepartment && <div>Updating data...</div>}
+
             {isLoadingDepartment && <div>loading data...</div>}
             {/* modal them */}
             <Modal
@@ -341,7 +338,7 @@ const DepartmentPage = () => {
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name="isDeleted" hidden></Form.Item>
+                            <Form.Item name="IsDeleted" hidden></Form.Item>
                         </Col>
                         <Col span={4} className='flex items-center'>
                             <Form.Item
@@ -444,6 +441,7 @@ const DepartmentPage = () => {
                         <Link to={`/department/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
                 </div>
+                {isFetchingDepartment && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>

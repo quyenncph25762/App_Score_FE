@@ -3,7 +3,7 @@
     {
       "id": "79f2",
       "code": "DIAKNX",
-      "username": "USER915956",
+      "username": "quyennc",
       "isActive": true,
       "name": "Nguyễn Công Quyền",
       "ProvinceId": "1",
@@ -11,14 +11,19 @@
       "WardId": "1",
       "address": "Yên lã 2 , tân hồng , hehe",
       "email": "quyennc1610203@gmail.com",
-      "isDeleted": 0,
-      "DepartmentId": "5f5d",
-      "ObjectId": "2"
+      "isDeleted": false,
+      "DepartmentId": [
+        "5f5d",
+        "4200"
+      ],
+      "ObjectId": "2",
+      "IsDeleted": false,
+      "ApartmentId": 3
     },
     {
       "id": "42e0",
       "code": "HKZBCI",
-      "username": "PH25762",
+      "username": "toannc",
       "isActive": true,
       "name": "Nguyễn Công Toàn",
       "ProvinceId": "2",
@@ -26,40 +31,48 @@
       "WardId": "2",
       "address": "Duong Loi",
       "email": "nguyencongtoan@gmail.com",
-      "isDeleted": 0,
-      "DepartmentId": "c39c",
-      "ObjectId": "f7de"
+      "DepartmentId": [
+        "c39c",
+        "4200"
+      ],
+      "ObjectId": "f7de",
+      "levelAccount": 2
     },
     {
       "id": "68df",
       "code": "IDHIIA",
-      "username": "USER217333",
-      "isActive": 1,
+      "username": "tiennc",
+      "isActive": true,
       "name": "Nguyễn Công Tiến ",
       "Department": "4200",
       "email": "tien@gmail.com",
-      "isDeleted": 0,
       "DepartmentId": "1fa0",
       "ObjectId": "60cb",
       "ProvinceId": "1",
       "DistrictId": "2",
-      "WardId": "1"
+      "WardId": "1",
+      "levelAccount": 2,
+      "IsDeleted": false
     },
     {
       "id": "9c06",
       "code": "IECOIK",
       "username": "USER311539",
-      "isActive": 1,
+      "isActive": true,
       "name": "123",
       "email": "a@gmail.com",
-      "isDeleted": 0
+      "DepartmentId": "4200",
+      "ObjectId": "1",
+      "ProvinceId": "1",
+      "DistrictId": "2",
+      "WardId": "2",
+      "IsDeleted": false
     },
     {
       "id": "a83c",
-      "isDeleted": 0,
       "code": "NKHDZE",
       "username": "USER044526",
-      "isActive": 1,
+      "isActive": true,
       "name": "Vũ Đình Đại",
       "email": "daivd@gmail.com",
       "DepartmentId": "1fa0",
@@ -67,13 +80,13 @@
       "ProvinceId": "2",
       "DistrictId": "1",
       "WardId": "2",
-      "address": "Hải Dương"
+      "address": "Hải Dương",
+      "IsDeleted": false
     },
     {
       "id": "b31d",
-      "isDeleted": 0,
       "code": "CMGOZN",
-      "username": "USER472568",
+      "username": "giangnc",
       "isActive": true,
       "name": "Nguyễn Công Giang",
       "email": "giangnc@gmail.com",
@@ -83,7 +96,106 @@
       "DistrictId": "2",
       "WardId": "2",
       "DepartmentId": "c39c",
-      "address": "Đố biết ở đâu"
+      "address": "Đố biết ở đâu",
+      "levelAccount": 1,
+      "IsDeleted": false
+    },
+    {
+      "id": "562a",
+      "code": "KINZCD",
+      "username": "daivd",
+      "isActive": true,
+      "name": "Vũ Đình Đại",
+      "email": "vudinhdai@gmail.com",
+      "DepartmentId": [
+        "4200",
+        "c39c",
+        "1fa0",
+        "5f5d"
+      ],
+      "ObjectId": "2",
+      "ProvinceId": "1",
+      "DistrictId": "2",
+      "WardId": "2",
+      "address": "qưeqw",
+      "levelAccount": 1,
+      "IsDeleted": false
+    },
+    {
+      "id": "ee1b",
+      "code": "AMKZMI",
+      "username": "truongnc",
+      "isActive": true,
+      "name": "Nguyễn Công Trường",
+      "email": "truongnc@gmail.com",
+      "DepartmentId": [
+        "c39c",
+        "4200",
+        "5f5d",
+        "1fa0"
+      ],
+      "ProvinceId": "1",
+      "DistrictId": "2",
+      "WardId": "2",
+      "ObjectId": "1",
+      "levelAccount": 2,
+      "IsDeleted": false
+    },
+    {
+      "id": "585c",
+      "levelAccount": 2,
+      "code": "IKIOCC",
+      "username": "phongpm",
+      "isActive": true,
+      "name": "Phạm hải Phong",
+      "email": "phongph@gmail.com",
+      "DepartmentId": [
+        "1fa0",
+        "c39c",
+        "bf28"
+      ],
+      "ObjectId": "9ff8",
+      "ProvinceId": "1",
+      "DistrictId": "1",
+      "WardId": "1",
+      "IsDeleted": false
+    },
+    {
+      "id": "b30d",
+      "code": "CEXBMB",
+      "username": "obama",
+      "isActive": true,
+      "name": "Brack Obama",
+      "email": "obame@gmail.com",
+      "DepartmentId": [
+        "5f5d",
+        "4200"
+      ],
+      "ObjectId": "60cb",
+      "ProvinceId": "1",
+      "DistrictId": "1",
+      "WardId": "1",
+      "address": "aaaaa",
+      "levelAccount": 2,
+      "IsDeleted": false
+    },
+    {
+      "id": "f1c5",
+      "code": "CKUMMN",
+      "username": "USER948108",
+      "isActive": true,
+      "name": "Nguyeenx Cong Test",
+      "email": "test@gmail.com",
+      "DepartmentId": [
+        "4200",
+        "5f5d"
+      ],
+      "ObjectId": "2",
+      "ProvinceId": "1",
+      "DistrictId": "2",
+      "WardId": "2",
+      "levelAccount": 2,
+      "IsDeleted": false
     }
   ],
   "department": [
@@ -91,25 +203,37 @@
       "id": "5f5d",
       "name": "Xây Dựng",
       "isActive": true,
-      "isDeleted": 0
+      "IsDeleted": false
     },
     {
       "id": "4200",
       "name": "Giao Thông Vận Tải",
-      "isActive": 1,
-      "isDeleted": 0
+      "isActive": true,
+      "IsDeleted": false
     },
     {
       "id": "c39c",
       "name": "Nông Nghiệp và Phát Triển Nông Thôn",
-      "isActive": 1,
-      "isDeleted": 0
+      "isActive": true,
+      "IsDeleted": false
     },
     {
       "id": "1fa0",
       "name": "Công Thương",
       "isActive": false,
-      "isDeleted": 0
+      "IsDeleted": false
+    },
+    {
+      "id": "1475",
+      "name": "test",
+      "isDeleted": false,
+      "IsDeleted": false
+    },
+    {
+      "id": "bf28",
+      "name": "Sở Giáo Dục",
+      "isActive": true,
+      "IsDeleted": false
     }
   ],
   "wards": [
@@ -154,38 +278,79 @@
     {
       "id": "1",
       "name": "Xã nông thôn mới",
-      "isDeleted": 0,
-      "isActive": true
+      "isDeleted": false,
+      "isActive": true,
+      "IsDeleted": false
     },
     {
       "id": "2",
       "name": "Xã nông thôn mới kiểu mẫu",
-      "isDeleted": 0,
-      "isActive": true
+      "isDeleted": false,
+      "isActive": true,
+      "IsDeleted": false
     },
     {
       "id": "f7de",
       "name": "Xã nông thôn mới nâng cao",
       "isActive": true,
-      "isDeleted": 0
+      "isDeleted": false,
+      "IsDeleted": false
     },
     {
       "id": "60cb",
       "name": "Huyện nông thôn mới",
-      "isDeleted": 0,
-      "isActive": true
+      "isDeleted": false,
+      "isActive": true,
+      "IsDeleted": false
     },
     {
       "id": "9ff8",
       "name": "Huyện nông thôn mới nâng cao",
-      "isDeleted": 0,
-      "isActive": true
+      "isDeleted": false,
+      "isActive": false,
+      "IsDeleted": false
     },
     {
       "id": "2424",
       "name": "Huyện nông thôn mới kiểu mẫu",
-      "isDeleted": 0,
-      "isActive": false
+      "isDeleted": false,
+      "isActive": true,
+      "IsDeleted": false
+    }
+  ],
+  "roles": [
+    {
+      "_id": 1,
+      "NameRole": "Admin",
+      "Note": "123",
+      "IsDeleted": false,
+      "id": "42fa"
+    },
+    {
+      "id": "ae8c",
+      "NameRole": "Nhân viên update",
+      "IsDeleted": true,
+      "Note": "xin chào"
+    },
+    {
+      "id": "5fa1",
+      "NameRole": "Cán bộ",
+      "IsDeleted": false,
+      "Note": ""
+    }
+  ],
+  "apartments": [
+    {
+      "id": 1,
+      "Name": "Cấp tỉnh"
+    },
+    {
+      "id": 2,
+      "Name": "Cấp Huyện"
+    },
+    {
+      "id": 3,
+      "Name": "Cấp Xã"
     }
   ]
 }

@@ -1,28 +1,30 @@
-import { Button, Popconfirm, Space, Table, TableProps, Tooltip } from 'antd'
+import { Button, Popconfirm, Space, Spin, Table, TableProps, Tooltip } from 'antd'
 import Search, { SearchProps } from 'antd/es/input/Search'
 import React, { Dispatch, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import Swal from 'sweetalert2'
-import { IIsDeletedUser, IUser } from '../../store/users/user.interface'
+import { IUser } from '../../store/users/user.interface'
 import { deleteUserSlice, listUsersSlice, listUsersTrashSlice } from '../../store/users/userSlice'
-import { ArrowLeftOutlined, SyncOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/icons'
 import { ColumnsType } from 'antd/es/table'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { useFetchAllWardQuery } from '../../store/wards/ward.service'
 import { useFetchAllDistrictQuery } from '../../store/districts/district.service'
 import { useFetchAllProvinceQuery } from '../../store/province/province.service'
 import { useFetchListUserQuery, useRevertUserMutation } from '../../store/users/user.service'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { Link } from 'react-router-dom'
+import { IDepartment } from '../../store/department/department.interface'
+import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted'
+import { useLazyFetchAllWardQuery } from '../../store/wards/ward.service'
 
 const UsersTrash = () => {
     const dispatch: Dispatch<any> = useDispatch()
     const [listUser, setListUser] = useState<IUser[]>([])
     const [checkStrictly, setCheckStrictly] = useState(false);
     // goi list user tu redux-toolkit
-    const { data: ListUserAPI, isError: isErrorListUser, isFetching, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
-    const { data: wards, isError: isErrorWards } = useFetchAllWardQuery()
+    const { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
+    const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
     const { data: districts, isError: isErrorDistricts } = useFetchAllDistrictQuery()
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     const [onRevert] = useRevertUserMutation()
@@ -66,21 +68,21 @@ const UsersTrash = () => {
         // },
         {
             title: 'Tên người dùng',
-            dataIndex: 'name',
+            dataIndex: 'FullName',
         },
         {
             title: 'Tên truy cập',
-            dataIndex: 'username',
+            dataIndex: 'UserName',
         },
         {
             title: 'Email',
-            dataIndex: 'email',
+            dataIndex: 'Email',
         },
         {
             title: 'Địa chỉ',
-            dataIndex: 'address',
+            dataIndex: 'Address',
             render: (_, value: IUser) => (
-                <p>{value.address},{value.WardId},{value.DistrictId},{value.WardId}</p>
+                <p>{value.Address},{value.WardId},{value.DistrictId},{value.WardId}</p>
             )
         },
         {
@@ -90,8 +92,8 @@ const UsersTrash = () => {
                 <Space size="middle" className='flex justify-start'>
                     <Popconfirm
                         title="Khôi phục người dùng"
-                        description={`Khôi phục: ${value.name}?`}
-                        onConfirm={() => confirmRevert(value.id!)}
+                        description={`Khôi phục: ${value.FullName}?`}
+                        onConfirm={() => confirmRevert(value._id!)}
                         okText="Yes"
                         cancelText="No"
                         okButtonProps={{ className: "text-white bg-blue-500" }}
@@ -106,8 +108,8 @@ const UsersTrash = () => {
     ];
     const confirmRevert = async (id?: string) => {
         if (id) {
-            const form: IIsDeletedUser = {
-                isDeleted: 0
+            const form: IIsDeleted = {
+                IsDeleted: false
             }
             const results = await onRevert({ id: id, ...form })
             if (results.error) {
@@ -120,18 +122,20 @@ const UsersTrash = () => {
     // data 
     const data: IUser[] = listUserReducer.map((user, index) => ({
         key: index + 1,
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        code: user.code,
-        isActive: user.isActive,
-        username: user.username,
-        address: user.address,
-        avatar: user.avatar,
+        _id: user._id,
+        Email: user.Email,
+        FullName: user.FullName,
+        Code: user.Code,
+        // isActive: user.isActive,
+        UserName: user.UserName,
+        Address: user.Address,
+        Avatar: user.Avatar,
         DistrictId: user.DistrictId,
         WardId: user.WardId,
         ProvinceId: user.ProvinceId,
-        isDeleted: user.isDeleted
+        IsDeleted: user.IsDeleted,
+        ApartmentId: user.ApartmentId,
+        Gender: user.Gender
     }));
     // nút filter
     const onChange: TableProps<IUser>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -141,7 +145,7 @@ const UsersTrash = () => {
     const handleRevertAll = async (listUser: IUser[]) => {
         try {
             if (listUser.length > 0) {
-                const listUserId = listUser.map((user) => user.id)
+                const listUserId = listUser.map((user) => user._id)
                 Swal.fire({
                     title: "Xác nhận Khôi phục mục đã chọn ?",
                     showCancelButton: true,
@@ -151,8 +155,8 @@ const UsersTrash = () => {
                     icon: "question",
                 }).then(async (results) => {
                     if (results.isConfirmed) {
-                        const form: IIsDeletedUser = {
-                            isDeleted: 0
+                        const form = {
+                            IsDeleted: false
                         }
                         for (const id of listUserId) {
                             await onRevert({ id: id, ...form })
@@ -171,6 +175,7 @@ const UsersTrash = () => {
     };
     return (
         <div>
+
             <div className="flex items-center gap-2">
                 <Tooltip title="Trở về">
                     <Link to={`/users`}>
@@ -180,6 +185,7 @@ const UsersTrash = () => {
                     </Link>
                 </Tooltip>
                 <h3 className='text-title mb-0'>Khôi phục Người dùng</h3>
+                {isFetchingUser && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
@@ -188,7 +194,7 @@ const UsersTrash = () => {
                 </Space>
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
-        </div>
+        </div >
     )
 }
 

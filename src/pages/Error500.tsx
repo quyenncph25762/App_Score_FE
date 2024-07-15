@@ -6,6 +6,7 @@ const Error500 = () => {
     return < Result
         status="500"
         title="500"
+
         subTitle="Xin lỗi , có lỗi xảy ra"
         extra={<Button type="primary"><Link to={`/`}>Quay về trang chủ</Link></Button>}
     />

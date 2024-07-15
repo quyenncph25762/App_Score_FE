@@ -1,7 +1,7 @@
 import React, { Dispatch, useEffect, useState } from 'react'
-import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { ArrowLeftOutlined, DeleteFilled, DeleteOutlined, EditFilled, SyncOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DeleteFilled, DeleteOutlined, EditFilled, LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -9,10 +9,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { IIsDeleted } from '../../store/department/department.interface';
 import { useAddObjectMutation, useFetchAllObjectQuery, useFetchOneObjectQuery, useRemoveObjectMutation, useRevertObjectMutation, useUpdateObjectMutation } from '../../store/object/object.service';
 import { IObject } from '../../store/object/object.interface';
 import { getAllObjectSlice, getObjectFromTrashSlice, searchObjectSlice } from '../../store/object/objectSlice';
+import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
 
 const ObjectPageTrash = () => {
     const dispatch: Dispatch<any> = useDispatch()
@@ -99,7 +99,7 @@ const ObjectPageTrash = () => {
     const confirmRevert = async (id?: string) => {
         try {
             const form: IIsDeleted = {
-                isDeleted: 0
+                IsDeleted: false
             }
             const results = await onRevert({ id: id, ...form })
             if (results.error) {
@@ -118,7 +118,7 @@ const ObjectPageTrash = () => {
         name: item.name,
         description: item.description,
         isActive: item.isActive,
-        isDeleted: item.isDeleted
+        IsDeleted: item.IsDeleted
     }))
     // nút filter
     const onChange: TableProps<IObject>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -138,7 +138,7 @@ const ObjectPageTrash = () => {
             }).then(async (results) => {
                 if (results.isConfirmed) {
                     const form: IIsDeleted = {
-                        isDeleted: 0
+                        IsDeleted: false
                     }
                     for (const id of listObjectId) {
                         await onRevert({ id: id, ...form })
@@ -158,8 +158,8 @@ const ObjectPageTrash = () => {
     };
     return (
         <div>
-            {isFetchingObject && <div>Updating data...</div>}
-            {isLoadingObject && <div>loading data...</div>}
+
+            {isLoadingObject && <div><Spin indicator={<LoadingOutlined spin />} size="small" />loading data...</div>}
             <div className="flex items-center gap-2">
                 <Tooltip title="Trở về">
                     <Link to={`/object`}>
@@ -169,6 +169,7 @@ const ObjectPageTrash = () => {
                     </Link>
                 </Tooltip>
                 <h3 className='text-title mb-0'>Khôi phục đối tượng</h3>
+                {isFetchingObject && <div><Spin indicator={<LoadingOutlined spin />} size="small" />Updating data...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>

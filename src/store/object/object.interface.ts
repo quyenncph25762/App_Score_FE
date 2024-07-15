@@ -3,7 +3,7 @@ export interface IObject {
     name: string
     isActive: boolean
     description: string
-    isDeleted: number
+    IsDeleted: boolean
 }
 
 export interface IObjectState {

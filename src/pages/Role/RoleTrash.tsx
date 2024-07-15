@@ -1,6 +1,5 @@
 import { Button, Popconfirm, Space, Spin, Table, Tooltip } from 'antd';
 import React, { Dispatch, useEffect, useState } from 'react'
-import { IDepartment } from '../../store/department/department.interface';
 import { ArrowLeftOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { ColumnsType, TableProps } from 'antd/es/table';
 import { useFetchAllDepartmentQuery, useRevertDepartmentMutation } from '../../store/department/department.service';
@@ -13,30 +12,35 @@ import { toast } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { Link } from 'react-router-dom';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
+import { useFetchAllRoleFromTrashQuery, useFetchAllRoleQuery, useRevertRoleByCheckboxMutation, useRevertRoleMutation } from '../../store/role/role.service';
+import { fetchAllRoleFromTrashSlice } from '../../store/role/roleSlice';
+import { IRole } from '../../store/role/role.interface';
 
-const DepartmentTrash = () => {
+const RoleTrash = () => {
     const dispatch: Dispatch<any> = useDispatch()
     // nut khoi phuc
-    const [onRevert] = useRevertDepartmentMutation()
+    const [onRevert] = useRevertRoleMutation()
+    // nut khoi phuc nhieu
+    const [onRevertByCheckbox] = useRevertRoleByCheckboxMutation()
     // listDeparment
-    const [listDepartment, setDepartment] = useState<IDepartment[]>([])
+    const [listRole, setRole] = useState<IRole[]>([])
     // state checked
     const [checkStrictly, setCheckStrictly] = useState(false);
     // department api & slice
-    const { data: listDepartmentApi, isError: isErrorDepartment, isFetching: isFetchingDepartment, isSuccess: isSuccessDepartment } = useFetchAllDepartmentQuery()
-    const listDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
+    const { data: listRoleApi, isError: isErrorRole, isFetching: isFetchingRole, isSuccess: isSuccessRole } = useFetchAllRoleFromTrashQuery()
+    const listRoleReducer = useSelector((state: RootState) => state.roleSlice.roles)
     // neu co listDepartmentApi thi dispatch vao trong reducer
     useEffect(() => {
-        if (listDepartmentApi) {
-            dispatch(fetchAllDepartmentTrash(listDepartmentApi))
+        if (listRoleApi) {
+            dispatch(fetchAllRoleFromTrashSlice(listRoleApi))
         }
-    }, [isSuccessDepartment, listDepartmentApi])
+    }, [isSuccessRole, listRoleApi])
     // nút checkbox
-    const rowSelection: TableRowSelection<IDepartment> = {
+    const rowSelection: TableRowSelection<IRole> = {
         onChange: (selectedRowKeys, selectedRows) => {
             if (selectedRowKeys.length > 0) {
                 // Nếu chọn thì xóa disaled 
-                setDepartment(selectedRows)
+                setRole(selectedRows)
                 document.querySelector(".handleDeleteAll")?.removeAttribute("disabled")
             } else {
                 // Nếu không chọn thì disabled 
@@ -52,21 +56,25 @@ const DepartmentTrash = () => {
         },
     };
     // column
-    const columns: ColumnsType<IDepartment> = [
+    const columns: ColumnsType<IRole> = [
 
         {
-            title: 'Tên lĩnh vực',
-            dataIndex: 'name',
+            title: 'Tên vai trò',
+            dataIndex: 'NameRole',
+        },
+        {
+            title: 'Ghi chú',
+            dataIndex: 'Note',
         },
         {
             title: 'Hành động',
             key: 'action',
-            render: (value: IDepartment) => (
+            render: (value: IRole) => (
                 <Space size="middle" className='flex justify-start'>
                     <Popconfirm
                         title="Khôi phục lĩnh vực"
-                        description={`Bạn muốn khôi phục: ${value.name}?`}
-                        onConfirm={() => confirmRevert(value.id!)}
+                        description={`Bạn muốn khôi phục: ${value.NameRole}?`}
+                        onConfirm={() => confirmRevert(value._id!)}
                         okText="Yes"
                         cancelText="No"
                         okButtonProps={{ className: "text-white bg-blue-500" }}
@@ -80,11 +88,11 @@ const DepartmentTrash = () => {
         },
     ];
     // data 
-    const data: IDepartment[] = listDepartmentReducer.map((item, index) => ({
+    const data: IRole[] = listRoleReducer.map((item, index) => ({
         key: index + 1,
-        id: item.id,
-        name: item.name,
-        isActive: item.isActive,
+        _id: item._id,
+        NameRole: item.NameRole,
+        Note: item.Note,
         IsDeleted: item.IsDeleted
     }))
     // nut khoi phuc
@@ -106,10 +114,10 @@ const DepartmentTrash = () => {
         }
     }
     // nut khôi phuc nhiều
-    const handleRevertAll = async (listDepartment: IDepartment[]) => {
+    const handleRevertAll = async (listRole: any) => {
         try {
-            if (listDepartment.length > 0) {
-                const listDepartmentId = listDepartment.map((department) => department.id)
+            if (listRole.length > 0) {
+                const listRoleId = listRole.map((role) => role._id)
                 Swal.fire({
                     title: "Xác nhận Khôi phục mục đã chọn ?",
                     showCancelButton: true,
@@ -119,12 +127,7 @@ const DepartmentTrash = () => {
                     icon: "question",
                 }).then(async (results) => {
                     if (results.isConfirmed) {
-                        const form: IIsDeleted = {
-                            IsDeleted: false
-                        }
-                        for (const id of listDepartmentId) {
-                            await onRevert({ id: id, ...form })
-                        }
+                        await onRevertByCheckbox(listRoleId)
                         toast.success("Xóa thành công!")
                         toast.success("Khôi phục thành công!")
                     }
@@ -135,7 +138,7 @@ const DepartmentTrash = () => {
         }
     }
     // nút filter
-    const onChange: TableProps<IDepartment>['onChange'] = (pagination, filters, sorter, extra) => {
+    const onChange: TableProps<IRole>['onChange'] = (pagination, filters, sorter, extra) => {
         console.log('params', pagination, filters, sorter, extra);
     };
     // nút tìm kiếm
@@ -146,19 +149,19 @@ const DepartmentTrash = () => {
         <div>
             <div className="flex items-center gap-2">
                 <Tooltip title="Trở về">
-                    <Link to={`/department`}>
+                    <Link to={`/roles`}>
                         <ArrowLeftOutlined style={{
                             marginBottom: "12px"
                         }} />
                     </Link>
                 </Tooltip>
                 <h3 className='text-title mb-0'>Khôi phục lĩnh vực</h3>
-                {isFetchingDepartment && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
+                {isFetchingRole && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
-                    <Button type='primary' onClick={() => handleRevertAll(listDepartment)}>Khôi phục tất cả</Button>
-                    <Search placeholder="Tìm kiếm tên lĩnh vực ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button type='primary' onClick={() => handleRevertAll(listRole)}>Khôi phục tất cả</Button>
+                    <Search placeholder="Tìm kiếm tên vai trò ..." className='w-[300px]' onSearch={onSearch} enterButton />
                 </Space>
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
@@ -166,4 +169,4 @@ const DepartmentTrash = () => {
     )
 }
 
-export default DepartmentTrash
+export default RoleTrash

@@ -1,19 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IWard } from "./ward.interface";
+import { BASE_URL } from "../../config/configApi";
 
 const wardApi = createApi({
     reducerPath: "wards",
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://localhost:3000'
+        baseUrl: BASE_URL
     }),
     tagTypes: ["wards"],
     endpoints: (builer) => ({
         fetchAllWard: builer.query<IWard[], void>({
-            query: () => `/wards`,
+            query: (id) => `/${id}/wards`,
             providesTags: ["wards"]
         })
     })
 })
 
-export const { useFetchAllWardQuery } = wardApi
+export const { useLazyFetchAllWardQuery } = wardApi
 export default wardApi

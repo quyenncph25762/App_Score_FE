@@ -8,6 +8,10 @@ import departmentApi from './department/department.service'
 import departmentSlice from './department/departmentSlice'
 import objectApi from './object/object.service'
 import objectSlice from './object/objectSlice'
+import roleApi from './role/role.service'
+import roleSlice from './role/roleSlice'
+import apartmentApi from './apartment/apartment.service'
+import authApi from './auth/auth.service'
 
 export const store = configureStore({
     reducer: {
@@ -22,11 +26,21 @@ export const store = configureStore({
         [departmentApi.reducerPath]: departmentApi.reducer,
         // object
         [objectApi.reducerPath]: objectApi.reducer,
+        // role
+        [roleApi.reducerPath]: roleApi.reducer,
+        // apartments
+        [apartmentApi.reducerPath]: apartmentApi.reducer,
         // slice
+        // login
+        [authApi.reducerPath]: authApi.reducer,
         // user
         userSlice: userSlice,
+        // department
         departmentSlice: departmentSlice,
+        // object
         objectSlice: objectSlice,
+        // role
+        roleSlice: roleSlice
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -40,6 +54,12 @@ export const store = configureStore({
             .concat([departmentApi.middleware])
             // object
             .concat([objectApi.middleware])
+            // role
+            .concat([roleApi.middleware])
+            // apartment
+            .concat([apartmentApi.middleware])
+            // login
+            .concat([authApi.middleware])
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

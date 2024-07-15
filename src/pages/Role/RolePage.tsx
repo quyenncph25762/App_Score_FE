@@ -1,5 +1,5 @@
 import React, { Dispatch, useEffect, useState } from 'react'
-import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Skeleton, Space, Spin, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { DeleteFilled, DeleteOutlined, EditFilled, LoadingOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
@@ -10,10 +10,11 @@ import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import TextArea from 'antd/es/input/TextArea';
-import { useAddObjectMutation, useFetchAllObjectQuery, useLazyFetchOneObjectQuery, useRemoveObjectMutation, useUpdateObjectMutation } from '../../store/object/object.service';
-import { IObject } from '../../store/object/object.interface';
-import { getAllObjectSlice, searchObjectSlice } from '../../store/object/objectSlice';
+import Error500 from '../Error500';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
+import { IRole } from '../../store/role/role.interface';
+import { useAddRoleMutation, useFetchAllRoleQuery, useLazyFetchOneRoleQuery, useRemoveRoleToTrashByCheckboxMutation, useRemoveRoleToTrashMutation, useUpdateRoleMutation } from '../../store/role/role.service';
+import { fetchAllRoleSlice, searchRoleSlice } from '../../store/role/roleSlice';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -57,7 +58,7 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
         </Button>
     );
 };
-const ObjectPage = () => {
+const RolePage = () => {
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     // modal state 
@@ -66,57 +67,54 @@ const ObjectPage = () => {
     const [openUpdate, setOpenUpdate] = useState(false);
     // state checked
     const [checkStrictly, setCheckStrictly] = useState(false);
-    // listObject
-    const [listObject, setObject] = useState<IObject[]>([])
-    // id object
-    const [idObject, setIdObject] = useState<string>("")
+    // listDeparment
+    const [listRole, setRole] = useState<IRole[]>([])
     // form
     const [form] = Form.useForm()
     // form update
     const [formUpdate] = Form.useForm()
     // nut them 
-    const [onAdd] = useAddObjectMutation()
+    const [onAdd] = useAddRoleMutation()
     // nut xoa
-    const [onDelete] = useRemoveObjectMutation()
+    const [onDelete] = useRemoveRoleToTrashMutation()
+    // nut xoa nhieu
+    const [onDeleteByCheckBox] = useRemoveRoleToTrashByCheckboxMutation()
     // nut cap nhat
-    const [onUpdate] = useUpdateObjectMutation()
+    const [onUpdate] = useUpdateRoleMutation()
     // setValue mac dinh cho form add
 
-    // object api & slice
-    const { data: listObjectApi, isLoading: isLoadingObject, isFetching: isFetchingObject, isError: isErrorObject, isSuccess: isSuccessObject } = useFetchAllObjectQuery()
-
-    // lay 1 object
-    const [trigger, { data: getOneObject, isSuccess: isSuccessFetchOneObject, isLoading: isLoadingGetOneObject, isError: isErrorFetchOneObject }] = useLazyFetchOneObjectQuery()
-
-    const listObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
+    // role api & slice
+    const { data: listRoleApi, isLoading: isLoadingRole, isFetching: isFetchingRole, isError: isErrorRole, isSuccess: isSuccessRole } = useFetchAllRoleQuery()
+    // lay 1 role
+    const [trigger, { data: getOneRole, isSuccess: isSuccessFetchOneRole, isError: isErrorFetchOneRole }] = useLazyFetchOneRoleQuery()
+    const listRoleReducer = useSelector((state: RootState) => state.roleSlice.roles)
     // useEffect khi co loi
     useEffect(() => {
-        if (isErrorObject || isErrorFetchOneObject) {
+        if (isErrorRole || isErrorFetchOneRole) {
             navigate("/err500")
             return
         }
-    }, [isErrorObject, isErrorFetchOneObject])
-    // neu co listObjectApi thi dispatch vao trong reducer
+    }, [isErrorRole, isErrorFetchOneRole])
+    // neu co listRoleApi thi dispatch vao trong reducer
     useEffect(() => {
-        if (listObjectApi) {
-            dispatch(getAllObjectSlice(listObjectApi))
+        if (listRoleApi) {
+            dispatch(fetchAllRoleSlice(listRoleApi))
         }
-    }, [isSuccessObject, listObjectApi])
-    // useEffect khi co getOneObject
+    }, [isSuccessRole, listRoleApi, dispatch])
+    // useEffect khi co getOneDeparrtment
     useEffect(() => {
-        if (getOneObject) {
+        if (getOneRole) {
             formUpdate.setFieldsValue({
-                isActive: getOneObject.isActive,
-                name: getOneObject.name
+                NameRole: getOneRole.NameRole,
+                Note: getOneRole.Note
             })
         }
-    }, [isSuccessFetchOneObject, getOneObject])
+    }, [isSuccessFetchOneRole, getOneRole])
     // modal
     // show modal them
     const showModal = () => {
         form.setFieldsValue({
-            isActive: true,
-            IsDeleted: 0
+            IsDeleted: false
         })
         setOpen(true);
     };
@@ -142,11 +140,11 @@ const ObjectPage = () => {
         formUpdate.resetFields()
     };
     // nút checkbox
-    const rowSelection: TableRowSelection<IObject> = {
+    const rowSelection: TableRowSelection<IRole> = {
         onChange: (selectedRowKeys, selectedRows) => {
             if (selectedRowKeys.length > 0) {
                 // Nếu chọn thì xóa disaled 
-                setObject(selectedRows)
+                setRole(selectedRows)
                 document.querySelector(".handleDeleteAll")?.removeAttribute("disabled")
             } else {
                 // Nếu không chọn thì disabled 
@@ -162,30 +160,27 @@ const ObjectPage = () => {
         },
     };
     // column
-    const columns: ColumnsType<IObject> = [
+    const columns: ColumnsType<IRole> = [
         {
-            title: 'Tên đối tượng',
-            dataIndex: 'name',
+            title: 'Tên vai trò',
+            dataIndex: 'NameRole',
         },
         {
-            title: 'Áp dụng',
-            dataIndex: 'isActive',
-            render: (_, value: IObject) => (
-                <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
-            )
+            title: 'Ghi chú',
+            dataIndex: 'Note',
         },
         {
             title: 'Hành động',
             key: 'action',
-            render: (value: IObject) => (
+            render: (value: IRole) => (
                 <Space size="middle" className='flex justify-start'>
                     <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
-                        <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value.id!)} />
+                        <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value._id!)} />
                     </Tooltip>
                     <Popconfirm
-                        title="Xóa đối tượng"
-                        description={`Bạn có chắc muốn xóa: ${value.name}`}
-                        onConfirm={() => confirmDelete(value.id!)}
+                        title="Xóa vai trò"
+                        description={`Bạn có chắc muốn xóa: ${value.NameRole}`}
+                        onConfirm={() => confirmDelete(value._id!)}
                         okText="Yes"
                         cancelText="No"
                         okButtonProps={{ className: "text-white bg-blue-500" }}
@@ -198,6 +193,7 @@ const ObjectPage = () => {
             )
         },
     ];
+    // xoa vao thung rac
     const confirmDelete = async (id?: string) => {
         try {
             const form: IIsDeleted = {
@@ -214,22 +210,23 @@ const ObjectPage = () => {
         }
     }
     // data 
-    const data: IObject[] = listObjectReducer.map((item, index) => ({
+    const data: IRole[] = listRoleReducer.map((item, index) => ({
         key: index + 1,
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        isActive: item.isActive,
+        _id: item._id,
+        NameRole: item.NameRole,
+        Note: item.Note,
         IsDeleted: item.IsDeleted
     }))
     // nút filter
-    const onChange: TableProps<IObject>['onChange'] = (pagination, filters, sorter, extra) => {
+    const onChange: TableProps<IRole>['onChange'] = (pagination, filters, sorter, extra) => {
         console.log('params', pagination, filters, sorter, extra);
     };
     // nút xóa tất cả
-    const handleDeleteAll = async (listObject: IObject[]) => {
-        if (listObject.length > 0) {
-            const listObjectId = listObject.map((object) => object.id)
+    const handleDeleteAll = async (listRole: any) => {
+        if (listRole.length > 0) {
+            console.log(listRole)
+            // lấy ra những id của vai trò
+            const listRoleId = listRole.map((role) => role._id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -239,12 +236,7 @@ const ObjectPage = () => {
                 icon: "question",
             }).then(async (results) => {
                 if (results.isConfirmed) {
-                    const form: IIsDeleted = {
-                        IsDeleted: true
-                    }
-                    for (const id of listObjectId) {
-                        await onDelete({ id: id, ...form })
-                    }
+                    await onDeleteByCheckBox(listRoleId)
                     toast.success("Xóa thành công!")
                 }
             })
@@ -252,24 +244,24 @@ const ObjectPage = () => {
     }
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
         if (value) {
-            dispatch(getAllObjectSlice(listObjectApi))
-            dispatch(searchObjectSlice({ searchTerm: value, objects: listObjectReducer }))
+            dispatch(searchRoleSlice({ searchTerm: value, roles: listRoleApi }))
         } else {
-            dispatch(getAllObjectSlice(listObjectApi))
+            dispatch(fetchAllRoleSlice(listRoleApi))
         }
     };
     const handleReset = () => {
-        dispatch(getAllObjectSlice(listObjectApi))
+        dispatch(fetchAllRoleSlice(listRoleApi))
     }
-    // submit add phòng ban
-    const onFinish = async (values: IObject) => {
+    // submit add vai trò
+    const onFinish = async (values: IRole) => {
         try {
             const results = await onAdd(values)
+            console.log(results)
             if (results.error) {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
                 return
             }
-            message.success(`Đã thêm thành công phòng: ${values.name}`);
+            message.success(`Đã thêm thành công vai trò: ${values.NameRole}`);
             form.resetFields()
             setOpen(false);
         } catch (error) {
@@ -277,10 +269,10 @@ const ObjectPage = () => {
         }
     }
     // submit update phòng ban
-    const onFinishUpdate = async (values: IObject) => {
+    const onFinishUpdate = async (values: IRole) => {
         try {
-            if (getOneObject) {
-                const results = await onUpdate({ id: getOneObject.id, ...values })
+            if (getOneRole) {
+                const results = await onUpdate({ _id: getOneRole._id, ...values })
                 if (results.error) {
                     message.error(`Thêm thất bại , vui lòng thử lại!`);
                     return
@@ -296,10 +288,10 @@ const ObjectPage = () => {
     return (
         <div>
 
-            {isLoadingObject && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> loading data...</div>}
+            {isLoadingRole && <div>loading data...</div>}
             {/* modal them */}
             <Modal
-                title="Thêm đối tượng"
+                title="Thêm vai trò"
                 open={open}
                 width={800}
                 onOk={handleOk}
@@ -320,10 +312,10 @@ const ObjectPage = () => {
                     className="mx-auto"
                 >
                     <Row gutter={25}>
-                        <Col span={20}>
+                        <Col span={24}>
                             <Form.Item
-                                name="name"
-                                label="Tên đối tượng"
+                                name="NameRole"
+                                label="Tên vai trò"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -340,22 +332,13 @@ const ObjectPage = () => {
                             >
                                 <Input />
                             </Form.Item>
-                            <Form.Item name="IsDeleted" hidden>
-                            </Form.Item>
-                        </Col>
-                        <Col span={4} className='flex items-center'>
-                            <Form.Item
-                                name="isActive"
-                                className='mb-0'
-                            >
-                                <Switch />
-                            </Form.Item>
+                            <Form.Item name="IsDeleted" hidden></Form.Item>
                         </Col>
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Form.Item name="descripton" label="Mô tả">
-                                <TextArea className='w-full'></TextArea>
+                            <Form.Item name="Note" label="Ghi chú">
+                                <Input></Input>
                             </Form.Item>
                         </Col>
                     </Row>
@@ -370,7 +353,7 @@ const ObjectPage = () => {
             </Modal>
             {/* modal update */}
             <Modal
-                title="Cập nhật đối tượng"
+                title="Cập nhật vai trò"
                 open={openUpdate}
                 width={800}
                 onOk={handleOkUpdate}
@@ -391,10 +374,10 @@ const ObjectPage = () => {
                     className="mx-auto"
                 >
                     <Row gutter={25}>
-                        <Col span={20}>
+                        <Col span={24}>
                             <Form.Item
-                                name="name"
-                                label="Tên đối tượng"
+                                name="NameRole"
+                                label="Tên vai trò"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -412,19 +395,11 @@ const ObjectPage = () => {
                                 <Input />
                             </Form.Item>
                         </Col>
-                        <Col span={4} className='flex items-center'>
-                            <Form.Item
-                                name="isActive"
-                                className='mb-0'
-                            >
-                                <Switch />
-                            </Form.Item>
-                        </Col>
                     </Row>
                     <Row>
                         <Col span={24}>
-                            <Form.Item name="description" label="Mô tả">
-                                <TextArea className='w-full'></TextArea>
+                            <Form.Item name="Note" label="Ghi chú">
+                                <Input></Input>
                             </Form.Item>
                         </Col>
                     </Row>
@@ -438,18 +413,18 @@ const ObjectPage = () => {
                 </Form>
             </Modal>
             <div className="flex items-center gap-2">
-                <h3 className='text-title mb-0'>Quản lí đối tượng</h3>
+                <h3 className='text-title mb-0'>Quản lí vai trò</h3>
                 <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
-                        <Link to={`/object/trash`}><DeleteOutlined color='red' /></Link>
+                        <Link to={`/roles/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
                 </div>
-                {isFetchingObject && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
+                {isFetchingRole && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
-                    <Button type='primary' danger onClick={() => handleDeleteAll(listObject)}>Xóa tất cả</Button>
-                    <Search placeholder="Tìm kiếm đối tượng ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button type='primary' danger onClick={() => handleDeleteAll(listRole)}>Xóa tất cả</Button>
+                    <Search placeholder="Tìm kiếm tên vai trò ..." className='w-[300px]' onSearch={onSearch} enterButton />
                     <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>
@@ -459,4 +434,4 @@ const ObjectPage = () => {
     )
 }
 
-export default ObjectPage
+export default RolePage

@@ -3,15 +3,24 @@ import { Button, Form, Input, Radio } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { IUser } from '../store/users/user.interface';
 import { Link } from 'react-router-dom';
+import { useLoginApiMutation } from '../store/auth/auth.service';
 
 
 const LoginPage = () => {
     const [form] = Form.useForm();
-
+    const [onLogin] = useLoginApiMutation()
     const onFinish = async (values: IUser) => {
         try {
-            console.log(values)
+            const { UserName, Password } = values
+            const NewValues = {
+                UserName: UserName,
+                Password: Password,
+                DistrictId: 1
+            }
+            const results = await onLogin(NewValues)
+            console.log(results)
         } catch (error) {
+            console.log(1)
             console.log(error)
         }
 
@@ -23,7 +32,19 @@ const LoginPage = () => {
         })
     }, [])
     return (
-        <>
+        <div className='area'>
+            <ul className="circles">
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
             <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
                 <div className="relative py-3 w-[450px] sm:mx-auto">
                     <div
@@ -51,7 +72,7 @@ const LoginPage = () => {
                                 <div className="divide-y divide-gray-200">
                                     <div className="text-base leading-6  text-gray-700 sm:text-lg sm:leading-7">
                                         <Form.Item
-                                            name="username"
+                                            name="UserName"
                                             label="Tên đăng nhập"
                                             rules={[
                                                 { required: true, message: '* Không được để trống' },
@@ -70,7 +91,7 @@ const LoginPage = () => {
                                             <Input placeholder="Tên đăng nhập" />
                                         </Form.Item>
                                         <Form.Item
-                                            name="password"
+                                            name="Password"
                                             label="Mật khẩu"
                                             rules={[
                                                 { required: true, message: '* Không được để trống' },
@@ -112,7 +133,7 @@ const LoginPage = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

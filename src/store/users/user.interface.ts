@@ -1,24 +1,24 @@
 export interface IUser {
-    id: string
-    name: string
-    code: string
-    isActive: boolean
-    username: string
-    email: string
-    address: string
-    avatar: string
-    WardId?: number
+    _id?: string
+    FullName: string
+    Code: string
+    Gender: string
+    // isActive: boolean
+    UserName: string
+    Email: string
+    Address: string
+    Avatar: string
+    WardId: number
     ObjectId?: number
     DepartmentId?: number
-    DistrictId?: number
-    ProvinceId?: number
-    isDeleted: number
+    DistrictId: number
+    ProvinceId: number
+    IsDeleted: boolean | number
+    CreatorUserId?: number
+    ApartmentId: number
+    Password?: string
 }
 
-export interface IIsDeletedUser {
-    id?: string
-    isDeleted: number
-}
 
 export interface IUserState {
     users: IUser[]

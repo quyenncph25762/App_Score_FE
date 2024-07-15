@@ -10,6 +10,7 @@ import { RootState } from '../../store';
 import { getAllObjectSlice } from '../../store/object/objectSlice';
 import { useFetchAllDepartmentQuery } from '../../store/department/department.service';
 import { fetchAllDepartmentSlice } from '../../store/department/departmentSlice';
+import { IDepartment } from '../../store/department/department.interface';
 
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
@@ -33,7 +34,10 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
         </Button>
     );
 };
+
+
 const ScoreTempAdd = () => {
+    // truyen props tu app
     const dispatch: Dispatch<any> = useDispatch()
     const [form] = Form.useForm();
     // scoretemptdetail
@@ -43,12 +47,12 @@ const ScoreTempAdd = () => {
     const navigate = useNavigate()
     // api object
     const { data: fetchAllObject, isSuccess: isSuccessObject, isLoading: isLoadingObject, isError: isErrorObject } = useFetchAllObjectQuery()
-    // api phòng ban
-    const { data: fetchAllDepartment, isSuccess: isSuccessDepartment, isLoading: isLoadingDepartment, isError: isErrorDepartment } = useFetchAllDepartmentQuery()
+    // goi list department tu redux-toolkit
+    const { data: listDepartmentApi, isError: isErrorDepartmenApi, isLoading: isLoadingDepartmentApi, isSuccess: isSuccessDepartmentApi } = useFetchAllDepartmentQuery()
     // reducer object
     const fetchAllObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
     const fetchAllDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
-    if (isErrorObject || isErrorDepartment) {
+    if (isErrorObject || isErrorDepartmenApi) {
         navigate("/err500")
         return
     }
@@ -57,17 +61,19 @@ const ScoreTempAdd = () => {
         if (fetchAllObject) {
             dispatch(getAllObjectSlice(fetchAllObject))
         }
-    }, [isSuccessObject, fetchAllObject])
+    }, [isSuccessObject, fetchAllObject, dispatch])
     // useEffect khi lay du lieu department thanh cong dispatch vao redux
     useEffect(() => {
-        if (fetchAllDepartment) {
-            dispatch(fetchAllDepartmentSlice(fetchAllDepartment))
+        if (listDepartmentApi) {
+            dispatch(fetchAllDepartmentSlice(listDepartmentApi))
         }
-    }, [isSuccessDepartment, fetchAllDepartment])
+    }, [isSuccessDepartmentApi, dispatch])
     // form scoretemp
-    form.setFieldsValue({
-        isActive: true
-    })
+    useEffect(() => {
+        form.setFieldsValue({
+            isActive: true
+        })
+    }, [])
     // Checked ty le %
     const toggleChecked = (key: number) => {
         setCheckedPercent(!checkedPercent);
@@ -99,10 +105,8 @@ const ScoreTempAdd = () => {
     return (
         <div>
             {isLoadingObject && <p> loading object....</p>}
-            {isLoadingDepartment && <p> loading deparment....</p>}
             <div className="flex items-center justify-between gap-2">
                 <h3 className='text-title mb-0'>Thêm mới phiếu chấm</h3>
-
             </div>
             <Form
                 form={form}

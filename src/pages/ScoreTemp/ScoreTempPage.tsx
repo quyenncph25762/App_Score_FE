@@ -7,6 +7,7 @@ import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
+import { IDepartment } from '../../store/department/department.interface';
 
 interface DataType {
     key: React.Key;
@@ -28,7 +29,9 @@ interface DataTypePreview {
     isCurrentState?: string;
     isPassed?: boolean
 }
+
 const ScoreTempPage = () => {
+
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listCriteria, setCriteria] = useState<DataType[]>([])
     // modal xem chi tiet
@@ -42,7 +45,7 @@ const ScoreTempPage = () => {
         // Simple loading mock. You should add cleanup logic in real world.
         setTimeout(() => {
             setLoading(false);
-        }, 2000);
+        }, 1000);
     };
     // nút checkbox
     const rowSelection: TableRowSelection<DataType> = {
@@ -236,7 +239,9 @@ const ScoreTempPage = () => {
                     <Button type='primary' danger onClick={() => handleDeleteAll(listCriteria)}>Xóa tất cả</Button>
                     <Search placeholder="Tìm kiếm tên tiêu chí ..." className='w-[300px]' onSearch={onSearch} enterButton />
                 </Space>
-                <Button type='primary' className='mb-3'>Thêm mới</Button>
+                <Link to={`/scoretemp/add`}>
+                    <Button type='primary' className='mb-3'>Thêm mới</Button>
+                </Link>
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
         </div>
