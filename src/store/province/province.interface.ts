@@ -1,4 +1,4 @@
 export interface IProvince {
-    id: string
-    name: string
+    _id?: number
+    Name: string
 }

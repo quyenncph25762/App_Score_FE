@@ -127,8 +127,10 @@ const RoleTrash = () => {
                     icon: "question",
                 }).then(async (results) => {
                     if (results.isConfirmed) {
-                        await onRevertByCheckbox(listRoleId)
-                        toast.success("Xóa thành công!")
+                        const results = await onRevertByCheckbox(listRoleId)
+                        if (results.error) {
+                            return toast.error("Khôi phục không thành công!")
+                        }
                         toast.success("Khôi phục thành công!")
                     }
                 })

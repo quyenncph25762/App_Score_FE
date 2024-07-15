@@ -13,7 +13,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteUserSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice';
 import { RootState } from '../../store';
 import { IUser } from '../../store/users/user.interface';
-import { useFetchAllDistrictQuery } from '../../store/districts/district.service';
 import { useFetchAllProvinceQuery } from '../../store/province/province.service';
 import { useFetchAllDepartmentQuery } from '../../store/department/department.service';
 import { fetchAllDepartmentSlice } from '../../store/department/departmentSlice';
@@ -23,6 +22,7 @@ import { IDepartment } from '../../store/department/department.interface';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
 import { useFetchAllApartmentQuery } from '../../store/apartment/apartment.service';
 import { useLazyFetchAllWardQuery } from '../../store/wards/ward.service';
+import { useLazyFetchAllDistrictQuery } from '../../store/districts/district.service';
 const { Option } = Select;
 const { Search } = Input;
 
@@ -114,7 +114,8 @@ const UsersPage = () => {
     const { data: listApartments, isLoading: isLoadingApartmentApi } = useFetchAllApartmentQuery()
     // goi list ward 
     const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
-    const { data: districts, isError: isErrorDistricts } = useFetchAllDistrictQuery()
+    const [triggerDistrict, { data: districts, isError: isErrorDistricts }] = useLazyFetchAllDistrictQuery()
+    // console.log(`districts:`, districts)
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     useEffect(() => {
         if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListObject) {
@@ -371,8 +372,7 @@ const UsersPage = () => {
             const ApartmentIdNumber = Number(ApartmentId);
             // Tạo đối tượng mới với ApartmentId đã chuyển đổi
             const newValues = { ...data, ApartmentId: ApartmentIdNumber };
-            console.log(newValues)
-            return
+
             const results = await onAddUser(newValues)
             if (results.error) {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
@@ -453,6 +453,16 @@ const UsersPage = () => {
     const handleChangeSelectUpdate = (value: string[]) => {
         console.log(`selected ${value}`);
     };
+    const handleDistrictByProvince = (IdProvince: number) => {
+        if (IdProvince) {
+            triggerDistrict(IdProvince)
+        }
+    }
+    const handleWardByDistrictId = (IdDistrict: number) => {
+        if (IdDistrict) {
+            triggerWard(IdDistrict)
+        }
+    }
     return (
         <div className=''>
             {isLoadingUserAPI || isLoadingApartmentApi || isLoadingObjectAPI ? <div>loading data...</div> : ""}
@@ -672,10 +682,10 @@ const UsersPage = () => {
                                     showSearch
                                     placeholder="Tìm kiếm tỉnh"
                                     optionFilterProp="children"
-
+                                    onChange={handleDistrictByProvince}
                                 >
                                     {provinces?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index} >{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -687,9 +697,10 @@ const UsersPage = () => {
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
                                     optionFilterProp="children"
+                                    onChange={handleWardByDistrictId}
                                 >
                                     {districts?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -703,7 +714,7 @@ const UsersPage = () => {
                                     optionFilterProp="children"
                                 >
                                     {wards?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -936,9 +947,10 @@ const UsersPage = () => {
                                     showSearch
                                     placeholder="Tìm kiếm tỉnh"
                                     optionFilterProp="children"
+                                    onChange={handleDistrictByProvince}
                                 >
                                     {provinces?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -950,9 +962,10 @@ const UsersPage = () => {
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
                                     optionFilterProp="children"
+                                    onChange={handleWardByDistrictId}
                                 >
                                     {districts?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -966,7 +979,7 @@ const UsersPage = () => {
                                     optionFilterProp="children"
                                 >
                                     {wards?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>

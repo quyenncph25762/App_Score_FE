@@ -2,13 +2,15 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { Button, Form, Input, Radio } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { IUser } from '../store/users/user.interface';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLoginApiMutation } from '../store/auth/auth.service';
+import { toast } from 'react-toastify';
 
 
 const LoginPage = () => {
     const [form] = Form.useForm();
     const [onLogin] = useLoginApiMutation()
+    const navigate = useNavigate()
     const onFinish = async (values: IUser) => {
         try {
             const { UserName, Password } = values
@@ -18,9 +20,14 @@ const LoginPage = () => {
                 DistrictId: 1
             }
             const results = await onLogin(NewValues)
-            console.log(results)
+            if (results.error) {
+                toast.error("Tài khoản hoặc mật khẩu không chính xác")
+                return
+            }
+            toast.success("Đăng nhập thành công!")
+            navigate("/")
         } catch (error) {
-            console.log(1)
+            toast.error("Tài khoản hoặc mật khẩu không chính xác")
             console.log(error)
         }
 

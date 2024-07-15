@@ -1,4 +1,4 @@
 export interface IDistrict {
-    id: string
-    name: string
+    _id: number
+    Name: string
 }

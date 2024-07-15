@@ -9,8 +9,6 @@ import { ArrowLeftOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/ic
 import { ColumnsType } from 'antd/es/table'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { useFetchAllDistrictQuery } from '../../store/districts/district.service'
-import { useFetchAllProvinceQuery } from '../../store/province/province.service'
 import { useFetchListUserQuery, useRevertUserMutation } from '../../store/users/user.service'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { Link } from 'react-router-dom'
@@ -25,10 +23,8 @@ const UsersTrash = () => {
     // goi list user tu redux-toolkit
     const { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
     const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
-    const { data: districts, isError: isErrorDistricts } = useFetchAllDistrictQuery()
-    const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     const [onRevert] = useRevertUserMutation()
-    if (isErrorListUser || isErrorWards || isErrorDistricts || isErrorProvinces) {
+    if (isErrorListUser || isErrorWards) {
         console.log("Lỗi không call được dữ liệu từ server!")
         return
     }

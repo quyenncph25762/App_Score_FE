@@ -9,7 +9,7 @@ const districtApi = createApi({
     }),
     tagTypes: ["districts"],
     endpoints: (builer) => ({
-        fetchAllDistrict: builer.query<IDistrict[], void>({
+        fetchAllDistrict: builer.query<IDistrict[], number>({
             query: (id) => ({
                 url: `/${id}/district`,
                 method: "GET"
@@ -19,6 +19,6 @@ const districtApi = createApi({
     })
 })
 
-export const { useFetchAllDistrictQuery } = districtApi
+export const { useLazyFetchAllDistrictQuery } = districtApi
 
 export default districtApi

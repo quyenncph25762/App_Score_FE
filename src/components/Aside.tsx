@@ -14,9 +14,10 @@ import {
     VideoCameraOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Col, Dropdown, Form, FormInstance, Image, Input, Layout, Menu, MenuProps, message, Modal, Popover, Row, Select, Space, Switch, theme, Upload } from 'antd';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { IUser } from '../store/users/user.interface';
+import { toast } from 'react-toastify';
 
 const { Header, Sider, Content } = Layout;
 const { Option } = Select
@@ -65,6 +66,7 @@ const Aside = () => {
     const [user, setUser] = useState<string>();
     const [color, setColor] = useState();
     const [gap, setGap] = useState();
+    const navigate = useNavigate()
     // form tai khoan cua toi
     const [form] = Form.useForm();
     // formChangePass
@@ -138,8 +140,9 @@ const Aside = () => {
             type: 'divider',
         },
         {
-            label: <Link to={`login`}>Đăng xuất</Link>,
+            label: <p>Đăng xuất</p>,
             danger: true,
+            onClick: () => handleLogout(),
             key: '3',
         },
     ];
@@ -147,6 +150,10 @@ const Aside = () => {
         fullName: "Quyền",
         colorList: '#f56a00',
         gapList: 4
+    }
+    const handleLogout = () => {
+        toast.success("Đăng xuất thành công!")
+        navigate("/login")
     }
     // user
     useEffect(() => {

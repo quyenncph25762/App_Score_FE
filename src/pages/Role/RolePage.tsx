@@ -236,7 +236,11 @@ const RolePage = () => {
                 icon: "question",
             }).then(async (results) => {
                 if (results.isConfirmed) {
-                    await onDeleteByCheckBox(listRoleId)
+                    const results = await onDeleteByCheckBox(listRoleId)
+                    if (results.error) {
+                        toast.error("Xóa không thành công!")
+                        return
+                    }
                     toast.success("Xóa thành công!")
                 }
             })
@@ -256,7 +260,6 @@ const RolePage = () => {
     const onFinish = async (values: IRole) => {
         try {
             const results = await onAdd(values)
-            console.log(results)
             if (results.error) {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
                 return
@@ -274,7 +277,7 @@ const RolePage = () => {
             if (getOneRole) {
                 const results = await onUpdate({ _id: getOneRole._id, ...values })
                 if (results.error) {
-                    message.error(`Thêm thất bại , vui lòng thử lại!`);
+                    message.error(`Sửa thất bại , vui lòng thử lại!`);
                     return
                 }
                 message.success(`Đã sửa thành công`);

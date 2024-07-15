@@ -9,8 +9,8 @@ const wardApi = createApi({
     }),
     tagTypes: ["wards"],
     endpoints: (builer) => ({
-        fetchAllWard: builer.query<IWard[], void>({
-            query: (id) => `/${id}/wards`,
+        fetchAllWard: builer.query<IWard[], number>({
+            query: (id) => `/${id}/ward`,
             providesTags: ["wards"]
         })
     })
