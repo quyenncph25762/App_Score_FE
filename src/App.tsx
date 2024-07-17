@@ -11,15 +11,15 @@ import SendEmailPage from './pages/SendEmailPage';
 import Error500 from './pages/Error500';
 import DepartmentTrash from './pages/Department/DepartmentTrash';
 import UsersTrash from './pages/UserPage/UsersTrash';
-import ObjectPage from './pages/Object/Object';
 import DepartmentPage from './pages/Department/DepartmentPage';
 import ScoreTempPage from './pages/ScoreTemp/ScoreTempPage';
 import ScoreTempAdd from './pages/ScoreTemp/ScoreTempAdd';
-import ObjectPageTrash from './pages/Object/ObjectTrash';
 import { useFetchAllDepartmentQuery } from './store/department/department.service';
 import { IDepartment } from './store/department/department.interface';
 import RolePage from './pages/Role/RolePage';
 import RoleTrash from './pages/Role/RoleTrash';
+import ObjectPage from './pages/Object/Object';
+import ObjectPageTrash from './pages/Object/ObjectTrash';
 
 function App() {
   const navigate = useNavigate()

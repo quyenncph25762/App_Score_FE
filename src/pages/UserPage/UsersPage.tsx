@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect, useState } from 'react'
+import React, { Dispatch, useEffect, useRef, useState } from 'react'
 import { Badge, Button, Col, Form, FormInstance, Image, Input, message, Modal, Popconfirm, Radio, Result, Row, Select, SelectProps, Space, Spin, Switch, Table, Tooltip, Typography, Upload, Flex } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { DeleteFilled, DeleteOutlined, EditFilled, LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload';
 import { SearchProps } from 'antd/es/input/Search';
-import { useAddUserMutation, useFetchListUserQuery, useLazyFetchOneUserQuery, useRemoveUserMutation, useUpdateUserMutation } from '../../store/users/user.service';
+import { useAddUserMutation, useLazyFetchListUserQuery, useLazyFetchOneUserQuery, useRemoveUserMutation, useUpdateUserMutation } from '../../store/users/user.service';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteUserSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice';
 import { RootState } from '../../store';
@@ -23,6 +23,10 @@ import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
 import { useFetchAllApartmentQuery } from '../../store/apartment/apartment.service';
 import { useLazyFetchAllWardQuery } from '../../store/wards/ward.service';
 import { useLazyFetchAllDistrictQuery } from '../../store/districts/district.service';
+import { useFetchAllRoleQuery } from '../../store/role/role.service';
+import Item from 'antd/es/list/Item';
+import { useLazyFetchInfoEmployeeByEmployeeIdQuery } from '../../store/infoEmployee/infoEmployee.service';
+import { IInfoEmployee } from '../../store/infoEmployee/infoEmployee.interface';
 const { Option } = Select;
 const { Search } = Input;
 
@@ -32,7 +36,7 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
     const values = Form.useWatch([], form);
 
     React.useEffect(() => {
-        form.validateFields({ validateOnly: true }).then(
+        form?.validateFields({ validateOnly: true }).then(
             () => {
                 setSubmittable(true);
             },
@@ -104,21 +108,28 @@ const UsersPage = () => {
     // gọi api khi nhấn trigger
     const [trigger, { data: getOneUser, isError: isErrorOneUser, isSuccess: isSuccessGetOneUser }] = useLazyFetchOneUserQuery()
     // goi list user tu redux-toolkit
-    const { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
+    const [triggerListUser, { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi }] = useLazyFetchListUserQuery()
+    // goi list infoEmployee theo employeeId
+    const [triggerInFoEmployee, { data: listInfoEmployee, isError: isErrorInfo, isLoading: isLoadingInfo }] = useLazyFetchInfoEmployeeByEmployeeIdQuery()
+    useEffect(() => {
+        triggerListUser(1)
+    }, [])
     // goi object API 
     const { data: ListObjectAPI, isError: isErrorListObject, isFetching: isFetchingObject, isLoading: isLoadingObjectAPI, isSuccess: isSuccessObjectApi } = useFetchAllObjectQuery()
-
+    // gọi Api Vai trò 
+    const { data: ListRoleApi, isError: isErrorListRole, isLoading: isLoadingRole } = useFetchAllRoleQuery()
     // goi list department tu redux-toolkit
-    // const { data: listDepartmentApi, isError: isErrorDepartmenApi, isLoading: isLoadingDepartmentApi, isSuccess: isSuccessDepartmentApi } = useFetchAllDepartmentQuery()
+    const { data: listDepartmentApi, isError: isErrorDepartmenApi, isLoading: isLoadingDepartmentApi, isSuccess: isSuccessDepartmentApi } = useFetchAllDepartmentQuery()
     // api cac cap tai khoan
     const { data: listApartments, isLoading: isLoadingApartmentApi } = useFetchAllApartmentQuery()
-    // goi list ward 
+    // goi list ward theo id cua district
     const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
+    // goi list district theo id cua province
     const [triggerDistrict, { data: districts, isError: isErrorDistricts }] = useLazyFetchAllDistrictQuery()
     // console.log(`districts:`, districts)
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     useEffect(() => {
-        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListObject) {
+        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListObject || isErrorInfo) {
             navigate("/err500")
             return
         }
@@ -139,13 +150,12 @@ const UsersPage = () => {
     const [openUpdate, setOpenUpdate] = useState(false);
     // danh sach list user tu redux
     const listUserReducer = useSelector((state: RootState) => state.userSlice?.users)
-    // danh sach list phong ban tu redux
-    const listDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
     //  list object trong reducer
     const listObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
+    const [currentPage, setCurrentPage] = useState(1)
     // neu ma goi thanh cong thi dispatch vao redux
     useEffect(() => {
-        if (ListUserAPI?.length > 0) {
+        if (ListUserAPI?.results.length > 0) {
             dispatch(listUsersSlice(ListUserAPI))
         }
     }, [isSuccessUserApi, ListUserAPI])
@@ -165,7 +175,7 @@ const UsersPage = () => {
     const [form] = Form.useForm();
     // form user update
     const [formUpdate] = Form.useForm();
-
+    // const listInfoEmployeeRef: any = useRef()
     // Xet du lieu cho formUpdate
     // useEffect lay du lieu update user thay doi theo khi call api getOneUser
     // set value cho form theo id
@@ -175,20 +185,24 @@ const UsersPage = () => {
                 Code: getOneUser.Code,
                 FullName: getOneUser.FullName,
                 UserName: getOneUser.UserName,
-                ProvinceId: getOneUser.ProvinceId,
+                CityId: getOneUser.CityId,
                 DistrictId: getOneUser.DistrictId,
                 // DepartmentId: getOneUser.DepartmentId,
+                Fields: listInfoEmployee ? listInfoEmployee.map((item) => item.FieldId) : "",
+                RoleId: getOneUser.RoleId,
                 ObjectId: getOneUser.ObjectId,
                 WardId: getOneUser.WardId,
-                // isActive: getOneUser.isActive,
-                Address: getOneUser.Address,
+                IsActive: getOneUser.IsActive,
+                Customer: getOneUser.Customer,
                 Email: getOneUser.Email,
+                Phone: getOneUser.Phone,
                 CreatorUserId: 1,
-                Gender: getOneUser.Gender,
                 ApartmentId: Number(getOneUser.ApartmentId)
             })
+            triggerDistrict(getOneUser.CityId)
+            triggerWard(getOneUser.DistrictId)
         }
-    }, [isSuccessGetOneUser, getOneUser, openUpdate])
+    }, [isSuccessGetOneUser, getOneUser, listInfoEmployee])
 
     // nút checkbox
     const rowSelection: TableRowSelection<IUser> = {
@@ -223,7 +237,7 @@ const UsersPage = () => {
         form.setFieldsValue({
             Code: randomCode(),
             UserName: randomUserName(),
-            // isActive: true,
+            IsActive: true,
             IsDeleted: 0
         })
         setOpen(true);
@@ -238,7 +252,10 @@ const UsersPage = () => {
     // show Modal update
     const showModalUpdate = (id: string) => {
         if (id) {
+            // trigger getOneEmployee
             trigger(id)
+            // trigger getInfoEmployee by Employee Id
+            triggerInFoEmployee(id)
         }
         setOpenUpdate(true);
     };
@@ -250,28 +267,36 @@ const UsersPage = () => {
     };
     // column
     const columns: ColumnsType<IUser> = [
-        // {
-        //     dataIndex: 'key',
-        //     render: (value: any) => <Link to={``} className='uppercase font-bold '>{value}</Link>,
-        //     className: 'w-[100px]'
-        // },
+        {
+            title: 'Tên đăng nhập',
+            dataIndex: 'UserName'
+        },
         {
             title: 'Tên người dùng',
             dataIndex: 'FullName',
+            render: (_, value: IUser) => (
+                <div className="">
+                    <p>{value.Customer}</p>
+                    <p className='text-[#1677ff] font-semibold text-[12px]'>{value.FullName}</p>
+                </div>
+            )
         },
         {
-            title: 'Tên truy cập',
-            dataIndex: 'UserName',
+            title: 'Vai trò',
+            dataIndex: 'RoleName',
         },
         {
             title: 'Email',
             dataIndex: 'Email',
         },
         {
+            title: 'Đối tượng',
+            dataIndex: 'ObjectName'
+        },
+        {
             title: 'Địa chỉ',
-            dataIndex: 'Address',
             render: (_, value: IUser) => (
-                <p>{value.Address},{value.WardId},{value.DistrictId},{value.WardId}</p>
+                <p>{value.NameWard} , {value.NameDistrict} , {value.NameCity}</p>
             )
         },
         // {
@@ -290,8 +315,7 @@ const UsersPage = () => {
                         <EditFilled className='text-xl text-yellow-400 cursor-pointer' onClick={() => showModalUpdate(value._id!)} />
                     </Tooltip>
                     <Popconfirm
-                        title="Xóa người dùng"
-                        description={`Bạn có chắc muốn xóa: ${value.UserName}`}
+                        title={`Xóa tải khoản: ${value.Customer}`}
                         onConfirm={() => confirmDelete(value._id!)}
                         okText="Yes"
                         cancelText="No"
@@ -325,22 +349,31 @@ const UsersPage = () => {
         _id: user._id,
         Email: user.Email,
         FullName: user.FullName,
+        Customer: user.Customer,
         Code: user.Code,
-        // isActive: user.isActive,
+        IsActive: user.IsActive,
         UserName: user.UserName,
-        Address: user.Address,
         Avatar: user.Avatar,
+        ObjectId: user.ObjectId,
         DistrictId: user.DistrictId,
         WardId: user.WardId,
-        ProvinceId: user.ProvinceId,
+        CityId: user.CityId,
+        RoleId: user.RoleId,
         IsDeleted: user.IsDeleted,
         ApartmentId: user.ApartmentId,
-        Gender: user.Gender
+        NameCity: user.NameCity,
+        NameDistrict: user.NameDistrict,
+        NameWard: user.NameWard,
+        ObjectName: user.ObjectName,
+        RoleName: user.RoleName,
+        Phone: user.Phone
     }));
     // nút filter
     const onChange: TableProps<IUser>['onChange'] = (pagination, filters, sorter, extra) => {
-        console.log('params', pagination, filters, sorter, extra);
+        setCurrentPage(pagination.current)
+        triggerListUser(pagination.current)
     };
+
     // nút xóa tất cả
     const handleDeleteAll = async (listUser: IUser[]) => {
         if (listUser.length > 0) {
@@ -368,11 +401,9 @@ const UsersPage = () => {
     // actions them moi
     const onFinish = async (values: IUser) => {
         try {
-            const { ApartmentId, ...data } = values
-            const ApartmentIdNumber = Number(ApartmentId);
+            const password = "123456";
             // Tạo đối tượng mới với ApartmentId đã chuyển đổi
-            const newValues = { ...data, ApartmentId: ApartmentIdNumber };
-
+            const newValues = { ...values, Password: password };
             const results = await onAddUser(newValues)
             if (results.error) {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
@@ -402,11 +433,7 @@ const UsersPage = () => {
     const onFinishUpdate = async (values: IUser) => {
         try {
             if (getOneUser) {
-                const { ApartmentId, ...data } = values
-                const ApartmentIdNumber = Number(ApartmentId);
-                const newValues = { ...data, ApartmentId: ApartmentIdNumber };
-                console.log(newValues)
-                const results = await onUpdateUser({ _id: getOneUser._id, ...newValues })
+                const results = await onUpdateUser({ _id: getOneUser._id, ...values })
                 if (results.error) {
                     message.error(`Cập nhật thất bại , vui lòng thử lại!`);
                     return
@@ -436,23 +463,24 @@ const UsersPage = () => {
 
     // option select
     // add
-    const optionsSelect: SelectProps['options'] = listDepartmentReducer.map((item) => ({
-        label: item.name, // Hoặc thuộc tính tương ứng từ item
-        value: item.id, // Hoặc thuộc tính tương ứng từ item
-        disabled: !item.isActive
+    const optionsSelect: SelectProps['options'] = listDepartmentApi?.map((item) => ({
+        label: item.Name, // Hoặc thuộc tính tương ứng từ item
+        value: item._id, // Hoặc thuộc tính tương ứng từ item
+        // disabled: !item.isActive
     }));
     const handleChangeSelect = (value: string[]) => {
         console.log(`selected ${value}`);
     };
     // update
-    const optionsSelectUpdate: SelectProps['options'] = listDepartmentReducer.map((item) => ({
-        label: item.name, // Hoặc thuộc tính tương ứng từ item
-        value: item.id, // Hoặc thuộc tính tương ứng từ item
-        disabled: !item.isActive
+    const optionsSelectUpdate: SelectProps['options'] = listDepartmentApi?.map((item) => ({
+        label: item.Name, // Hoặc thuộc tính tương ứng từ item
+        value: item._id, // Hoặc thuộc tính tương ứng từ item
+        // disabled: !item.isActive
     }));
     const handleChangeSelectUpdate = (value: string[]) => {
         console.log(`selected ${value}`);
     };
+    // loc theo thanh pho , huyen
     const handleDistrictByProvince = (IdProvince: number) => {
         if (IdProvince) {
             triggerDistrict(IdProvince)
@@ -463,9 +491,45 @@ const UsersPage = () => {
             triggerWard(IdDistrict)
         }
     }
+    // -------- SELECT OPTIONS
+    // select objects
+    const selectObjects = listObjectReducer?.map((item, index) => ({
+        label: item.NameObject,
+        value: item._id,
+    }))
+    // select provinces
+    const selectProvinces = provinces?.map((item, index) => ({
+        label: item.Name,
+        value: item._id,
+    }))
+    // select districts
+    const selectDistricts = districts?.map((item, index) => ({
+        label: item.Name,
+        value: item._id,
+    }))
+    // select wards
+    const selectWards = wards?.map((item, index) => ({
+        label: item.Name,
+        value: item._id,
+    }))
+    // selectRole
+    const selectRoles = ListRoleApi?.map((item, index) => ({
+        label: item.NameRole,
+        value: item._id,
+    }))
+    // radioApartments Add
+    const radioApartmentsAdd = listApartments?.map((apartment, index) => ({
+        label: apartment.Name,
+        value: apartment._id
+    }))
+    // radioApartments update
+    const radioApartmentsUpdate = listApartments?.map((apartment, index) => ({
+        label: apartment.Name,
+        value: apartment._id
+    }))
     return (
         <div className=''>
-            {isLoadingUserAPI || isLoadingApartmentApi || isLoadingObjectAPI ? <div>loading data...</div> : ""}
+            {isLoadingUserAPI || isLoadingApartmentApi || isLoadingObjectAPI || isLoadingRole || isLoadingInfo ? <div>loading data...</div> : ""}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí người dùng</h3>
                 <div className="iconDelete-title">
@@ -474,7 +538,6 @@ const UsersPage = () => {
                     </Tooltip>
                 </div>
                 {isFetchingUser && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
-
             </div>
             {/* modal them moi nguoi dung */}
             <Modal
@@ -503,7 +566,7 @@ const UsersPage = () => {
                         {/* avatar */}
                         <Col span={8} className='flex justify-center text-center'>
                             {/* Upload Images */}
-                            <Form.Item name="Avatar">
+                            {/* <Form.Item name="Avatar">
                                 <label htmlFor="" className='text-center'>Ảnh đại diện</label>
                                 <Upload {...props}
                                     maxCount={1}
@@ -514,24 +577,41 @@ const UsersPage = () => {
                                         <div className='w-full'>Upload</div>
                                     </div>
                                 </Upload>
-                            </Form.Item>
+                            </Form.Item> */}
+                            <Image src='https://media.istockphoto.com/id/177228186/fr/photo/jeune-capybara.jpg?s=612x612&w=0&k=20&c=fSMMXOPp5aJzdOV6UnQQDiCGkE7BXUOAmEsspxJxW7I=' className='rounded-[50%] object-cover' width={160} height={160}></Image>
                             <Form.Item name="IsDeleted">
                                 <Input type='hidden'></Input>
                             </Form.Item>
                         </Col>
-                        {/* cap tai khoan */}
                         <Col span={16}>
                             <Row gutter={12}>
-                                <Col span={24}>
-                                    <Form.Item label="Cấp tài khoản" name="ApartmentId">
-                                        <Radio.Group>
-                                            {listApartments?.map((apartment, index) => (
-                                                <Radio.Button key={index} value={`${apartment.id}`} type='number'>{apartment.Name}</Radio.Button>
-                                            ))}
-                                            {/* <Radio.Button value="2" type='number'>Cấp Xã</Radio.Button>
-                                            <Radio.Button value="2" type='number'>Cấp Huyện</Radio.Button>
-                                            <Radio.Button value="3" type='number'>Cấp Tỉnh</Radio.Button> */}
+                                {/* cap tai khoan */}
+                                <Col span={12}>
+                                    <Form.Item label="Cấp tài khoản" name="ApartmentId" rules={[
+                                        { required: true, message: '* Không được để trống' },
+                                    ]}>
+                                        <Radio.Group options={radioApartmentsAdd}>
                                         </Radio.Group>
+                                    </Form.Item>
+                                </Col>
+                                {/* RoleId */}
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="RoleId"
+                                        label="Vai trò"
+                                        rules={[
+                                            { required: true, message: '* Không được để trống' },
+                                        ]}
+                                    >
+                                        <Select
+                                            showSearch
+                                            placeholder="Tìm kiếm vai trò"
+                                            optionFilterProp="children"
+                                        >
+                                            {ListRoleApi?.map((item, index) => (
+                                                <Option value={`${item._id}`} key={index}>{item.NameRole}</Option>
+                                            ))}
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -571,7 +651,7 @@ const UsersPage = () => {
                                 {/* active */}
                                 <Col span={4} className='flex items-center'>
                                     <Form.Item
-                                        name="isActive"
+                                        name="IsActive"
                                         className='mb-0'
                                     >
                                         <Switch />
@@ -580,12 +660,12 @@ const UsersPage = () => {
                             </Row>
                         </Col>
                     </Row>
-                    {/* fullname */}
                     <Row gutter={12}>
+                        {/* Customer */}
                         <Col span={12}>
                             <Form.Item
-                                name="FullName"
-                                label="Họ và tên"
+                                name="Customer"
+                                label="Tên Khu vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -597,6 +677,48 @@ const UsersPage = () => {
                                         },
                                     },
                                     { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                        {/* FullName */}
+                        <Col span={12}>
+                            <Form.Item name="FullName" label="Người sở hữu" rules={[
+                                { required: true, message: '* Không được để trống' },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && value.trim() === '') {
+                                            return Promise.reject('Không được để khoảng trắng');
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                                { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                            ]}>
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={12}>
+                        {/* Phone */}
+                        <Col span={12}>
+                            <Form.Item
+                                name="Phone"
+                                label="Số điện thoại"
+                                rules={[
+                                    { required: true, message: '* Không được để trống' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value && value.trim() === '') {
+                                                return Promise.reject('Không được để khoảng trắng');
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                    { min: 9, message: 'Tối thiểu 9 kí tự' },
 
                                 ]}
                             >
@@ -631,7 +753,7 @@ const UsersPage = () => {
                     <Row gutter={12}>
                         <Col span={12}>
                             <Form.Item
-                                name="DepartmentId"
+                                name="Fields"
                                 label="Lĩnh vực"
                             >
                                 <Select
@@ -648,17 +770,6 @@ const UsersPage = () => {
                             <Form.Item
                                 name="ObjectId"
                                 label="Đối tượng"
-                                rules={[
-                                    { required: true, message: '* Không được để trống' },
-                                    {
-                                        validator: (_, value) => {
-                                            if (value && value.trim() === '') {
-                                                return Promise.reject('Không được để khoảng trắng');
-                                            }
-                                            return Promise.resolve();
-                                        },
-                                    },
-                                ]}
                             >
                                 <Select
                                     showSearch
@@ -667,7 +778,7 @@ const UsersPage = () => {
 
                                 >
                                     {listObjectReducer?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
+                                        <Option value={`${item._id}`} key={index} >{item.NameObject}</Option>
                                     ))}
                                 </Select>
                             </Form.Item>
@@ -677,7 +788,9 @@ const UsersPage = () => {
                     <Row gutter={12}>
                         {/* province */}
                         <Col span={8}>
-                            <Form.Item name="ProvinceId" label="Tỉnh">
+                            <Form.Item name="CityId" label="Tỉnh" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm tỉnh"
@@ -692,7 +805,9 @@ const UsersPage = () => {
                         </Col>
                         {/* district */}
                         <Col span={8}>
-                            <Form.Item name="DistrictId" label="Huyện">
+                            <Form.Item name="DistrictId" label="Huyện" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
@@ -707,7 +822,9 @@ const UsersPage = () => {
                         </Col>
                         {/* ward */}
                         <Col span={8}>
-                            <Form.Item name="WardId" label="Xã">
+                            <Form.Item name="WardId" label="Xã" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm xã"
@@ -717,14 +834,6 @@ const UsersPage = () => {
                                         <Option value={`${item._id}`} key={index}>{item.Name}</Option>
                                     ))}
                                 </Select>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    {/* dia chi */}
-                    <Row>
-                        <Col span={24}>
-                            <Form.Item name="Address" label="Địa chỉ">
-                                <Input />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -763,34 +872,38 @@ const UsersPage = () => {
                     <Row gutter={30}>
                         <Col span={8} className='flex justify-center text-center'>
                             {/* Upload Images */}
-                            <Form.Item name="Avatar">
-                                <label htmlFor="" className='text-center'>Ảnh đại diện</label>
-                                <Upload {...props}
-                                    maxCount={1}
-                                    style={{ width: "500px" }}
-                                    className="user-page-upload mt-3"
-                                >
-                                    <div>
-                                        <PlusOutlined />
-                                        <div className='w-full'>Upload</div>
-                                    </div>
-                                </Upload>
-                            </Form.Item>
+                            <Image src={getOneUser?.Avatar ? `${getOneUser.Avatar}` : "https://qph.cf2.quoracdn.net/main-qimg-1a4bafe2085452fdc55f646e3e31279c-lq"} className='rounded-[50%] object-cover' width={160} height={160}></Image>
                         </Col>
                         {/*  */}
                         <Col span={16}>
                             {/* cap tai khoan */}
                             <Row gutter={12}>
-                                <Col span={24}>
-                                    <Form.Item label="Cấp tài khoản" name="ApartmentId">
+                                <Col span={12}>
+                                    <Form.Item label="Cấp tài khoản" name="ApartmentId" rules={[
+                                        { required: true, message: '* Không được để trống' },
+                                    ]}>
+                                        <Radio.Group options={radioApartmentsUpdate}>
 
-                                        <Radio.Group defaultValue={String(getOneUser?.ApartmentId)}>
-                                            {listApartments?.map((apartment) => (
-                                                <Radio.Button key={apartment.id} value={`${apartment.id}`}>
-                                                    {apartment.Name}
-                                                </Radio.Button>
-                                            ))}
                                         </Radio.Group>
+                                    </Form.Item>
+                                </Col>
+                                {/* RoleId */}
+                                <Col span={12}>
+                                    <Form.Item
+                                        name="RoleId"
+                                        label="Vai trò"
+                                        rules={[
+                                            { required: true, message: '* Không được để trống' }
+                                        ]}
+                                    >
+                                        <Select
+                                            showSearch
+                                            placeholder="Tìm kiếm vai trò"
+                                            optionFilterProp="children"
+                                            options={selectRoles}
+                                        >
+
+                                        </Select>
                                     </Form.Item>
                                 </Col>
                             </Row>
@@ -831,7 +944,7 @@ const UsersPage = () => {
                                 <Col span={4} className='flex items-center'>
                                     {/* Name Category */}
                                     <Form.Item
-                                        name="isActive"
+                                        name="IsActive"
                                         className='mb-0'
                                     >
                                         <Switch />
@@ -844,8 +957,8 @@ const UsersPage = () => {
                         {/* fullname */}
                         <Col span={12}>
                             <Form.Item
-                                name="FullName"
-                                label="Họ và tên"
+                                name="Customer"
+                                label="Tên khu vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
                                     {
@@ -857,6 +970,48 @@ const UsersPage = () => {
                                         },
                                     },
                                     { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                        {/* FullName */}
+                        <Col span={12}>
+                            <Form.Item name="FullName" label="Người sở hữu" rules={[
+                                { required: true, message: '* Không được để trống' },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && value.trim() === '') {
+                                            return Promise.reject('Không được để khoảng trắng');
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
+                                { min: 3, message: 'Tối thiểu 3 kí tự' },
+
+                            ]}>
+                                <Input />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={12}>
+                        {/* Phone */}
+                        <Col span={12}>
+                            <Form.Item
+                                name="Phone"
+                                label="Số điện thoại"
+                                rules={[
+                                    { required: true, message: '* Không được để trống' },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value && value.trim() === '') {
+                                                return Promise.reject('Không được để khoảng trắng');
+                                            }
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                    { min: 9, message: 'Tối thiểu 9 kí tự' },
 
                                 ]}
                             >
@@ -892,7 +1047,7 @@ const UsersPage = () => {
                         <label htmlFor=""></label>
                         <Col span={12}>
                             <Form.Item
-                                name="DepartmentId"
+                                name="Fields"
                                 label="Lĩnh vực"
                             >
                                 <Select
@@ -913,27 +1068,15 @@ const UsersPage = () => {
                             <Form.Item
                                 name="ObjectId"
                                 label="Đối tượng"
-                                rules={[
-                                    { required: true, message: '* Không được để trống' },
-                                    {
-                                        validator: (_, value) => {
-                                            if (value && value.trim() === '') {
-                                                return Promise.reject('Không được để khoảng trắng');
-                                            }
-                                            return Promise.resolve();
-                                        },
-                                    },
-                                ]}
                             >
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm đối tượng"
                                     optionFilterProp="children"
-
+                                    allowClear
+                                    options={selectObjects}
                                 >
-                                    {listObjectReducer?.map((item, index) => (
-                                        <Option value={`${item.id}`} key={index} disabled={!item.isActive}>{item.name}</Option>
-                                    ))}
+
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -942,54 +1085,47 @@ const UsersPage = () => {
                     <Row gutter={12}>
                         {/* province */}
                         <Col span={8}>
-                            <Form.Item name="ProvinceId" label="Tỉnh">
+                            <Form.Item name="CityId" label="Tỉnh" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm tỉnh"
                                     optionFilterProp="children"
+                                    options={selectProvinces}
                                     onChange={handleDistrictByProvince}
                                 >
-                                    {provinces?.map((item, index) => (
-                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
-                                    ))}
+
                                 </Select>
                             </Form.Item>
                         </Col>
                         {/* district */}
                         <Col span={8}>
-                            <Form.Item name="DistrictId" label="Huyện">
+                            <Form.Item name="DistrictId" label="Huyện" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
                                     optionFilterProp="children"
                                     onChange={handleWardByDistrictId}
+                                    options={selectDistricts}
                                 >
-                                    {districts?.map((item, index) => (
-                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
-                                    ))}
                                 </Select>
                             </Form.Item>
                         </Col>
                         {/* ward */}
                         <Col span={8}>
-                            <Form.Item name="WardId" label="Xã">
+                            <Form.Item name="WardId" label="Xã" rules={[
+                                { required: true, message: '* Không được để trống' }
+                            ]}>
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm xã"
                                     optionFilterProp="children"
+                                    options={selectWards}
                                 >
-                                    {wards?.map((item, index) => (
-                                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
-                                    ))}
                                 </Select>
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    {/* Address */}
-                    <Row>
-                        <Col span={24}>
-                            <Form.Item name="Address" label="Địa chỉ">
-                                <Input />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -1002,7 +1138,6 @@ const UsersPage = () => {
                     </Space>
                 </Form>
             </Modal>
-
             <div className="flex justify-between">
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listUser)}>Xóa tất cả</Button>
@@ -1011,7 +1146,11 @@ const UsersPage = () => {
                 </Space>
                 <Button type='primary' className='mb-3' onClick={showModal}>Thêm mới</Button>
             </div>
-            <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
+            <Table columns={columns} pagination={{
+                current: currentPage,
+                pageSize: ListUserAPI?.results.length,
+                total: (ListUserAPI?.results.length * ListUserAPI?.pagination.pages.length)
+            }} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
         </div >
     )
 }

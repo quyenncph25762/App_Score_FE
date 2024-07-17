@@ -11,7 +11,7 @@ const departmentApi = createApi({
     tagTypes: ["departments"],
     endpoints: (builder) => ({
         fetchAllDepartment: builder.query<IDepartment[], void>({
-            query: () => `/department`,
+            query: () => `/fields`,
             providesTags: ["departments"]
         }),
         addDepartment: builder.mutation<IDepartment[], IDepartment>({
@@ -46,8 +46,8 @@ const departmentApi = createApi({
             providesTags: ["departments"]
         }),
         updateDepartment: builder.mutation<IDepartment[], IDepartment>({
-            query: ({ id, ...department }) => ({
-                url: `/department/${id}`,
+            query: ({ _id, ...department }) => ({
+                url: `/department/${_id}`,
                 method: "PATCH",
                 body: department
             }),

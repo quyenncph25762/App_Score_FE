@@ -15,14 +15,14 @@ const departmentSlice = createSlice({
     initialState: initalDepartmentState || initialDepartmentSearchState,
     reducers: ({
         fetchAllDepartmentSlice: (state: IDepartmentState, actions: PayloadAction<IDepartment[]>) => {
-            state.departments = actions.payload.filter((department) => department.IsDeleted === false)
+            state.departments = actions.payload.filter((department) => department.IsDeleted === 0)
         },
         fetchAllDepartmentTrash: (state: IDepartmentState, actions: PayloadAction<IDepartment[]>) => {
-            state.departments = actions.payload.filter((department) => department.IsDeleted === true)
+            state.departments = actions.payload.filter((department) => department.IsDeleted === 1)
         },
         searchDepartmentSlice: (state: IDepartmentState, actions: PayloadAction<IDepartmentSearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase().trim()
-            const departmentFilter = actions.payload.departments.filter((department) => department.IsDeleted === false && department.name.toLocaleLowerCase().trim().includes(nameTerm))
+            const departmentFilter = actions.payload.departments.filter((department) => department.IsDeleted === 0 && department.Name.toLocaleLowerCase().trim().includes(nameTerm))
             state.departments = departmentFilter
         },
     })

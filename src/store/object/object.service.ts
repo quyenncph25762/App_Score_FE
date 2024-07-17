@@ -37,8 +37,8 @@ const objectApi = createApi({
             providesTags: ["objects"]
         }),
         updateObject: builer.mutation<IObject[], IObject>({
-            query: ({ id, ...object }) => ({
-                url: `/objects/${id}`,
+            query: ({ _id, ...object }) => ({
+                url: `/objects/${_id}`,
                 method: "PATCH",
                 body: object
             }),

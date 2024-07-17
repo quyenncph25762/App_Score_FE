@@ -14,14 +14,14 @@ const objectSlice = createSlice({
     initialState: initialObjectSlice || initialSearchSlice,
     reducers: ({
         getAllObjectSlice: (state: IObjectState, actions: PayloadAction<IObject[]>) => {
-            state.objects = actions.payload.filter((object) => object.IsDeleted === false)
+            state.objects = actions.payload.filter((object) => object.IsDeleted === 0)
         },
         getObjectFromTrashSlice: (state: IObjectState, actions: PayloadAction<IObject[]>) => {
-            state.objects = actions.payload.filter((object) => object.IsDeleted === true)
+            state.objects = actions.payload.filter((object) => object.IsDeleted === 1)
         },
         searchObjectSlice: (state: IObjectState, actions: PayloadAction<ISearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase()
-            const listObjectFilter = actions.payload.objects.filter((object) => object.IsDeleted === false && object.name && object.name.toLowerCase().includes(nameTerm))
+            const listObjectFilter = actions.payload.objects.filter((object) => object.IsDeleted === 0 && object.NameObject && object.NameObject.toLowerCase().includes(nameTerm))
             state.objects = listObjectFilter
         }
     })

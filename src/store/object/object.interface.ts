@@ -1,9 +1,7 @@
 export interface IObject {
-    id: string
-    name: string
-    isActive: boolean
-    description: string
-    IsDeleted: boolean
+    _id?: string
+    NameObject: string
+    IsDeleted: boolean | number
 }
 
 export interface IObjectState {

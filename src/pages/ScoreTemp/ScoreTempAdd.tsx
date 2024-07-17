@@ -166,7 +166,7 @@ const ScoreTempAdd = () => {
                                 optionFilterProp="children"
                             >
                                 {fetchAllObjectReducer?.map((object, index) => (
-                                    <Option value={`${object.id}`} key={`${index}`} disabled={!object.isActive}>{object.name}</Option>
+                                    <Option value={`${object._id}`} key={`${index}`}>{object.NameObject}</Option>
                                 ))}
                             </Select>
                         </Form.Item>
@@ -259,27 +259,17 @@ const ScoreTempAdd = () => {
                                         <Col span={6}>
                                             <Form.Item
                                                 label="Lĩnh vực"
-                                                name={[field.name, 'DepartmentId']}
+                                                name={[field.name, 'Field']}
                                                 rules={[
-                                                    { required: true, message: '* Không được để trống' },
-                                                    {
-                                                        validator: (_, value) => {
-                                                            if (value && value.trim() === '') {
-                                                                return Promise.reject('Không được để khoảng trắng');
-                                                            }
-                                                            return Promise.resolve();
-                                                        },
-                                                    },
-                                                    { min: 3, message: 'Tối thiểu 6 kí tự' },
-
+                                                    { required: true, message: '* Không được để trống' }
                                                 ]}>
                                                 <Select
                                                     showSearch
-                                                    placeholder="Tìm kiếm phòng ban"
+                                                    placeholder="Tìm kiếm lĩnh vực"
                                                     optionFilterProp="children"
                                                 >
                                                     {fetchAllDepartmentReducer?.map((department, index) => (
-                                                        <Option value={department.id} key={`${index}`} disabled={!department.isActive}>{department.name}</Option>
+                                                        <Option value={department._id} key={`${index}`}>{department.Name}</Option>
                                                     ))}
                                                 </Select>
                                             </Form.Item>

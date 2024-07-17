@@ -84,10 +84,9 @@ const ObjectPage = () => {
 
     // object api & slice
     const { data: listObjectApi, isLoading: isLoadingObject, isFetching: isFetchingObject, isError: isErrorObject, isSuccess: isSuccessObject } = useFetchAllObjectQuery()
-
     // lay 1 object
     const [trigger, { data: getOneObject, isSuccess: isSuccessFetchOneObject, isLoading: isLoadingGetOneObject, isError: isErrorFetchOneObject }] = useLazyFetchOneObjectQuery()
-
+    console.log(getOneObject)
     const listObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
     // useEffect khi co loi
     useEffect(() => {
@@ -106,8 +105,8 @@ const ObjectPage = () => {
     useEffect(() => {
         if (getOneObject) {
             formUpdate.setFieldsValue({
-                isActive: getOneObject.isActive,
-                name: getOneObject.name
+                // isActive: getOneObject.isActive,
+                name: getOneObject.NameObject
             })
         }
     }, [isSuccessFetchOneObject, getOneObject])
@@ -165,38 +164,38 @@ const ObjectPage = () => {
     const columns: ColumnsType<IObject> = [
         {
             title: 'Tên đối tượng',
-            dataIndex: 'name',
+            dataIndex: 'NameObject',
         },
-        {
-            title: 'Áp dụng',
-            dataIndex: 'isActive',
-            render: (_, value: IObject) => (
-                <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
-            )
-        },
-        {
-            title: 'Hành động',
-            key: 'action',
-            render: (value: IObject) => (
-                <Space size="middle" className='flex justify-start'>
-                    <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
-                        <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value.id!)} />
-                    </Tooltip>
-                    <Popconfirm
-                        title="Xóa đối tượng"
-                        description={`Bạn có chắc muốn xóa: ${value.name}`}
-                        onConfirm={() => confirmDelete(value.id!)}
-                        okText="Yes"
-                        cancelText="No"
-                        okButtonProps={{ className: "text-white bg-blue-500" }}
-                    >
-                        <Tooltip title="Xóa" color={'red'} key={'red'}>
-                            <DeleteFilled className='text-xl text-red-500' />
-                        </Tooltip>
-                    </Popconfirm>
-                </Space>
-            )
-        },
+        // {
+        //     title: 'Áp dụng',
+        //     dataIndex: 'isActive',
+        //     render: (_, value: IObject) => (
+        //         <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
+        //     )
+        // },
+        // {
+        //     title: 'Hành động',
+        //     key: 'action',
+        //     render: (value: IObject) => (
+        //         <Space size="middle" className='flex justify-start'>
+        //             <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
+        //                 <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value._id!)} />
+        //             </Tooltip>
+        //             <Popconfirm
+        //                 title="Xóa đối tượng"
+        //                 description={`Bạn có chắc muốn xóa: ${value.NameObject}`}
+        //                 onConfirm={() => confirmDelete(value._id!)}
+        //                 okText="Yes"
+        //                 cancelText="No"
+        //                 okButtonProps={{ className: "text-white bg-blue-500" }}
+        //             >
+        //                 <Tooltip title="Xóa" color={'red'} key={'red'}>
+        //                     <DeleteFilled className='text-xl text-red-500' />
+        //                 </Tooltip>
+        //             </Popconfirm>
+        //         </Space>
+        //     )
+        // },
     ];
     const confirmDelete = async (id?: string) => {
         try {
@@ -216,10 +215,8 @@ const ObjectPage = () => {
     // data 
     const data: IObject[] = listObjectReducer.map((item, index) => ({
         key: index + 1,
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        isActive: item.isActive,
+        _id: item._id,
+        NameObject: item.NameObject,
         IsDeleted: item.IsDeleted
     }))
     // nút filter
@@ -229,7 +226,7 @@ const ObjectPage = () => {
     // nút xóa tất cả
     const handleDeleteAll = async (listObject: IObject[]) => {
         if (listObject.length > 0) {
-            const listObjectId = listObject.map((object) => object.id)
+            const listObjectId = listObject.map((object) => object._id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -269,7 +266,7 @@ const ObjectPage = () => {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
                 return
             }
-            message.success(`Đã thêm thành công phòng: ${values.name}`);
+            message.success(`Đã thêm thành công phòng: ${values.NameObject}`);
             form.resetFields()
             setOpen(false);
         } catch (error) {
@@ -280,7 +277,7 @@ const ObjectPage = () => {
     const onFinishUpdate = async (values: IObject) => {
         try {
             if (getOneObject) {
-                const results = await onUpdate({ id: getOneObject.id, ...values })
+                const results = await onUpdate({ _id: getOneObject._id, ...values })
                 if (results.error) {
                     message.error(`Thêm thất bại , vui lòng thử lại!`);
                     return

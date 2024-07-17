@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { IUser } from "./user.interface";
+import { IPaginateUser, IUser } from "./user.interface";
 import { BASE_URL } from "../../config/configApi";
 import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 
@@ -10,8 +10,8 @@ const usersApi = createApi({
     }),
     tagTypes: ["employees"],
     endpoints: (builder) => ({
-        fetchListUser: builder.query<IUser[], void>({
-            query: () => `/getAllEmployee`,
+        fetchListUser: builder.query<IPaginateUser, number>({
+            query: (page) => `/getAllEmployee?page=${page}`,
             providesTags: ["employees"]
         }),
         // xoa vao thung rac
@@ -34,7 +34,7 @@ const usersApi = createApi({
         }),
         // lay 1 user
         fetchOneUser: builder.query<IUser, string>({
-            query: (id) => `/users/${id}`,
+            query: (id) => `/${id}/getOne-Employee`,
             providesTags: ["employees"]
         }),
         // them user
@@ -49,7 +49,7 @@ const usersApi = createApi({
         // cap nhat user
         updateUser: builder.mutation<IUser[], IUser>({
             query: ({ _id, ...data }) => ({
-                url: `/users/${_id}`,
+                url: `/${_id}/update-employee`,
                 body: data,
                 method: "PATCH"
             }),
@@ -67,5 +67,5 @@ const usersApi = createApi({
     })
 })
 
-export const { useFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation } = usersApi;
+export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation } = usersApi;
 export default usersApi;

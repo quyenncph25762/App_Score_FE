@@ -1,29 +1,38 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { IUser, IUserSearchState, IUserState } from "./user.interface"
+import { IPaginateUser, IUser, IUserSearchState, IUserState } from "./user.interface"
 
 export const initialStateListUser: IUserState = {
-    users: []
+    users: [],
+    pagination: {
+        next: null,
+        pages: [],
+        prev: null
+    }
 }
 
 export const initialStateSearchUser: IUserSearchState = {
     searchTerm: "",
-    users: []
+    users: [],
+    pagination: {
+        next: null,
+        pages: [],
+        prev: null
+    }
 }
 
 const userSlice = createSlice({
     name: "users",
     initialState: initialStateListUser || initialStateSearchUser,
     reducers: ({
-        listUsersSlice: (state: IUserState, actions: PayloadAction<IUser[]>) => {
-            state.users = actions.payload
-            state.users = state.users.filter((item) => item.IsDeleted === 0)
+        listUsersSlice: (state: IUserState, actions: PayloadAction<IPaginateUser>) => {
+            state.users = actions.payload.results
+            state.pagination = actions.payload.pagination;
         },
         deleteUserSlice: (state: IUserState, actions: PayloadAction<string>) => {
             state.users = state.users.filter((user) => user._id !== actions.payload)
         },
-        listUsersTrashSlice: (state: IUserState, actions: PayloadAction<IUser[]>) => {
-            state.users = actions.payload
-            state.users = state.users.filter((item) => item.IsDeleted === 1)
+        listUsersTrashSlice: (state: IUserState, actions: PayloadAction<IPaginateUser>) => {
+            state.users = actions.payload.results
         },
         listUserSearchSlice: (state: IUserState, actions: PayloadAction<IUserSearchState>) => {
             const searchName = actions.payload.searchTerm.toLowerCase()

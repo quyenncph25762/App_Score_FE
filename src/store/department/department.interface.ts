@@ -1,8 +1,7 @@
 export interface IDepartment {
-    id?: string
-    name: string
-    isActive: boolean
-    IsDeleted: boolean
+    _id?: string
+    Name: string
+    IsDeleted?: boolean | number
 }
 
 

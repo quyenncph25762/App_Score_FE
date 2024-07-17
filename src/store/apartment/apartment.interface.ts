@@ -1,5 +1,5 @@
 export interface IApartment {
-    id: number
+    _id?: number
     Name: string
 }
 

@@ -31,7 +31,6 @@ interface DataTypePreview {
 }
 
 const ScoreTempPage = () => {
-
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listCriteria, setCriteria] = useState<DataType[]>([])
     // modal xem chi tiet

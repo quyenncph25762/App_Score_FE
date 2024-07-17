@@ -12,12 +12,15 @@ import roleApi from './role/role.service'
 import roleSlice from './role/roleSlice'
 import apartmentApi from './apartment/apartment.service'
 import authApi from './auth/auth.service'
+import infoEmployeeApi from './infoEmployee/infoEmployee.service'
 
 export const store = configureStore({
     reducer: {
         // reducer
         // user
         [usersApi.reducerPath]: usersApi.reducer,
+        // infoEmployee
+        [infoEmployeeApi.reducerPath]: infoEmployeeApi.reducer,
         // address
         [wardApi.reducerPath]: wardApi.reducer,
         [districtApi.reducerPath]: districtApi.reducer,
@@ -46,6 +49,8 @@ export const store = configureStore({
         getDefaultMiddleware()
             // user
             .concat([usersApi.middleware])
+            // infoEmployee
+            .concat([infoEmployeeApi.middleware])
             // address
             .concat([wardApi.middleware])
             .concat([districtApi.middleware])

@@ -9,7 +9,7 @@ import { ArrowLeftOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/ic
 import { ColumnsType } from 'antd/es/table'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { useFetchListUserQuery, useRevertUserMutation } from '../../store/users/user.service'
+import { useLazyFetchListUserQuery, useRevertUserMutation } from '../../store/users/user.service'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { Link } from 'react-router-dom'
 import { IDepartment } from '../../store/department/department.interface'
@@ -21,7 +21,7 @@ const UsersTrash = () => {
     const [listUser, setListUser] = useState<IUser[]>([])
     const [checkStrictly, setCheckStrictly] = useState(false);
     // goi list user tu redux-toolkit
-    const { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserQuery()
+    const [triggerUser, { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi }] = useLazyFetchListUserQuery()
     const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
     const [onRevert] = useRevertUserMutation()
     if (isErrorListUser || isErrorWards) {
@@ -51,24 +51,29 @@ const UsersTrash = () => {
     };
     // dispatch vao redux
     useEffect(() => {
-        if (ListUserAPI?.length > 0) {
+        if (ListUserAPI?.results.length > 0) {
             dispatch(listUsersTrashSlice(ListUserAPI))
         }
     }, [isSuccessUserApi, ListUserAPI])
     // column
     const columns: ColumnsType<IUser> = [
-        // {
-        //     dataIndex: 'key',
-        //     render: (value: any) => <Link to={``} className='uppercase font-bold '>{value}</Link>,
-        //     className: 'w-[100px]'
-        // },
+        {
+            title: 'Tên đăng nhập',
+            dataIndex: 'UserName'
+        },
         {
             title: 'Tên người dùng',
             dataIndex: 'FullName',
+            render: (_, value: IUser) => (
+                <div className="">
+                    <p>{value.Customer}</p>
+                    <p className='text-[#1677ff] font-semibold text-[12px]'>{value.FullName}</p>
+                </div>
+            )
         },
         {
-            title: 'Tên truy cập',
-            dataIndex: 'UserName',
+            title: 'Vai trò',
+            dataIndex: 'RoleName',
         },
         {
             title: 'Email',
@@ -78,7 +83,7 @@ const UsersTrash = () => {
             title: 'Địa chỉ',
             dataIndex: 'Address',
             render: (_, value: IUser) => (
-                <p>{value.Address},{value.WardId},{value.DistrictId},{value.WardId}</p>
+                <p>{value.NameWard} , {value.NameDistrict} , {value.NameCity}</p>
             )
         },
         {
@@ -122,16 +127,21 @@ const UsersTrash = () => {
         Email: user.Email,
         FullName: user.FullName,
         Code: user.Code,
-        // isActive: user.isActive,
+        IsActive: user.IsActive,
         UserName: user.UserName,
-        Address: user.Address,
+        Customer: user.Customer,
         Avatar: user.Avatar,
         DistrictId: user.DistrictId,
         WardId: user.WardId,
-        ProvinceId: user.ProvinceId,
+        ProvinceId: user.CityId,
         IsDeleted: user.IsDeleted,
         ApartmentId: user.ApartmentId,
-        Gender: user.Gender
+        NameCity: user.NameCity,
+        NameDistrict: user.NameDistrict,
+        NameWard: user.NameWard,
+        ObjectName: user.ObjectName,
+        RoleName: user.RoleName,
+        Phone: user.Phone
     }));
     // nút filter
     const onChange: TableProps<IUser>['onChange'] = (pagination, filters, sorter, extra) => {

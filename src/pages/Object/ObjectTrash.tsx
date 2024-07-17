@@ -9,7 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { useAddObjectMutation, useFetchAllObjectQuery, useFetchOneObjectQuery, useRemoveObjectMutation, useRevertObjectMutation, useUpdateObjectMutation } from '../../store/object/object.service';
+import { useAddObjectMutation, useFetchAllObjectQuery, useRemoveObjectMutation, useRevertObjectMutation, useUpdateObjectMutation } from '../../store/object/object.service';
 import { IObject } from '../../store/object/object.interface';
 import { getAllObjectSlice, getObjectFromTrashSlice, searchObjectSlice } from '../../store/object/objectSlice';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';

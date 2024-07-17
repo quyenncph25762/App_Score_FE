@@ -20,7 +20,7 @@ const roleSlice = createSlice({
         },
         searchRoleSlice: (state: IRoleState, actions: PayloadAction<IRoleSearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase().trim()
-            const roleFilter = actions.payload.roles.filter((role) => role.IsDeleted === false && role.NameRole.toLocaleLowerCase().trim().includes(nameTerm))
+            const roleFilter = actions.payload.roles.filter((role) => role.IsDeleted === 0 && role.NameRole.toLocaleLowerCase().trim().includes(nameTerm))
             state.roles = roleFilter
         },
     })

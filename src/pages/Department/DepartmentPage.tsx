@@ -104,10 +104,10 @@ const DepartmentPage = () => {
     // useEffect khi co getOneDeparrtment
     useEffect(() => {
         if (getOneDepartment) {
-            formUpdate.setFieldsValue({
-                isActive: getOneDepartment.isActive,
-                name: getOneDepartment.name
-            })
+            // formUpdate.setFieldsValue({
+            //     isActive: getOneDepartment.isActive,
+            //     name: getOneDepartment.name
+            // })
         }
     }, [isSuccessFetchOneDepartment, getOneDepartment])
     // modal
@@ -164,38 +164,38 @@ const DepartmentPage = () => {
     const columns: ColumnsType<IDepartment> = [
         {
             title: 'Tên lĩnh vực',
-            dataIndex: 'name',
+            dataIndex: 'Name',
         },
-        {
-            title: 'Áp dụng',
-            dataIndex: 'isActive',
-            render: (_, value: IDepartment) => (
-                <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
-            )
-        },
-        {
-            title: 'Hành động',
-            key: 'action',
-            render: (value: IDepartment) => (
-                <Space size="middle" className='flex justify-start'>
-                    <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
-                        <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value.id!)} />
-                    </Tooltip>
-                    <Popconfirm
-                        title="Xóa lĩnh vực"
-                        description={`Bạn có chắc muốn xóa: ${value.name}`}
-                        onConfirm={() => confirmDelete(value.id!)}
-                        okText="Yes"
-                        cancelText="No"
-                        okButtonProps={{ className: "text-white bg-blue-500" }}
-                    >
-                        <Tooltip title="Xóa" color={'red'} key={'red'}>
-                            <DeleteFilled className='text-xl text-red-500' />
-                        </Tooltip>
-                    </Popconfirm>
-                </Space>
-            )
-        },
+        // {
+        //     title: 'Áp dụng',
+        //     dataIndex: 'isActive',
+        //     render: (_, value: IDepartment) => (
+        //         <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
+        //     )
+        // },
+        // {
+        //     title: 'Hành động',
+        //     key: 'action',
+        //     render: (value: IDepartment) => (
+        //         <Space size="middle" className='flex justify-start'>
+        //             <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
+        //                 <EditFilled className='text-xl text-yellow-400' onClick={() => showModalUpdate(value._id!)} />
+        //             </Tooltip>
+        //             <Popconfirm
+        //                 title="Xóa lĩnh vực"
+        //                 description={`Bạn có chắc muốn xóa: ${value.Name}`}
+        //                 onConfirm={() => confirmDelete(value._id!)}
+        //                 okText="Yes"
+        //                 cancelText="No"
+        //                 okButtonProps={{ className: "text-white bg-blue-500" }}
+        //             >
+        //                 <Tooltip title="Xóa" color={'red'} key={'red'}>
+        //                     <DeleteFilled className='text-xl text-red-500' />
+        //                 </Tooltip>
+        //             </Popconfirm>
+        //         </Space>
+        //     )
+        // },
     ];
     const confirmDelete = async (id?: string) => {
         try {
@@ -215,10 +215,9 @@ const DepartmentPage = () => {
     // data 
     const data: IDepartment[] = listDepartmentReducer.map((item, index) => ({
         key: index + 1,
-        id: item.id,
-        name: item.name,
-        isActive: item.isActive,
-        IsDeleted: item.IsDeleted
+        _id: item._id,
+        Name: item.Name,
+
     }))
     // nút filter
     const onChange: TableProps<IDepartment>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -228,7 +227,7 @@ const DepartmentPage = () => {
     const handleDeleteAll = async (listDepartment: IDepartment[]) => {
         if (listDepartment.length > 0) {
             // lấy ra những id của phòng ban
-            const listDepartmentId = listDepartment.map((department) => department.id)
+            const listDepartmentId = listDepartment.map((department) => department._id)
             Swal.fire({
                 title: "Xác nhận xóa mục đã chọn ?",
                 showCancelButton: true,
@@ -267,7 +266,7 @@ const DepartmentPage = () => {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
                 return
             }
-            message.success(`Đã thêm thành công phòng: ${values.name}`);
+            message.success(`Đã thêm thành công phòng: ${values.Name}`);
             form.resetFields()
             setOpen(false);
         } catch (error) {
@@ -278,7 +277,7 @@ const DepartmentPage = () => {
     const onFinishUpdate = async (values: IDepartment) => {
         try {
             if (getOneDepartment) {
-                const results = await onUpdate({ id: getOneDepartment.id, ...values })
+                const results = await onUpdate({ _id: getOneDepartment._id, ...values })
                 if (results.error) {
                     message.error(`Thêm thất bại , vui lòng thử lại!`);
                     return
@@ -320,7 +319,7 @@ const DepartmentPage = () => {
                     <Row gutter={25}>
                         <Col span={20}>
                             <Form.Item
-                                name="name"
+                                name="Name"
                                 label="Tên lĩnh vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
@@ -390,7 +389,7 @@ const DepartmentPage = () => {
                     <Row gutter={25}>
                         <Col span={20}>
                             <Form.Item
-                                name="name"
+                                name="Name"
                                 label="Tên lĩnh vực"
                                 rules={[
                                     { required: true, message: '* Không được để trống' },
