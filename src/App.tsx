@@ -20,6 +20,8 @@ import RolePage from './pages/Role/RolePage';
 import RoleTrash from './pages/Role/RoleTrash';
 import ObjectPage from './pages/Object/Object';
 import ObjectPageTrash from './pages/Object/ObjectTrash';
+import ScoreTempUpdate from './pages/ScoreTemp/ScoreTempUpdate';
+import ScoreTempTrash from './pages/ScoreTemp/ScoreTempTrash';
 
 function App() {
   const navigate = useNavigate()
@@ -54,7 +56,9 @@ function App() {
             {/* Phiếu chấm */}
             <Route path='/scoretemp' element={<ScoreTempPage ></ScoreTempPage>}></Route>
             <Route path='/scoretemp/add' element={<ScoreTempAdd></ScoreTempAdd>}></Route>
-            <Route path='/object/trash' element={<DepartmentTrash></DepartmentTrash>}></Route>
+            <Route path='/scoretemp/update/:id' element={<ScoreTempUpdate></ScoreTempUpdate>}></Route>
+            <Route path='/scoretemp/trash' element={<ScoreTempTrash></ScoreTempTrash>}></Route>
+            {/* <Route path='/object/trash' element={<DepartmentTrash></DepartmentTrash>}></Route> */}
             {/* Vai trò */}
             <Route path='/roles' element={<RolePage></RolePage>}></Route>
             <Route path='/roles/trash' element={<RoleTrash></RoleTrash>}></Route>

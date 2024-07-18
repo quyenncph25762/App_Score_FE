@@ -1,7 +1,7 @@
 import React, { Dispatch, useEffect, useState } from 'react'
 import { Badge, Button, message, Modal, Popconfirm, Space, Spin, Table, TableColumnsType, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, EyeOutlined, LoadingOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, EyeOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -9,10 +9,11 @@ import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { IDepartment } from '../../store/department/department.interface';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFetchAllScoreTempQuery, useRemoveScoreTempByCheckboxMutation, useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
+import { useFetchAllScoreTempFromTrashQuery, useFetchAllScoreTempQuery, useRemoveScoreTempToTrashMutation, useRevertScoreTempByCheckboxMutation, useRevertScoreTempMutation } from '../../store/scoretemp/scoretemp.service';
 import { RootState } from '../../store';
 import { fetchAllScoreTempSlice } from '../../store/scoretemp/scoretempSlice';
 import { IScoreTemp } from '../../store/scoretemp/scoretemp.interface';
+import { IId } from '../../store/interface/_id/id.interface';
 
 
 
@@ -27,18 +28,18 @@ interface DataTypePreview {
     isPassed?: boolean
 }
 
-const ScoreTempPage = () => {
+const ScoreTempTrash = () => {
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
-    const [onRemove] = useRemoveScoreTempToTrashMutation()
-    const [onRemoveByCheckbox] = useRemoveScoreTempByCheckboxMutation()
+    const [onRevert] = useRevertScoreTempMutation()
+    const [onRevertByCheckbox] = useRevertScoreTempByCheckboxMutation()
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listScoreTemp, setScoreTemp] = useState<IScoreTemp[]>([])
     // modal xem chi tiet
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);
     // api
-    const { data: listScoreTempApi, isSuccess: successApiScoreTemp, isLoading: LoadingApiScoreTemp, isError: errorApiScoreTemp, isFetching: isFetchingScoreTemp } = useFetchAllScoreTempQuery()
+    const { data: listScoreTempApi, isSuccess: successApiScoreTemp, isLoading: LoadingApiScoreTemp, isError: errorApiScoreTemp, isFetching: isFetchingScoreTemp } = useFetchAllScoreTempFromTrashQuery()
     const listScoreTempReducer = useSelector((state: RootState) => state.scoreTempSlice.scoreTemps)
     useEffect(() => {
         if (errorApiScoreTemp) {
@@ -102,7 +103,7 @@ const ScoreTempPage = () => {
         },
         {
             title: 'Áp dụng',
-            dataIndex: 'isActive',
+            dataIndex: 'IsActive',
             render: (_, value: any) => (
                 <p>{value.isActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
             )
@@ -112,35 +113,27 @@ const ScoreTempPage = () => {
             key: 'action',
             render: (value: IScoreTemp) => (
                 <Space size="middle" className='flex justify-start'>
-                    <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
-                        <Link to={`/scoretemp/update/${value._id!}`}>
-                            <EditFilled className='text-xl text-yellow-400' />
-                        </Link>
-                    </Tooltip>
                     <Popconfirm
-                        title="Xóa danh mục"
-                        description="Bạn có chắc muốn xóa danh mục này"
-                        onConfirm={() => confirmDelete(value._id!)}
+                        title="Khôi phục lĩnh vực"
+                        description={`Bạn muốn khôi phục: ${value.Name}?`}
+                        onConfirm={() => confirmRevert(value._id!)}
                         okText="Yes"
                         cancelText="No"
                         okButtonProps={{ className: "text-white bg-blue-500" }}
                     >
-                        <Tooltip title="Xóa" color={'red'} key={'red'}>
-                            <DeleteFilled className='text-xl text-red-500' />
+                        <Tooltip title="Khôi phục" color={'blue'} key={'blue'}>
+                            <SyncOutlined className='text-xl text-blue-500' />
                         </Tooltip>
                     </Popconfirm>
-                    <Tooltip title="Xem chi tiết" color={"green"}>
-                        <EyeFilled className='text-xl text-green-400 cursor-pointer' onClick={showLoading} />
-                    </Tooltip>
                 </Space>
             )
         },
     ];
-    const confirmDelete = async (_id?: number) => {
+    const confirmRevert = async (_id?: number) => {
         try {
-            const results = await onRemove(_id)
+            const results = await onRevert(_id)
             if (results.error) {
-                return toast.error("Xóa thất bại")
+                return toast.error("Xóa thât!")
             }
             toast.success("Xóa thành công!")
         } catch (error) {
@@ -177,7 +170,7 @@ const ScoreTempPage = () => {
                 icon: "question",
             }).then(async (results) => {
                 if (results.isConfirmed) {
-                    await onRemoveByCheckbox(listScoreTempId)
+                    await onRevertByCheckbox(listScoreTempId)
                     toast.success("Xóa thành công!")
                 }
             })
@@ -265,26 +258,25 @@ const ScoreTempPage = () => {
                 <Table columns={columnsPrewView} dataSource={dataPreviews} bordered pagination={false} />
             </Modal>
             <div className="flex items-center gap-2">
-                <h3 className='text-title mb-0'>Quản lí phiếu chấm</h3>
-                <div className="iconDelete-title">
-                    <Tooltip title="Thùng rác của bạn" color='red'>
-                        <Link to={`/scoretemp/trash`}><DeleteOutlined color='red' /></Link>
-                    </Tooltip>
-                </div>
+                <Tooltip title="Trở về">
+                    <Link to={`/scoretemp`}>
+                        <ArrowLeftOutlined style={{
+                            marginBottom: "12px"
+                        }} />
+                    </Link>
+                </Tooltip>
+                <h3 className='text-title mb-0'>Khôi phục phiếu chấm</h3>
                 {isFetchingScoreTemp && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
-                    <Button type='primary' danger onClick={() => handleDeleteAll(listScoreTemp)}>Xóa tất cả</Button>
+                    <Button type='primary' onClick={() => handleDeleteAll(listScoreTemp)}>Khôi phục tất cả</Button>
                     <Search placeholder="Tìm kiếm tên tiêu chí ..." className='w-[300px]' onSearch={onSearch} enterButton />
                 </Space>
-                <Link to={`/scoretemp/add`}>
-                    <Button type='primary' className='mb-3'>Thêm mới</Button>
-                </Link>
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
         </div>
     )
 }
 
-export default ScoreTempPage
+export default ScoreTempTrash

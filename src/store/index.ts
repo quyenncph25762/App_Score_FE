@@ -13,6 +13,11 @@ import roleSlice from './role/roleSlice'
 import apartmentApi from './apartment/apartment.service'
 import authApi from './auth/auth.service'
 import infoEmployeeApi from './infoEmployee/infoEmployee.service'
+import scoreTempApi from './scoretemp/scoretemp.service'
+import scoretempSlice from './scoretemp/scoretempSlice'
+import criteriaApi from './criteria/criteria.service'
+import criteriaDetailApi from './criteriaDetail/criteriaDetail.service'
+import yearAPI from './year/year.service'
 
 export const store = configureStore({
     reducer: {
@@ -36,6 +41,14 @@ export const store = configureStore({
         // slice
         // login
         [authApi.reducerPath]: authApi.reducer,
+        // scoretemp
+        [scoreTempApi.reducerPath]: scoreTempApi.reducer,
+        // criteria
+        [criteriaApi.reducerPath]: criteriaApi.reducer,
+        // criteria Detail
+        [criteriaDetailApi.reducerPath]: criteriaDetailApi.reducer,
+        // year
+        [yearAPI.reducerPath]: yearAPI.reducer,
         // user
         userSlice: userSlice,
         // department
@@ -43,7 +56,9 @@ export const store = configureStore({
         // object
         objectSlice: objectSlice,
         // role
-        roleSlice: roleSlice
+        roleSlice: roleSlice,
+        // scoretemp
+        scoreTempSlice: scoretempSlice
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -65,6 +80,14 @@ export const store = configureStore({
             .concat([apartmentApi.middleware])
             // login
             .concat([authApi.middleware])
+            // scoreTemp
+            .concat([scoreTempApi.middleware])
+            // criteria
+            .concat([criteriaApi.middleware])
+            // criteriaDetail
+            .concat([criteriaDetailApi.middleware])
+            //year
+            .concat([yearAPI.middleware])
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

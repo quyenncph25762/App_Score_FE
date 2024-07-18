@@ -224,7 +224,6 @@ const RolePage = () => {
     // nút xóa tất cả
     const handleDeleteAll = async (listRole: any) => {
         if (listRole.length > 0) {
-            console.log(listRole)
             // lấy ra những id của vai trò
             const listRoleId = listRole.map((role) => role._id)
             Swal.fire({

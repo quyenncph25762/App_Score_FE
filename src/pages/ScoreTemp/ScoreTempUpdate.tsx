@@ -1,9 +1,9 @@
-import { CloseOutlined, DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, Space, Switch, Tooltip, Typography } from 'antd'
+import { CloseOutlined, DeleteOutlined, LoadingOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { Button, Card, Checkbox, Col, Form, FormInstance, Input, message, Row, Select, SelectProps, Space, Spin, Switch, Tooltip, Typography } from 'antd'
 import TextArea from 'antd/es/input/TextArea';
 import { Option } from 'antd/es/mentions';
 import React, { Dispatch, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useFetchAllObjectQuery } from '../../store/object/object.service';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -11,9 +11,9 @@ import { getAllObjectSlice } from '../../store/object/objectSlice';
 import { useFetchAllDepartmentQuery } from '../../store/department/department.service';
 import { fetchAllDepartmentSlice } from '../../store/department/departmentSlice';
 import { IDepartment } from '../../store/department/department.interface';
-import { useAddScoreTempMutation } from '../../store/scoretemp/scoretemp.service';
-import { IScoreTemp } from '../../store/scoretemp/scoretemp.interface';
+import { useLazyFetchOneScoreTempQuery, useUpdateScoreTempMutation } from '../../store/scoretemp/scoretemp.service';
 import { useFetchAllYearQuery } from '../../store/year/year.service';
+import { useLazyFetchAllCriteriaByScoreTempIdQuery } from '../../store/criteria/criteria.service';
 
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
@@ -33,18 +33,18 @@ const SubmitButton = ({ form }: { form: FormInstance }) => {
 
     return (
         <Button type="primary" htmlType="submit" disabled={!submittable} className='bg-blue-500'>
-            Thêm phiếu chấm
+            Cập nhật phiếu chấm
         </Button>
     );
 };
 
 
-const ScoreTempAdd = () => {
+const ScoreTempUpdate = () => {
     // truyen props tu app
     const dispatch: Dispatch<any> = useDispatch()
     const [form] = Form.useForm();
-    // nut them phieu cham
-    const [onAddScoreTemp] = useAddScoreTempMutation()
+    const { id } = useParams()
+    const [onUpdate] = useUpdateScoreTempMutation()
     // scoretemptdetail
     const [checkedPercent, setCheckedPercent] = useState(true);
     const [checkedTotal, setCheckedTotal] = useState(true);
@@ -54,12 +54,15 @@ const ScoreTempAdd = () => {
     const { data: fetchAllObject, isSuccess: isSuccessObject, isLoading: isLoadingObject, isError: isErrorObject } = useFetchAllObjectQuery()
     // goi list department tu redux-toolkit
     const { data: listDepartmentApi, isError: isErrorDepartmenApi, isLoading: isLoadingDepartmentApi, isSuccess: isSuccessDepartmentApi } = useFetchAllDepartmentQuery()
-    // goi list year API
+    // goi list year ru Api 
     const { data: listYearApi, isError: errorYearApi, isLoading: loadingYearApi } = useFetchAllYearQuery()
+    // fetchOne scoretemp
+    const [triggerGetOneScoreTemp, { data: getOneScoreTemp, isError: errorScoreTempApi, isLoading: LoadingScoreTempApi, isSuccess: successScoreTempApi, isFetching: fetchingScoreTempApi }] = useLazyFetchOneScoreTempQuery()
+    // fetch criteria By scoretempId
+    const [triggerCriteria, { data: listCriteria, isError: errorCriteriaApi, isLoading: LoadingCriteriaApi, isSuccess: successCriteriaApi, isFetching: fetchingCriteriaApi }] = useLazyFetchAllCriteriaByScoreTempIdQuery()
     // reducer object
-    const fetchAllObjectReducer = useSelector((state: RootState) => state.objectSlice.objects)
     const fetchAllDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
-    if (isErrorObject || isErrorDepartmenApi || errorYearApi) {
+    if (isErrorObject || isErrorDepartmenApi || errorScoreTempApi || errorYearApi || errorCriteriaApi) {
         navigate("/err500")
         return
     }
@@ -75,13 +78,30 @@ const ScoreTempAdd = () => {
             dispatch(fetchAllDepartmentSlice(listDepartmentApi))
         }
     }, [isSuccessDepartmentApi, dispatch])
-    // form scoretemp
+    // getOne scoretemp theo id
     useEffect(() => {
-        // console.log(1)
-        form.setFieldsValue({
-            IsActive: true,
-        })
-    }, [])
+        if (id) {
+            triggerGetOneScoreTemp(Number(id))
+            triggerCriteria(Number(id))
+        }
+    }, [id])
+    // set dữ liệu vào form
+    useEffect(() => {
+        if (getOneScoreTemp) {
+            form.setFieldsValue({
+                Name: getOneScoreTemp.Name,
+                ObjectId: getOneScoreTemp.ObjectId,
+                Description: getOneScoreTemp.Description,
+                YearId: getOneScoreTemp.YearId,
+                Criteria: listCriteria
+            })
+        }
+    }, [getOneScoreTemp])
+    // goi ham set criteriaValue theo scoretemp
+
+    // function criteriaSetValues() {
+
+    // }
     // Checked ty le %
     const toggleChecked = (key: number) => {
         setCheckedPercent(!checkedPercent);
@@ -95,27 +115,40 @@ const ScoreTempAdd = () => {
         setCheckedCurrentStatus(!checkedCurrentStatus);
     };
     // submit add phiếu chấm
-    const onFinish = async (values: IScoreTemp) => {
+    const onFinish = async (values: any) => {
         try {
-
-            const results = await onAddScoreTemp(values)
+            const results = await onUpdate(values)
             if (results.error) {
-                message.error(`Thêm thất bại , vui lòng thử lại!`);
+                message.error(`Cập nhật thất bại , vui lòng thử lại!`);
                 return
             }
+            message.success(`Đã cập nhật thành công phiếu chấm`);
             navigate("/scoretemp")
-            message.success(`Đã thêm thành công phiếu chấm`);
             form.resetFields()
             // setOpen(false);
         } catch (error) {
             console.log(error)
         }
     }
+    // object
+    // const option Objects
+    const optionObjects: SelectProps['options'] = fetchAllObject?.map((item) => ({
+        label: item.NameObject, // Hoặc thuộc tính tương ứng từ item
+        value: item._id, // Hoặc thuộc tính tương ứng từ item
+        // disabled: !item.isActive
+    }));
+    // const option years
+    const optionYears: SelectProps['options'] = listYearApi?.map((item) => ({
+        label: item.Name, // Hoặc thuộc tính tương ứng từ item
+        value: item._id, // Hoặc thuộc tính tương ứng từ item
+        // disabled: !item.isActive
+    }));
     return (
         <div>
-            {isLoadingObject || loadingYearApi && <p> loading object....</p>}
+            {isLoadingObject || LoadingScoreTempApi || isLoadingDepartmentApi || loadingYearApi && <p> loading object....</p>}
             <div className="flex items-center justify-between gap-2">
-                <h3 className='text-title mb-0'>Thêm mới phiếu chấm</h3>
+                <h3 className='text-title mb-0'>Cập nhật phiếu chấm  </h3>
+                {fetchingScoreTempApi && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <Form
                 form={form}
@@ -129,7 +162,6 @@ const ScoreTempAdd = () => {
                 autoComplete="off"
                 onFinish={onFinish}
                 className="mx-auto"
-
             >
                 <Row gutter={24}>
                     {/* Tên phiếu chấm */}
@@ -149,7 +181,8 @@ const ScoreTempAdd = () => {
                                 },
                                 { min: 3, message: 'Tối thiểu 6 kí tự' },
 
-                            ]}>
+                            ]}
+                        >
                             <Input></Input>
                         </Form.Item>
                     </Col>
@@ -166,16 +199,15 @@ const ScoreTempAdd = () => {
                                 showSearch
                                 placeholder="--"
                                 optionFilterProp="children"
+                                options={optionObjects}
                             >
-                                {fetchAllObjectReducer?.map((object, index) => (
-                                    <Option value={`${object._id}`} key={`${index}`}>{object.NameObject}</Option>
-                                ))}
+
                             </Select>
                         </Form.Item>
                     </Col>
                     {/* Kích hoạt */}
                     <Col span={4} className='flex items-center'>
-                        <Form.Item label="Kích hoạt" name="IsActive" valuePropName="checked">
+                        <Form.Item label="Kích hoạt" name="IsActive" valuePropName="checked" initialValue={true}>
                             <Switch />
                         </Form.Item>
                     </Col>
@@ -194,10 +226,8 @@ const ScoreTempAdd = () => {
                                 showSearch
                                 placeholder="--"
                                 optionFilterProp="children"
+                                options={optionYears}
                             >
-                                {listYearApi?.map((year, index) => (
-                                    <Option value={`${year._id}`} key={`${index}`}>{year.Name}</Option>
-                                ))}
                             </Select>
                         </Form.Item>
                     </Col>
@@ -212,7 +242,7 @@ const ScoreTempAdd = () => {
                 <Form.List name="Criteria">
                     {(fields, { add, remove }) => (
                         <div style={{ display: 'flex', rowGap: 16, flexDirection: 'column' }}>
-                            {fields.map((field) => (
+                            {fields?.map((field) => (
                                 <Card
                                     size="small"
                                     title={`Tiêu chí ${field.name + 1}`}
@@ -227,6 +257,7 @@ const ScoreTempAdd = () => {
                                         </Tooltip>
                                     }
                                 >
+                                    {/* <p>{fi}</p> */}
                                     <Row gutter={24}>
                                         {/* Tên tiêu chí */}
                                         <Col span={18}>
@@ -272,7 +303,7 @@ const ScoreTempAdd = () => {
                                     {/* Tiêu chí chi tiết */}
                                     <Form.Item
                                         label="Tiêu chí chi tiết"
-                                        name="CriteriaDetailName"
+                                        name="criteriaDetailName"
 
                                     >
                                         <Form.List name={[field.name, 'listCriteria']}>
@@ -295,13 +326,13 @@ const ScoreTempAdd = () => {
                                                             </Col>
                                                             {/* tỉ lệ % */}
                                                             <Col span={3}>
-                                                                <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} initialValue={false} valuePropName="checked">
+                                                                <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} valuePropName="checked">
                                                                     <Checkbox>Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>
                                                             {/* Tổng số */}
                                                             <Col span={3}>
-                                                                <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} initialValue={false} valuePropName="checked">
+                                                                <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} valuePropName="checked">
                                                                     <Checkbox>Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>
@@ -310,8 +341,8 @@ const ScoreTempAdd = () => {
                                                                 <div className="pb-[8px]"> Hiện trạng <Tooltip title="Khi hiện trạng không cho phép nhập thì sẽ tích đạt hay không đạt" >
                                                                     <QuestionCircleOutlined style={{ cursor: "pointer", color: "#1677ff", fontSize: "18px", marginLeft: "8px" }} />
                                                                 </Tooltip></div>
-                                                                <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked" initialValue={false}>
-                                                                    <Checkbox>Cho phép nhập</Checkbox>
+                                                                <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked">
+                                                                    <Checkbox >Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>
 
@@ -333,7 +364,6 @@ const ScoreTempAdd = () => {
                                     </Form.Item>
                                 </Card>
                             ))}
-
                             <Button type="primary" onClick={() => add()} block>
                                 + Thêm tiêu chí
                             </Button>
@@ -352,4 +382,4 @@ const ScoreTempAdd = () => {
     )
 }
 
-export default ScoreTempAdd
+export default ScoreTempUpdate
