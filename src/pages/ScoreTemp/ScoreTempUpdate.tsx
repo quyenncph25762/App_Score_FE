@@ -14,6 +14,7 @@ import { IDepartment } from '../../store/department/department.interface';
 import { useLazyFetchOneScoreTempQuery, useUpdateScoreTempMutation } from '../../store/scoretemp/scoretemp.service';
 import { useFetchAllYearQuery } from '../../store/year/year.service';
 import { useLazyFetchAllCriteriaByScoreTempIdQuery } from '../../store/criteria/criteria.service';
+import { useLazyFetchAllCriteriaDetailByCriteriaQuery } from '../../store/criteriaDetail/criteriaDetail.service';
 
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
@@ -60,9 +61,11 @@ const ScoreTempUpdate = () => {
     const [triggerGetOneScoreTemp, { data: getOneScoreTemp, isError: errorScoreTempApi, isLoading: LoadingScoreTempApi, isSuccess: successScoreTempApi, isFetching: fetchingScoreTempApi }] = useLazyFetchOneScoreTempQuery()
     // fetch criteria By scoretempId
     const [triggerCriteria, { data: listCriteria, isError: errorCriteriaApi, isLoading: LoadingCriteriaApi, isSuccess: successCriteriaApi, isFetching: fetchingCriteriaApi }] = useLazyFetchAllCriteriaByScoreTempIdQuery()
+    // fetch criteria detail By criteria
+    const [triggerCriteriaDetail, { data: listCriteriaDetail, isError: errorCriteriaDetailApi, isFetching: fetchingCriteriaDetailApi, isLoading: LoadingCriteriaDetailApi }] = useLazyFetchAllCriteriaDetailByCriteriaQuery()
     // reducer object
     const fetchAllDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
-    if (isErrorObject || isErrorDepartmenApi || errorScoreTempApi || errorYearApi || errorCriteriaApi) {
+    if (isErrorObject || isErrorDepartmenApi || errorScoreTempApi || errorYearApi || errorCriteriaApi || errorCriteriaDetailApi) {
         navigate("/err500")
         return
     }
@@ -86,6 +89,7 @@ const ScoreTempUpdate = () => {
         }
     }, [id])
     // set dữ liệu vào form
+
     useEffect(() => {
         if (getOneScoreTemp) {
             form.setFieldsValue({
@@ -93,15 +97,17 @@ const ScoreTempUpdate = () => {
                 ObjectId: getOneScoreTemp.ObjectId,
                 Description: getOneScoreTemp.Description,
                 YearId: getOneScoreTemp.YearId,
-                Criteria: listCriteria
+                Criteria: getOneScoreTemp.Criteria,
             })
         }
     }, [getOneScoreTemp])
     // goi ham set criteriaValue theo scoretemp
+    useEffect(() => {
+        listCriteria?.forEach((criteria) => {
+            triggerCriteriaDetail(criteria._id)
+        })
 
-    // function criteriaSetValues() {
-
-    // }
+    }, [listCriteria])
     // Checked ty le %
     const toggleChecked = (key: number) => {
         setCheckedPercent(!checkedPercent);
@@ -117,14 +123,18 @@ const ScoreTempUpdate = () => {
     // submit add phiếu chấm
     const onFinish = async (values: any) => {
         try {
-            const results = await onUpdate(values)
-            if (results.error) {
-                message.error(`Cập nhật thất bại , vui lòng thử lại!`);
-                return
+            // return
+            if (id) {
+                console.log(values)
+                const results = await onUpdate({ _id: id, ...values })
+                if (results.error) {
+                    message.error(`Cập nhật thất bại , vui lòng thử lại!`);
+                    return
+                }
+                message.success(`Đã cập nhật thành công phiếu chấm`);
+                navigate("/scoretemp")
+                form.resetFields()
             }
-            message.success(`Đã cập nhật thành công phiếu chấm`);
-            navigate("/scoretemp")
-            form.resetFields()
             // setOpen(false);
         } catch (error) {
             console.log(error)
@@ -145,10 +155,10 @@ const ScoreTempUpdate = () => {
     }));
     return (
         <div>
-            {isLoadingObject || LoadingScoreTempApi || isLoadingDepartmentApi || loadingYearApi && <p> loading object....</p>}
+            {isLoadingObject || LoadingScoreTempApi || isLoadingDepartmentApi || loadingYearApi || LoadingCriteriaApi || LoadingCriteriaDetailApi && <p> loading object....</p>}
             <div className="flex items-center justify-between gap-2">
                 <h3 className='text-title mb-0'>Cập nhật phiếu chấm  </h3>
-                {fetchingScoreTempApi && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
+                {fetchingScoreTempApi || fetchingCriteriaApi || fetchingCriteriaDetailApi && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <Form
                 form={form}
@@ -326,13 +336,13 @@ const ScoreTempUpdate = () => {
                                                             </Col>
                                                             {/* tỉ lệ % */}
                                                             <Col span={3}>
-                                                                <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} valuePropName="checked">
+                                                                <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} valuePropName="checked" initialValue={false}>
                                                                     <Checkbox>Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>
                                                             {/* Tổng số */}
                                                             <Col span={3}>
-                                                                <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} valuePropName="checked">
+                                                                <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} valuePropName="checked" initialValue={false}>
                                                                     <Checkbox>Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>
@@ -341,7 +351,7 @@ const ScoreTempUpdate = () => {
                                                                 <div className="pb-[8px]"> Hiện trạng <Tooltip title="Khi hiện trạng không cho phép nhập thì sẽ tích đạt hay không đạt" >
                                                                     <QuestionCircleOutlined style={{ cursor: "pointer", color: "#1677ff", fontSize: "18px", marginLeft: "8px" }} />
                                                                 </Tooltip></div>
-                                                                <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked">
+                                                                <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked" initialValue={false}>
                                                                     <Checkbox >Cho phép nhập</Checkbox>
                                                                 </Form.Item>
                                                             </Col>

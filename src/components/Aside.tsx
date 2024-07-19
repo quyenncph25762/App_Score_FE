@@ -8,6 +8,7 @@ import {
     PieChartOutlined,
     PlusOutlined,
     SlidersOutlined,
+    SnippetsOutlined,
     SolutionOutlined,
     UploadOutlined,
     UserOutlined,
@@ -91,6 +92,10 @@ const Aside = () => {
         getItem('Phiếu chấm', 'sub1', <CodeSandboxOutlined />, [
             getItem(<Link to={"/scoretemp/add"}>Tạo mới phiếu chấm</Link >, '2'),
             getItem(<Link to={"/scoretemp"}>Quản lý phiếu chấm</Link >, '3'),
+        ]),
+        getItem('Quản lí số liệu', 'sub6', <SnippetsOutlined />, [
+            getItem(<Link to={"/scorefile"}>Thông tin chi tiết</Link >, '6'),
+            getItem(<Link to={"/scoretemp"}>Hiện trạng</Link >, '7'),
         ]),
         getItem('Cán bộ', 'sub2', <UserOutlined />, [
             getItem(<Link to={"/users"}>Quản lý tài khoản</Link >, '4'),

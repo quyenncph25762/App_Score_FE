@@ -9,23 +9,13 @@ import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
 import { IDepartment } from '../../store/department/department.interface';
 import { useDispatch, useSelector } from 'react-redux';
-import { useFetchAllScoreTempQuery, useRemoveScoreTempByCheckboxMutation, useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
+import { useFetchAllScoreTempQuery, useLazyFetchOneScoreTempQuery, useRemoveScoreTempByCheckboxMutation, useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
 import { RootState } from '../../store';
 import { fetchAllScoreTempSlice } from '../../store/scoretemp/scoretempSlice';
 import { IScoreTemp } from '../../store/scoretemp/scoretemp.interface';
+import { ICriteria } from '../../store/criteria/criteria.interface';
+import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
 
-
-
-interface DataTypePreview {
-    key: React.Key,
-    _id?: number,
-    name: string,
-    target?: string;
-    isPercentType?: string;
-    isTotalType?: number;
-    isCurrentState?: string;
-    isPassed?: boolean
-}
 
 const ScoreTempPage = () => {
     const dispatch: Dispatch<any> = useDispatch()
@@ -39,6 +29,7 @@ const ScoreTempPage = () => {
     const [loading, setLoading] = React.useState<boolean>(true);
     // api
     const { data: listScoreTempApi, isSuccess: successApiScoreTemp, isLoading: LoadingApiScoreTemp, isError: errorApiScoreTemp, isFetching: isFetchingScoreTemp } = useFetchAllScoreTempQuery()
+    const [triggerGetOneScoreTemp, { data: getOneScoreTemp, isError: errorScoreTempApi, isLoading: LoadingScoreTempApi, isSuccess: successScoreTempApi, isFetching: fetchingScoreTempApi }] = useLazyFetchOneScoreTempQuery()
     const listScoreTempReducer = useSelector((state: RootState) => state.scoreTempSlice.scoreTemps)
     useEffect(() => {
         if (errorApiScoreTemp) {
@@ -52,14 +43,16 @@ const ScoreTempPage = () => {
             dispatch(fetchAllScoreTempSlice(listScoreTempApi))
         }
     }, [listScoreTempApi, successApiScoreTemp])
-    const showLoading = () => {
-        setOpen(true);
-        setLoading(true);
+    const showLoading = (_id: number) => {
+        if (_id) {
+            setOpen(true);
+            setLoading(true);
+            triggerGetOneScoreTemp(_id)
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000);
 
-        // Simple loading mock. You should add cleanup logic in real world.
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
+        }
     };
     // nút checkbox
     const rowSelection: TableRowSelection<IScoreTemp> = {
@@ -130,7 +123,7 @@ const ScoreTempPage = () => {
                         </Tooltip>
                     </Popconfirm>
                     <Tooltip title="Xem chi tiết" color={"green"}>
-                        <EyeFilled className='text-xl text-green-400 cursor-pointer' onClick={showLoading} />
+                        <EyeFilled className='text-xl text-green-400 cursor-pointer' onClick={() => showLoading(value._id!)} />
                     </Tooltip>
                 </Space>
             )
@@ -158,7 +151,8 @@ const ScoreTempPage = () => {
         YearId: scoretemp.YearId,
         Description: scoretemp.Description,
         NameObject: scoretemp.NameObject,
-        NameYear: scoretemp.NameYear
+        NameYear: scoretemp.NameYear,
+        Criteria: scoretemp.Criteria
     }));
     // nút filter
     const onChange: TableProps<IScoreTemp>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -188,81 +182,53 @@ const ScoreTempPage = () => {
     };
 
     // Table
-    const columnsPrewView: TableColumnsType<DataTypePreview> = [
-        {
-            title: 'STT',
-            dataIndex: 'key',
-        },
+    const columnsPrewView: TableColumnsType<ICriteria> = [
+
         {
             title: 'Tên tiêu chí',
-            dataIndex: 'name',
-            onCell: () => {
-                return {
-                    style: {
-                        maxWidth: 200
-                    }
-                }
-            },
+            dataIndex: 'Name',
             width: 400
         },
-        {
-            title: 'Chỉ tiêu',
-            dataIndex: 'target',
-        },
-        {
-            title: 'Tỷ lệ %',
-            dataIndex: 'isPercentType',
-        },
-        {
-            title: 'Tổng số',
-            dataIndex: 'isTotalType',
-        },
-        {
-            title: 'Hiện trạng',
-            dataIndex: 'isCurrentState',
-        },
-        {
-            title: 'Đạt chuẩn',
-            dataIndex: 'isPassed',
-            render: (_, value: DataTypePreview) => (
-                // Nếu isPasswed mà bằng undefine thì sẽ không hiện đạt hay không
-                <strong>{value.isPassed === false ? <p className='text-red-500'>Không đạt</p> : "Đạt"}</strong>
-            )
-        },
-    ];
 
-    const dataPreviews: DataTypePreview[] = [
-        {
-            key: 1,
-            name: 'Quy hoạch'
-        },
-        {
-            key: 2,
-            name: 'Có quy hoạch chung xây dựng xã còn thời hạn hoặc đã được rà soát, điều chỉnh theo quy định của pháp luật về quy hoạch',
-            target: "Đạt",
-            isPercentType: "60 %",
-            isTotalType: 700,
-            isCurrentState: "Đạt",
-            isPassed: false
-        },
     ];
-
+    const expandedRowRender = (record: ICriteria) => {
+        const columns: ColumnsType<ICriteriaDetail> = [
+            { title: "Tên tiêu chí", dataIndex: "Name", key: "Name" },
+            { title: 'Chỉ tiêu', dataIndex: 'Target', key: 'Target' },
+            { title: 'Tỷ lệ %', dataIndex: 'IsTypePercent', key: 'IsTypePercent', render: value => value ? 'Cho nhập' : 'Không nhập' },
+            { title: 'Tổng số', dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', render: value => value ? 'Cho nhập' : 'Không nhập' },
+            { title: 'Hiện trạng', dataIndex: 'IsCurrentStatusType', key: 'IsCurrentStatusType', render: value => value ? 'Cho nhập' : 'Không nhập' },
+        ];
+        return (
+            <Table
+                bordered
+                columns={columns}
+                dataSource={record.listCriteria}
+                pagination={false}
+                rowKey="detailId"
+            />
+        );
+    };
+    const dataPreviews: ICriteria[] = getOneScoreTemp?.Criteria.map((scoretemp, index) => ({
+        key: index + 1,
+        _id: scoretemp._id,
+        ScoreTempId: scoretemp.ScoreTempId,
+        Name: scoretemp.Name,
+        FieldId: scoretemp.FieldId,
+        NameScoreTemp: scoretemp.NameScoreTemp,
+        listCriteria: scoretemp.listCriteria
+    }));
     return (
         <div>
             {LoadingApiScoreTemp ? <div>loading data...</div> : ""}
             <Modal
-                title={<p>Chi tiết phiếu chấm</p>}
-                footer={
-                    <Button type="primary" onClick={showLoading}>
-                        Reload
-                    </Button>
-                }
+                title={<p>Chi tiết phiếu chấm: {getOneScoreTemp?.Name}</p>}
                 width={1200}
                 loading={loading}
                 open={open}
                 onCancel={() => setOpen(false)}
             >
-                <Table columns={columnsPrewView} dataSource={dataPreviews} bordered pagination={false} />
+                <Table columns={columnsPrewView} expandable={{ expandedRowRender }} dataSource={dataPreviews} bordered pagination={false} />
             </Modal>
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí phiếu chấm</h3>

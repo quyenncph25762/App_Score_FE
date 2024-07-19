@@ -34,5 +34,5 @@ const criteriaDetailApi = createApi({
     })
 })
 
-export const { useFetchAllCriteriaDetailByCriteriaQuery, useUpdateCriteriaDetailMutation, useRemoveCriteriaDetailByIdMutation } = criteriaDetailApi
+export const { useLazyFetchAllCriteriaDetailByCriteriaQuery, useUpdateCriteriaDetailMutation, useRemoveCriteriaDetailByIdMutation } = criteriaDetailApi
 export default criteriaDetailApi

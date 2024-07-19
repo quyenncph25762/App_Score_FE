@@ -1,7 +1,10 @@
+import { ICriteriaDetail } from "../criteriaDetail/criteriaDetail.interface"
+
 export interface ICriteria {
     _id?: number
     ScoreTempId: number
-    NameCriteria: string
+    Name: string
     FieldId: number
     NameScoreTemp: string
+    listCriteria: ICriteriaDetail[]
 }

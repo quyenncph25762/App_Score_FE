@@ -22,6 +22,7 @@ import ObjectPage from './pages/Object/Object';
 import ObjectPageTrash from './pages/Object/ObjectTrash';
 import ScoreTempUpdate from './pages/ScoreTemp/ScoreTempUpdate';
 import ScoreTempTrash from './pages/ScoreTemp/ScoreTempTrash';
+import ScoreFilePage from './pages/ScoreFile/ScoreFilePage';
 
 function App() {
   const navigate = useNavigate()
@@ -62,6 +63,8 @@ function App() {
             {/* Vai trò */}
             <Route path='/roles' element={<RolePage></RolePage>}></Route>
             <Route path='/roles/trash' element={<RoleTrash></RoleTrash>}></Route>
+            {/* ScoreFile */}
+            <Route path='/scorefile' element={<ScoreFilePage></ScoreFilePage>}></Route>
           </Route>
           <Route path='/login' element={<LoginPage></LoginPage>}></Route>
           <Route path='/sendEmail' element={<SendEmailPage></SendEmailPage>}></Route>
