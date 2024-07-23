@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IRole, IRoleSearchState, IRoleState } from "./role.interface";
+import { stringToSlug } from "../../components/funtions/removeAccents";
 
 const initalRoleState: IRoleState = {
     roles: []
@@ -20,7 +21,7 @@ const roleSlice = createSlice({
         },
         searchRoleSlice: (state: IRoleState, actions: PayloadAction<IRoleSearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase().trim()
-            const roleFilter = actions.payload.roles.filter((role) => role.IsDeleted === 0 && role.NameRole.toLocaleLowerCase().trim().includes(nameTerm))
+            const roleFilter = actions.payload.roles.filter((role) => role.IsDeleted === 0 && stringToSlug(role.NameRole).toLocaleLowerCase().trim().includes(nameTerm))
             state.roles = roleFilter
         },
     })

@@ -35,8 +35,9 @@ const userSlice = createSlice({
             state.users = actions.payload.results
         },
         listUserSearchSlice: (state: IUserState, actions: PayloadAction<IUserSearchState>) => {
-            const searchName = actions.payload.searchTerm.toLowerCase()
-            const listUserFilter = state.users.filter((user) => user.IsDeleted === false && user.FullName && user.FullName.toLowerCase().includes(searchName) || user.UserName.toLowerCase().includes(searchName))
+            const searchName = actions.payload.searchTerm.toLowerCase().trim()
+
+            const listUserFilter = state.users.filter((user) => user.IsDeleted === 0 && user.FullName.toLowerCase().trim().includes(searchName) || user.UserName.toLowerCase().trim().includes(searchName) || user.Customer.toLowerCase().trim().includes(searchName))
             state.users = listUserFilter
         }
 

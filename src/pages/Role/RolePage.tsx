@@ -87,6 +87,7 @@ const RolePage = () => {
     const { data: listRoleApi, isLoading: isLoadingRole, isFetching: isFetchingRole, isError: isErrorRole, isSuccess: isSuccessRole } = useFetchAllRoleQuery()
     // lay 1 role
     const [trigger, { data: getOneRole, isSuccess: isSuccessFetchOneRole, isError: isErrorFetchOneRole }] = useLazyFetchOneRoleQuery()
+    console.log(getOneRole)
     const listRoleReducer = useSelector((state: RootState) => state.roleSlice.roles)
     // useEffect khi co loi
     useEffect(() => {
@@ -289,7 +290,6 @@ const RolePage = () => {
     }
     return (
         <div>
-
             {isLoadingRole && <div>loading data...</div>}
             {/* modal them */}
             <Modal

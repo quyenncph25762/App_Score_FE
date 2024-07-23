@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IDepartment, IDepartmentSearchState, IDepartmentState } from "./department.interface";
+import { stringToSlug } from "../../components/funtions/removeAccents";
 
 export const initalDepartmentState: IDepartmentState = {
     departments: []
@@ -9,6 +10,7 @@ export const initialDepartmentSearchState: IDepartmentSearchState = {
     searchTerm: "",
     departments: []
 }
+
 
 const departmentSlice = createSlice({
     name: "departmentSlice",
@@ -22,7 +24,8 @@ const departmentSlice = createSlice({
         },
         searchDepartmentSlice: (state: IDepartmentState, actions: PayloadAction<IDepartmentSearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase().trim()
-            const departmentFilter = actions.payload.departments.filter((department) => department.IsDeleted === 0 && department.Name.toLocaleLowerCase().trim().includes(nameTerm))
+            console.log(nameTerm)
+            const departmentFilter = actions.payload.departments.filter((department) => department.IsDeleted === 0 && stringToSlug(department.Name).toLocaleLowerCase().trim().includes(nameTerm))
             state.departments = departmentFilter
         },
     })

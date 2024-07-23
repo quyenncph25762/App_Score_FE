@@ -61,11 +61,10 @@ const ScoreTempUpdate = () => {
     const [triggerGetOneScoreTemp, { data: getOneScoreTemp, isError: errorScoreTempApi, isLoading: LoadingScoreTempApi, isSuccess: successScoreTempApi, isFetching: fetchingScoreTempApi }] = useLazyFetchOneScoreTempQuery()
     // fetch criteria By scoretempId
     const [triggerCriteria, { data: listCriteria, isError: errorCriteriaApi, isLoading: LoadingCriteriaApi, isSuccess: successCriteriaApi, isFetching: fetchingCriteriaApi }] = useLazyFetchAllCriteriaByScoreTempIdQuery()
-    // fetch criteria detail By criteria
-    const [triggerCriteriaDetail, { data: listCriteriaDetail, isError: errorCriteriaDetailApi, isFetching: fetchingCriteriaDetailApi, isLoading: LoadingCriteriaDetailApi }] = useLazyFetchAllCriteriaDetailByCriteriaQuery()
+
     // reducer object
     const fetchAllDepartmentReducer = useSelector((state: RootState) => state.departmentSlice.departments)
-    if (isErrorObject || isErrorDepartmenApi || errorScoreTempApi || errorYearApi || errorCriteriaApi || errorCriteriaDetailApi) {
+    if (isErrorObject || isErrorDepartmenApi || errorScoreTempApi || errorYearApi || errorCriteriaApi) {
         navigate("/err500")
         return
     }
@@ -101,13 +100,6 @@ const ScoreTempUpdate = () => {
             })
         }
     }, [getOneScoreTemp])
-    // goi ham set criteriaValue theo scoretemp
-    useEffect(() => {
-        listCriteria?.forEach((criteria) => {
-            triggerCriteriaDetail(criteria._id)
-        })
-
-    }, [listCriteria])
     // Checked ty le %
     const toggleChecked = (key: number) => {
         setCheckedPercent(!checkedPercent);
@@ -155,10 +147,10 @@ const ScoreTempUpdate = () => {
     }));
     return (
         <div>
-            {isLoadingObject || LoadingScoreTempApi || isLoadingDepartmentApi || loadingYearApi || LoadingCriteriaApi || LoadingCriteriaDetailApi && <p> loading object....</p>}
+            {isLoadingObject || LoadingScoreTempApi || isLoadingDepartmentApi || loadingYearApi || LoadingCriteriaApi && <p> loading object....</p>}
             <div className="flex items-center justify-between gap-2">
                 <h3 className='text-title mb-0'>Cập nhật phiếu chấm  </h3>
-                {fetchingScoreTempApi || fetchingCriteriaApi || fetchingCriteriaDetailApi && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
+                {fetchingScoreTempApi || fetchingCriteriaApi && <div><Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <Form
                 form={form}

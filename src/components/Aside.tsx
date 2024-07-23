@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {
     CodeSandboxOutlined,
     DownOutlined,
+    FileDoneOutlined,
+    FileSearchOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     PartitionOutlined,
@@ -93,9 +95,13 @@ const Aside = () => {
             getItem(<Link to={"/scoretemp/add"}>Tạo mới phiếu chấm</Link >, '2'),
             getItem(<Link to={"/scoretemp"}>Quản lý phiếu chấm</Link >, '3'),
         ]),
+        getItem('Phê duyệt', 'sub7', <FileDoneOutlined />, [
+            // getItem(<Link to={"/scorefile/:id"}>Thông tin chi tiết</Link >, '6'),
+            getItem(<Link to={"/searchInfomation"}>Phê duyệt thông tin</Link >, '9'),
+        ]),
         getItem('Quản lí số liệu', 'sub6', <SnippetsOutlined />, [
-            getItem(<Link to={"/scorefile"}>Thông tin chi tiết</Link >, '6'),
-            getItem(<Link to={"/scoretemp"}>Hiện trạng</Link >, '7'),
+            // getItem(<Link to={"/scorefile/:id"}>Thông tin chi tiết</Link >, '6'),
+            getItem(<Link to={"/scorefile"}>Quản lý</Link >, '8'),
         ]),
         getItem('Cán bộ', 'sub2', <UserOutlined />, [
             getItem(<Link to={"/users"}>Quản lý tài khoản</Link >, '4'),

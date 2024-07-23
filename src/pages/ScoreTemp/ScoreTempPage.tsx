@@ -11,7 +11,7 @@ import { IDepartment } from '../../store/department/department.interface';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFetchAllScoreTempQuery, useLazyFetchOneScoreTempQuery, useRemoveScoreTempByCheckboxMutation, useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
 import { RootState } from '../../store';
-import { fetchAllScoreTempSlice } from '../../store/scoretemp/scoretempSlice';
+import { fetchAllScoreTempSlice, searchScoreTempSlice } from '../../store/scoretemp/scoretempSlice';
 import { IScoreTemp } from '../../store/scoretemp/scoretemp.interface';
 import { ICriteria } from '../../store/criteria/criteria.interface';
 import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
@@ -44,14 +44,9 @@ const ScoreTempPage = () => {
         }
     }, [listScoreTempApi, successApiScoreTemp])
     const showLoading = (_id: number) => {
+        setOpen(true);
         if (_id) {
-            setOpen(true);
-            setLoading(true);
             triggerGetOneScoreTemp(_id)
-            setTimeout(() => {
-                setLoading(false);
-            }, 1000);
-
         }
     };
     // nút checkbox
@@ -152,7 +147,8 @@ const ScoreTempPage = () => {
         Description: scoretemp.Description,
         NameObject: scoretemp.NameObject,
         NameYear: scoretemp.NameYear,
-        Criteria: scoretemp.Criteria
+        Criteria: scoretemp.Criteria,
+        IsDeleted: scoretemp.IsDeleted
     }));
     // nút filter
     const onChange: TableProps<IScoreTemp>['onChange'] = (pagination, filters, sorter, extra) => {
@@ -178,9 +174,15 @@ const ScoreTempPage = () => {
         }
     }
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
-        console.log(value)
+        if (value) {
+            dispatch(searchScoreTempSlice({ searchName: value, scoreTemps: listScoreTempApi }))
+        } else {
+            dispatch(fetchAllScoreTempSlice(listScoreTempApi))
+        }
     };
-
+    const handleReset = () => {
+        dispatch(fetchAllScoreTempSlice(listScoreTempApi))
+    }
     // Table
     const columnsPrewView: TableColumnsType<ICriteria> = [
 
@@ -224,7 +226,6 @@ const ScoreTempPage = () => {
             <Modal
                 title={<p>Chi tiết phiếu chấm: {getOneScoreTemp?.Name}</p>}
                 width={1200}
-                loading={loading}
                 open={open}
                 onCancel={() => setOpen(false)}
             >
@@ -243,6 +244,7 @@ const ScoreTempPage = () => {
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listScoreTemp)}>Xóa tất cả</Button>
                     <Search placeholder="Tìm kiếm tên tiêu chí ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Link to={`/scoretemp/add`}>
                     <Button type='primary' className='mb-3'>Thêm mới</Button>

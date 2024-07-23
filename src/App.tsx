@@ -22,7 +22,10 @@ import ObjectPage from './pages/Object/Object';
 import ObjectPageTrash from './pages/Object/ObjectTrash';
 import ScoreTempUpdate from './pages/ScoreTemp/ScoreTempUpdate';
 import ScoreTempTrash from './pages/ScoreTemp/ScoreTempTrash';
+import ScoreFileDetail from './pages/ScoreFile/ScoreFileDetail';
 import ScoreFilePage from './pages/ScoreFile/ScoreFilePage';
+import SearchInformation from './pages/ApproveInformation/ApproveInformation';
+
 
 function App() {
   const navigate = useNavigate()
@@ -65,6 +68,9 @@ function App() {
             <Route path='/roles/trash' element={<RoleTrash></RoleTrash>}></Route>
             {/* ScoreFile */}
             <Route path='/scorefile' element={<ScoreFilePage></ScoreFilePage>}></Route>
+            <Route path='/scorefile/:id' element={<ScoreFileDetail></ScoreFileDetail>}></Route>
+            {/* Tra cứu thông tin */}
+            <Route path='/searchInfomation' element={<SearchInformation></SearchInformation>}></Route>
           </Route>
           <Route path='/login' element={<LoginPage></LoginPage>}></Route>
           <Route path='/sendEmail' element={<SendEmailPage></SendEmailPage>}></Route>

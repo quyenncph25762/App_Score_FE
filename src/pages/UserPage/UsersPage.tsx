@@ -627,7 +627,7 @@ const UsersPage = () => {
 
                                 </Col>
                                 {/* UserName */}
-                                <Col span={14}>
+                                <Col span={13}>
                                     <Form.Item
                                         name="UserName"
                                         label="Tên người dùng"
@@ -649,10 +649,10 @@ const UsersPage = () => {
                                     </Form.Item>
                                 </Col>
                                 {/* active */}
-                                <Col span={4} className='flex items-center'>
+                                <Col span={5} className='flex items-center'>
                                     <Form.Item
                                         name="IsActive"
-                                        className='mb-0'
+                                        label="Kích hoạt"
                                     >
                                         <Switch />
                                     </Form.Item>
@@ -772,6 +772,7 @@ const UsersPage = () => {
                                 label="Đối tượng"
                             >
                                 <Select
+                                    mode="multiple"
                                     showSearch
                                     placeholder="Tìm kiếm đối tượng"
                                     optionFilterProp="children"
@@ -919,7 +920,7 @@ const UsersPage = () => {
                                     </Form.Item>
                                 </Col>
                                 {/* username */}
-                                <Col span={14}>
+                                <Col span={13}>
                                     <Form.Item
                                         name="UserName"
                                         label="Tên người dùng"
@@ -941,11 +942,10 @@ const UsersPage = () => {
                                     </Form.Item>
                                 </Col>
                                 {/* active */}
-                                <Col span={4} className='flex items-center'>
-                                    {/* Name Category */}
+                                <Col span={5} className='flex items-center'>
                                     <Form.Item
                                         name="IsActive"
-                                        className='mb-0'
+                                        label="Kích hoạt"
                                     >
                                         <Switch />
                                     </Form.Item>
@@ -1070,6 +1070,7 @@ const UsersPage = () => {
                                 label="Đối tượng"
                             >
                                 <Select
+                                    mode="multiple"
                                     showSearch
                                     placeholder="Tìm kiếm đối tượng"
                                     optionFilterProp="children"

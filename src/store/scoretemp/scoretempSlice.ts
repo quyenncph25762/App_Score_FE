@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IScoreTemp, IScoreTempSearchState, IScoreTempState } from "./scoretemp.interface";
+import { stringToSlug } from "../../components/funtions/removeAccents";
 
 const initialScoreTemp: IScoreTempState = {
     scoreTemps: []
@@ -21,7 +22,7 @@ const scoreTempSlice = createSlice({
         },
         searchScoreTempSlice: (state: IScoreTempState, actions: PayloadAction<IScoreTempSearchState>) => {
             const nameTerm = actions.payload.searchName.toLowerCase()
-            const listScoreTempFilter = actions.payload.scoreTemps.filter((scoretemp) => scoretemp.Name && scoretemp.Name.toLowerCase().includes(nameTerm))
+            const listScoreTempFilter = actions.payload.scoreTemps.filter((scoretemp) => scoretemp.IsDeleted === 0 && scoretemp.Name && stringToSlug(scoretemp.Name).toLowerCase().includes(nameTerm))
             state.scoreTemps = listScoreTempFilter
         }
     })

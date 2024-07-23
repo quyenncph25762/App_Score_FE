@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IObject, IObjectState, ISearchState } from "./object.interface";
+import { stringToSlug } from "../../components/funtions/removeAccents";
 
 const initialObjectSlice: IObjectState = {
     objects: []
@@ -21,7 +22,7 @@ const objectSlice = createSlice({
         },
         searchObjectSlice: (state: IObjectState, actions: PayloadAction<ISearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase()
-            const listObjectFilter = actions.payload.objects.filter((object) => object.IsDeleted === 0 && object.NameObject && object.NameObject.toLowerCase().includes(nameTerm))
+            const listObjectFilter = actions.payload.objects.filter((object) => object.IsDeleted === 0 && object.NameObject && stringToSlug(object.NameObject).toLowerCase().includes(nameTerm))
             state.objects = listObjectFilter
         }
     })

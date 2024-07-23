@@ -2,7 +2,7 @@ import { ICriteria } from "../criteria/criteria.interface"
 
 export interface IScoreTemp {
     _id?: number
-    Name?: string
+    Name: string
     Code?: string
     YearId?: number
     ObjectId?: number
@@ -10,6 +10,7 @@ export interface IScoreTemp {
     Description?: string
     NameObject?: string
     NameYear?: string
+    IsDeleted: boolean | number
     Criteria: ICriteria[]
 }
 
@@ -18,6 +19,6 @@ export interface IScoreTempState {
 }
 
 export interface IScoreTempSearchState {
-    searchName: ""
+    searchName: string
     scoreTemps: IScoreTemp[]
 }

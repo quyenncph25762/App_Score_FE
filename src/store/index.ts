@@ -18,6 +18,9 @@ import scoretempSlice from './scoretemp/scoretempSlice'
 import criteriaApi from './criteria/criteria.service'
 import criteriaDetailApi from './criteriaDetail/criteriaDetail.service'
 import yearAPI from './year/year.service'
+import scoreFileApi from './scorefile/scorefile.service'
+import scoreFileSlice from './scorefile/scoreFileSlice'
+
 
 export const store = configureStore({
     reducer: {
@@ -49,6 +52,8 @@ export const store = configureStore({
         [criteriaDetailApi.reducerPath]: criteriaDetailApi.reducer,
         // year
         [yearAPI.reducerPath]: yearAPI.reducer,
+        // scorefile
+        [scoreFileApi.reducerPath]: scoreFileApi.reducer,
         // user
         userSlice: userSlice,
         // department
@@ -58,39 +63,33 @@ export const store = configureStore({
         // role
         roleSlice: roleSlice,
         // scoretemp
-        scoreTempSlice: scoretempSlice
+        scoreTempSlice: scoretempSlice,
+        // scorefile
+        scoreFileSlice: scoreFileSlice
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware()
-            // user
-            .concat([usersApi.middleware])
-            // infoEmployee
-            .concat([infoEmployeeApi.middleware])
-            // address
-            .concat([wardApi.middleware])
-            .concat([districtApi.middleware])
-            .concat([provinceApi.middleware])
-            //department
-            .concat([departmentApi.middleware])
-            // object
-            .concat([objectApi.middleware])
-            // role
-            .concat([roleApi.middleware])
-            // apartment
-            .concat([apartmentApi.middleware])
-            // login
-            .concat([authApi.middleware])
-            // scoreTemp
-            .concat([scoreTempApi.middleware])
-            // criteria
-            .concat([criteriaApi.middleware])
-            // criteriaDetail
-            .concat([criteriaDetailApi.middleware])
-            //year
-            .concat([yearAPI.middleware])
+        getDefaultMiddleware().concat(
+            usersApi.middleware,
+            infoEmployeeApi.middleware,
+            wardApi.middleware,
+            districtApi.middleware,
+            provinceApi.middleware,
+            departmentApi.middleware,
+            objectApi.middleware,
+            roleApi.middleware,
+            apartmentApi.middleware,
+            authApi.middleware,
+            scoreTempApi.middleware,
+            criteriaApi.middleware,
+            criteriaDetailApi.middleware,
+            yearAPI.middleware,
+            scoreFileApi.middleware
+        ),
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch
+
+
