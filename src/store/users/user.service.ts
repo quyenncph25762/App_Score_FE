@@ -14,6 +14,10 @@ const usersApi = createApi({
             query: (page) => `/getAllEmployee?page=${page}`,
             providesTags: ["employees"]
         }),
+        fetchListUserAll: builder.query<IPaginateUser, void>({
+            query: () => `/getAllEmployee`,
+            providesTags: ["employees"]
+        }),
         // xoa vao thung rac
         removeUser: builder.mutation<IIsDeleted[], IIsDeleted>({
             query: ({ id, ...user }) => ({
@@ -67,5 +71,5 @@ const usersApi = createApi({
     })
 })
 
-export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation } = usersApi;
+export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation, useFetchListUserAllQuery } = usersApi;
 export default usersApi;

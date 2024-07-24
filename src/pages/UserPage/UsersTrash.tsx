@@ -139,7 +139,6 @@ const UsersTrash = () => {
         NameCity: user.NameCity,
         NameDistrict: user.NameDistrict,
         NameWard: user.NameWard,
-        ObjectName: user.ObjectName,
         RoleName: user.RoleName,
         Phone: user.Phone
     }));

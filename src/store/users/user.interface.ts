@@ -10,7 +10,6 @@ export interface IUser {
     Avatar: string
     RoleId?: number
     WardId: number
-    ObjectId?: number
     Fields?: number
     DistrictId: number
     CityId?: number
@@ -21,7 +20,6 @@ export interface IUser {
     NameCity?: string
     NameDistrict?: string
     NameWard?: string
-    ObjectName?: string
     RoleName?: string
 }
 

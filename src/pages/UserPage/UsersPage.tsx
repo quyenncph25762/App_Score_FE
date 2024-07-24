@@ -114,8 +114,7 @@ const UsersPage = () => {
     useEffect(() => {
         triggerListUser(1)
     }, [])
-    // goi object API 
-    const { data: ListObjectAPI, isError: isErrorListObject, isFetching: isFetchingObject, isLoading: isLoadingObjectAPI, isSuccess: isSuccessObjectApi } = useFetchAllObjectQuery()
+
     // gọi Api Vai trò 
     const { data: ListRoleApi, isError: isErrorListRole, isLoading: isLoadingRole } = useFetchAllRoleQuery()
     // goi list department tu redux-toolkit
@@ -129,7 +128,7 @@ const UsersPage = () => {
     // console.log(`districts:`, districts)
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     useEffect(() => {
-        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorListObject || isErrorInfo) {
+        if (isErrorListUser || isErrorOneUser || isErrorWards || isErrorDistricts || isErrorProvinces || isErrorInfo) {
             navigate("/err500")
             return
         }
@@ -165,12 +164,7 @@ const UsersPage = () => {
     //         dispatch(fetchAllDepartmentSlice(listDepartmentApi))
     //     }
     // }, [isSuccessDepartmentApi, listDepartmentApi, dispatch])
-    // dispatch object
-    useEffect(() => {
-        if (ListObjectAPI) {
-            dispatch(getAllObjectSlice(ListObjectAPI))
-        }
-    }, [isSuccessObjectApi, ListObjectAPI])
+
     // form add
     const [form] = Form.useForm();
     // form user update
@@ -190,7 +184,6 @@ const UsersPage = () => {
                 // DepartmentId: getOneUser.DepartmentId,
                 Fields: listInfoEmployee ? listInfoEmployee.map((item) => item.FieldId) : "",
                 RoleId: getOneUser.RoleId,
-                ObjectId: getOneUser.ObjectId,
                 WardId: getOneUser.WardId,
                 IsActive: getOneUser.IsActive,
                 Customer: getOneUser.Customer,
@@ -290,10 +283,6 @@ const UsersPage = () => {
             dataIndex: 'Email',
         },
         {
-            title: 'Đối tượng',
-            dataIndex: 'ObjectName'
-        },
-        {
             title: 'Địa chỉ',
             render: (_, value: IUser) => (
                 <p>{value.NameWard} , {value.NameDistrict} , {value.NameCity}</p>
@@ -354,7 +343,6 @@ const UsersPage = () => {
         IsActive: user.IsActive,
         UserName: user.UserName,
         Avatar: user.Avatar,
-        ObjectId: user.ObjectId,
         DistrictId: user.DistrictId,
         WardId: user.WardId,
         CityId: user.CityId,
@@ -364,7 +352,6 @@ const UsersPage = () => {
         NameCity: user.NameCity,
         NameDistrict: user.NameDistrict,
         NameWard: user.NameWard,
-        ObjectName: user.ObjectName,
         RoleName: user.RoleName,
         Phone: user.Phone
     }));
@@ -492,11 +479,6 @@ const UsersPage = () => {
         }
     }
     // -------- SELECT OPTIONS
-    // select objects
-    const selectObjects = listObjectReducer?.map((item, index) => ({
-        label: item.NameObject,
-        value: item._id,
-    }))
     // select provinces
     const selectProvinces = provinces?.map((item, index) => ({
         label: item.Name,
@@ -529,7 +511,7 @@ const UsersPage = () => {
     }))
     return (
         <div className=''>
-            {isLoadingUserAPI || isLoadingApartmentApi || isLoadingObjectAPI || isLoadingRole || isLoadingInfo ? <div>loading data...</div> : ""}
+            {isLoadingUserAPI || isLoadingApartmentApi || isLoadingRole || isLoadingInfo ? <div>loading data...</div> : ""}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí người dùng</h3>
                 <div className="iconDelete-title">
@@ -751,7 +733,7 @@ const UsersPage = () => {
                     </Row>
                     {/*linh vuc */}
                     <Row gutter={12}>
-                        <Col span={12}>
+                        <Col span={24}>
                             <Form.Item
                                 name="Fields"
                                 label="Lĩnh vực"
@@ -759,31 +741,13 @@ const UsersPage = () => {
                                 <Select
                                     mode="multiple"
                                     style={{ width: '100%' }}
-                                    placeholder="Please select"
+                                    placeholder="Chọn lĩnh vực"
                                     onChange={handleChangeSelect}
                                     options={optionsSelect}
                                 />
                             </Form.Item>
                         </Col>
-                        {/* đối tượng */}
-                        <Col span={12}>
-                            <Form.Item
-                                name="ObjectId"
-                                label="Đối tượng"
-                            >
-                                <Select
-                                    mode="multiple"
-                                    showSearch
-                                    placeholder="Tìm kiếm đối tượng"
-                                    optionFilterProp="children"
 
-                                >
-                                    {listObjectReducer?.map((item, index) => (
-                                        <Option value={`${item._id}`} key={index} >{item.NameObject}</Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
                     </Row>
                     {/* Address */}
                     <Row gutter={12}>
@@ -1045,7 +1009,7 @@ const UsersPage = () => {
                     <Row gutter={12}>
                         {/* phong ban */}
                         <label htmlFor=""></label>
-                        <Col span={12}>
+                        <Col span={24}>
                             <Form.Item
                                 name="Fields"
                                 label="Lĩnh vực"
@@ -1053,7 +1017,7 @@ const UsersPage = () => {
                                 <Select
                                     mode="multiple"
                                     style={{ width: '100%' }}
-                                    placeholder="Please select"
+                                    placeholder="Chọn lĩnh vực"
                                     onChange={handleChangeSelectUpdate}
                                     options={optionsSelectUpdate}
                                 >
@@ -1063,24 +1027,7 @@ const UsersPage = () => {
                                 </Select>
                             </Form.Item>
                         </Col>
-                        {/* đối tượng */}
-                        <Col span={12}>
-                            <Form.Item
-                                name="ObjectId"
-                                label="Đối tượng"
-                            >
-                                <Select
-                                    mode="multiple"
-                                    showSearch
-                                    placeholder="Tìm kiếm đối tượng"
-                                    optionFilterProp="children"
-                                    allowClear
-                                    options={selectObjects}
-                                >
 
-                                </Select>
-                            </Form.Item>
-                        </Col>
                     </Row>
                     {/* địa chỉ */}
                     <Row gutter={12}>

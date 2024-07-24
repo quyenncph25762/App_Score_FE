@@ -103,7 +103,6 @@ const ApproveInformation = () => {
     const handleOk = () => {
         setIsModalOpen(false);
     };
-
     const handleCancel = () => {
         setIsModalOpen(false);
     };
