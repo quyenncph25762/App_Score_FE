@@ -24,7 +24,9 @@ import ScoreTempUpdate from './pages/ScoreTemp/ScoreTempUpdate';
 import ScoreTempTrash from './pages/ScoreTemp/ScoreTempTrash';
 import ScoreFileDetail from './pages/ScoreFile/ScoreFileDetail';
 import ScoreFilePage from './pages/ScoreFile/ScoreFilePage';
-import SearchInformation from './pages/ApproveInformation/ApproveInformation';
+
+import ApproveInformation from './pages/ApproveInformation/ApproveInformation';
+import SearchInfomation from './pages/SearchInfomation/SearchInfomation';
 
 
 function App() {
@@ -69,8 +71,10 @@ function App() {
             {/* ScoreFile */}
             <Route path='/scorefile' element={<ScoreFilePage></ScoreFilePage>}></Route>
             <Route path='/scorefile/:id' element={<ScoreFileDetail></ScoreFileDetail>}></Route>
+            {/* Phê duyệt */}
+            <Route path='/approveInfomation' element={<ApproveInformation></ApproveInformation>}></Route>
             {/* Tra cứu thông tin */}
-            <Route path='/searchInfomation' element={<SearchInformation></SearchInformation>}></Route>
+            <Route path='/searchInfomation' element={<SearchInfomation></SearchInfomation>}></Route>
           </Route>
           <Route path='/login' element={<LoginPage></LoginPage>}></Route>
           <Route path='/sendEmail' element={<SendEmailPage></SendEmailPage>}></Route>

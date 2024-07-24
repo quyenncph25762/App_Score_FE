@@ -29,7 +29,7 @@ const items = [
     { key: '1', label: 'Action 1' },
     { key: '2', label: 'Action 2' },
 ];
-const SearchInformation = () => {
+const ApproveInformation = () => {
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -218,4 +218,4 @@ const SearchInformation = () => {
     )
 }
 
-export default SearchInformation
+export default ApproveInformation

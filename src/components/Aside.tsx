@@ -95,9 +95,13 @@ const Aside = () => {
             getItem(<Link to={"/scoretemp/add"}>Tạo mới phiếu chấm</Link >, '2'),
             getItem(<Link to={"/scoretemp"}>Quản lý phiếu chấm</Link >, '3'),
         ]),
+        getItem('Tra cứu', 'sub8', <FileSearchOutlined />, [
+            // getItem(<Link to={"/scorefile/:id"}>Thông tin chi tiết</Link >, '6'),
+            getItem(<Link to={"/searchInfomation"}>Tra cứu thông tin</Link >, '10'),
+        ]),
         getItem('Phê duyệt', 'sub7', <FileDoneOutlined />, [
             // getItem(<Link to={"/scorefile/:id"}>Thông tin chi tiết</Link >, '6'),
-            getItem(<Link to={"/searchInfomation"}>Phê duyệt thông tin</Link >, '9'),
+            getItem(<Link to={"/approveInfomation"}>Phê duyệt thông tin</Link >, '9'),
         ]),
         getItem('Quản lí số liệu', 'sub6', <SnippetsOutlined />, [
             // getItem(<Link to={"/scorefile/:id"}>Thông tin chi tiết</Link >, '6'),
