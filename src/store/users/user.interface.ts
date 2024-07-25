@@ -35,6 +35,12 @@ export interface IUserSearchState {
     pagination?: IPaginate
 }
 
+export interface IUserFilterByAddress {
+    provinceId: number
+    districtId: number
+    users: IUser[]
+    pagination?: IPaginate
+}
 // paginate
 
 export interface IPaginateUser {

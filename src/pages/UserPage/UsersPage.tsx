@@ -105,6 +105,7 @@ const UsersPage = () => {
     // truyen props tu app
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
+    const elementSearch = useRef(null)
     // gọi api khi nhấn trigger
     const [trigger, { data: getOneUser, isError: isErrorOneUser, isSuccess: isSuccessGetOneUser }] = useLazyFetchOneUserQuery()
     // goi list user tu redux-toolkit
@@ -112,9 +113,8 @@ const UsersPage = () => {
     // goi list infoEmployee theo employeeId
     const [triggerInFoEmployee, { data: listInfoEmployee, isError: isErrorInfo, isLoading: isLoadingInfo }] = useLazyFetchInfoEmployeeByEmployeeIdQuery()
     useEffect(() => {
-        triggerListUser(1)
+        triggerListUser({ page: 1, searchName: "" })
     }, [])
-
     // gọi Api Vai trò 
     const { data: ListRoleApi, isError: isErrorListRole, isLoading: isLoadingRole } = useFetchAllRoleQuery()
     // goi list department tu redux-toolkit
@@ -143,6 +143,8 @@ const UsersPage = () => {
     // 
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listUser, setListUser] = useState<IUser[]>([])
+    // state luu ten search
+    const [nameSearch, setNameSearch] = useState<string>("")
     // modal state add
     const [open, setOpen] = useState(false);
     // modal State update
@@ -358,7 +360,7 @@ const UsersPage = () => {
     // nút filter
     const onChange: TableProps<IUser>['onChange'] = (pagination, filters, sorter, extra) => {
         setCurrentPage(pagination.current)
-        triggerListUser(pagination.current)
+        triggerListUser({ page: pagination.current, searchName: nameSearch })
     };
 
     // nút xóa tất cả
@@ -435,18 +437,9 @@ const UsersPage = () => {
     };
     // search
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
-        if (value) {
-            // dispatch list user tu api vao redux trc khi nhan search
-            dispatch(listUsersSlice(ListUserAPI))
-            dispatch(listUserSearchSlice({ searchTerm: value, users: listUserReducer }))
-        } else {
-            dispatch(listUsersSlice(ListUserAPI))
-        }
+        setNameSearch(value)
+        triggerListUser({ page: 1, searchName: value })
     };
-
-    const handleReset = () => {
-        dispatch(listUsersSlice(ListUserAPI))
-    }
 
     // option select
     // add
@@ -1089,8 +1082,7 @@ const UsersPage = () => {
             <div className="flex justify-between">
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listUser)}>Xóa tất cả</Button>
-                    <Search placeholder="Tìm kiếm người dùng ..." className='w-[300px]' onSearch={onSearch} enterButton />
-                    <Button onClick={() => handleReset()}>reset</Button>
+                    <Search ref={elementSearch} placeholder="Tìm kiếm người dùng ..." className='w-[300px]' onSearch={onSearch} enterButton />
                 </Space>
                 <Button type='primary' className='mb-3' onClick={showModal}>Thêm mới</Button>
             </div>

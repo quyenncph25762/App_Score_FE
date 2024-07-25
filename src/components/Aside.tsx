@@ -10,6 +10,7 @@ import {
     PieChartOutlined,
     PlusOutlined,
     SlidersOutlined,
+    SmileOutlined,
     SnippetsOutlined,
     SolutionOutlined,
     UploadOutlined,
@@ -21,7 +22,8 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { IUser } from '../store/users/user.interface';
 import { toast } from 'react-toastify';
-
+import { Alert } from 'antd';
+import Marquee from 'react-fast-marquee';
 const { Header, Sider, Content } = Layout;
 const { Option } = Select
 type MenuItem = Required<MenuProps>["items"][number];
@@ -455,6 +457,15 @@ const Aside = () => {
                         </a>
                     </Dropdown>
                 </Header>
+                <Alert
+                    className='bg-white'
+                    banner
+                    message={
+                        <Marquee pauseOnHover gradient={false}>
+                            Hê hê hê <SmileOutlined className='ml-2' />
+                        </Marquee>
+                    }
+                />
                 <Content
                     style={{
                         margin: '24px 16px',

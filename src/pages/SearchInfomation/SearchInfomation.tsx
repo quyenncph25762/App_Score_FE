@@ -1,5 +1,5 @@
-import { Badge, Button, Card, Checkbox, Col, Form, FormInstance, Input, Radio, Row, Select, Space, Spin } from 'antd'
-import React, { useEffect, useState } from 'react'
+import { Badge, Button, Card, Checkbox, Col, Form, FormInstance, Input, Pagination, Radio, Row, Select, Space, Spin, TableProps } from 'antd'
+import React, { Dispatch, useEffect, useRef, useState } from 'react'
 import { useLazyFetchAllWardQuery } from '../../store/wards/ward.service'
 import { useLazyFetchAllDistrictQuery } from '../../store/districts/district.service'
 import { useFetchAllProvinceQuery } from '../../store/province/province.service'
@@ -8,10 +8,14 @@ import { useNavigate } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import Search, { SearchProps } from 'antd/es/input/Search'
 import FormItem from 'antd/es/form/FormItem'
-import { useFetchListUserAllQuery } from '../../store/users/user.service'
+import { useLazyFetchListUserQuery } from '../../store/users/user.service'
 import { IUser } from '../../store/users/user.interface'
 import Swal from 'sweetalert2'
 import { toast } from 'react-toastify'
+import { useFetchAllYearQuery } from '../../store/year/year.service'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '../../store'
+import { listUserFilterByAddressSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice'
 const { Option } = Select;
 
 // const OPTIONS = ['Apples', 'Nails', 'Bananas', 'Helicopters'];
@@ -37,68 +41,92 @@ const { Option } = Select;
 //     );
 // };
 const SearchInfomation = () => {
+    const dispatch: Dispatch<any> = useDispatch()
     const [form] = Form.useForm();
+    // id cua nguoi phat phieu
+    const [id, setId] = useState<number>(0)
+    // tao 1 state để lưu gia tri search
+    const [nameSearch, setNameSearch] = useState<string>("")
     const navigate = useNavigate()
     // api object
     const { data: ListObjectAPI, isError: isErrorListObject, isFetching: isFetchingObject, isLoading: isLoadingObjectAPI, isSuccess: isSuccessObjectApi } = useFetchAllObjectQuery()
-
-    const { data: ListUser, isLoading: LoadingListUser, isFetching: FetchingListUser, isError: ErrorListUser } = useFetchListUserAllQuery()
+    // api User
+    const [triggerListUser, { data: ListUser, isLoading: LoadingListUser, isFetching: FetchingListUser, isError: ErrorListUser, isSuccess: isSuccessUser }] = useLazyFetchListUserQuery()
+    // api year
+    const { data: listYear, isLoading: LoadingYear, isFetching: FetchingYear, isError: ErrorYear } = useFetchAllYearQuery()
+    const listUserReducer = useSelector((state: RootState) => state.userSlice.users)
+    // tim kiem
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
-        console.log(value)
+        setNameSearch(value)
+        triggerListUser({ page: 1, searchName: value })
     };
     // API province 
     const { data: provinces, isError: isErrorProvinces } = useFetchAllProvinceQuery()
     // goi list district theo id cua province
     const [triggerDistrict, { data: districts, isError: isErrorDistricts }] = useLazyFetchAllDistrictQuery()
 
-
+    // them list userAPI vao reducer 
+    useEffect(() => {
+        if (ListUser) {
+            dispatch(listUsersSlice(ListUser))
+        }
+    }, [isSuccessUser, ListUser])
     // loc theo thanh pho , huyen
     const handleDistrictByProvince = (IdProvince: number) => {
         if (IdProvince) {
+            dispatch(listUserFilterByAddressSlice({ provinceId: IdProvince, districtId: undefined, users: ListUser?.results }))
             triggerDistrict(IdProvince)
         }
     }
-    // form
-    const onClickApprove = (number: number) => {
-        Swal.fire({
-            title: "Xác nhận duyệt ?",
-            showCancelButton: true,
-            confirmButtonColor: "#1677ff",
-            confirmButtonText: "Xác nhận",
-            cancelButtonText: "Hủy",
-            icon: "question",
-        }).then((results) => {
-            if (results.isConfirmed) {
-                toast.success("Xóa thành công!")
-            }
-        })
+    // set mac dinh trang cho listUser
+    useEffect(() => {
+        triggerListUser({ page: 1, searchName: "" })
+    }, [])
+    // onChange paginate
+    const onChangePaginate: (page: number, pageSize: number) => void = (page, pageSize) => {
+        triggerListUser({ page: page, searchName: nameSearch });
     };
-
+    // khi click vao phat phieu , lay ra id cua employee
+    const handleClick = (id: number) => {
+        setId(id)
+    }
+    // nut submit
     const onFinish = async (values: IUser) => {
-        const arrValues = Object.values(values)
-        // loc ra nhung gia tri da tich
-        const filterValues = arrValues.filter((value) => value.ObjectId !== undefined)
-        Swal.fire({
-            title: "Xác nhận phát phiếu ?",
-            showCancelButton: true,
-            confirmButtonColor: "#1677ff",
-            confirmButtonText: "Xác nhận",
-            cancelButtonText: "Hủy",
-            icon: "question",
-        }).then((results) => {
-            if (results.isConfirmed) {
-                console.log(filterValues)
-                toast.success("Phát phiếu thành công!")
-                form.resetFields()
+        if (id) {
+            const arrValues = Object.values(values)
+            // loc ra co gia tri
+            const filterValuesNotUndefine = arrValues.filter((value) => value.ObjectId !== undefined && value.yearId !== undefined)
+            if (filterValuesNotUndefine.length === 0) {
+                return Swal.fire({
+                    icon: "error",
+                    title: "Lỗi khi phát phiếu",
+                    text: "Hãy chọn đối tượng phát phiếu và năm của phiếu !",
+                });
             }
-        })
+            Swal.fire({
+                title: "Xác nhận phát phiếu ?",
+                showCancelButton: true,
+                confirmButtonColor: "#1677ff",
+                confirmButtonText: "Xác nhận",
+                cancelButtonText: "Hủy",
+                icon: "question",
+            }).then((results) => {
+                if (results.isConfirmed) {
+                    // Loc ra id nhan vao phat phieu
+                    const filterUser = filterValuesNotUndefine.filter((user) => user.EmployeeId === id)
+                    console.log(filterUser)
+                    toast.success(`Phát phiếu thành công`)
+                    form.resetFields()
+                }
+            })
+        }
     }
     return (
         <div>
             <div className="flex gap-2">
-                <h3 className='text-title mb-0'>Phát phiếu</h3>
-                {isFetchingObject || isFetchingObject && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
-                {isLoadingObjectAPI || LoadingListUser ? <div className='ml-2'>loading data...</div> : ""}
+                <h3 className='text-title mb-0'>Phát phiếu chấm</h3>
+                {isFetchingObject || FetchingListUser || FetchingYear && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
+                {isLoadingObjectAPI || LoadingListUser || LoadingYear ? <div className='ml-2'>loading data...</div> : ""}
             </div>
             <h1 className='mb-4 font-semibold'>Nhập khu vực muốn tìm kiếm</h1>
             <Search onSearch={onSearch} placeholder="Hãy nhập vào đây ..." enterButton="Tìm kiếm" size="large" />
@@ -126,45 +154,61 @@ const SearchInfomation = () => {
                     ))}
                 </Select>
             </Space>
-            {ListUser?.results.map((user, index) => (
-                <Badge.Ribbon text="Xã nông thôn mới" color="green">
-                    <Form
-                        key={index}
-                        form={form}
-                        name={`form_${index}`}
-                        layout="vertical"
-                        style={{
-                            width: "100%",
-                            margin: 0
-                        }}
+            <Form
+                form={form}
+                name={`form`}
+                layout="vertical"
+                style={{
+                    width: "100%",
+                    margin: 0
+                }}
 
-                        autoComplete="off"
-                        onFinish={onFinish}
-                        className="mx-auto"
-                    >
-                        <Card key={index} title={`${user.Customer}`} className='mt-8' size="small">
+                autoComplete="off"
+                onFinish={onFinish}
+                className="mx-auto"
+            >
+                {listUserReducer?.map((user, index) => (
+                    <Badge.Ribbon text={`${user.FullName}`} color="green" key={index}>
+                        <Card key={user._id} title={`${user.Customer}`} className='mt-8' size="small">
                             <div className="flex flex-col">
-                                <Form.Item label="Đối tượng" name={[index, "ObjectId"]} key={index}>
-                                    <Select
-                                        mode='multiple'
-                                        showSearch
-                                        placeholder="Chọn đối tượng phiếu"
-                                        optionFilterProp="children"
-                                        style={{ width: "300px" }}
-                                    >
-                                        {ListObjectAPI?.map((item, index) => (
-                                            <Option value={`${item._id}`} key={index}>{item.NameObject}</Option>
-                                        ))}
-                                    </Select>
-                                </Form.Item>
+                                <Space>
+                                    <Form.Item label="Đối tượng" name={[index, "ObjectId"]} >
+                                        <Select
+                                            mode='multiple'
+                                            showSearch
+                                            placeholder="Chọn đối tượng phiếu"
+                                            optionFilterProp="children"
+                                            style={{ width: "300px" }}
+
+                                        >
+                                            {ListObjectAPI?.map((item, index) => (
+                                                <Option value={`${item._id}`} key={index}>{item.NameObject}</Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                    <Form.Item label="Năm" name={[index, "yearId"]} >
+                                        <Select
+                                            showSearch
+                                            placeholder="Chọn số năm"
+                                            optionFilterProp="children"
+                                            style={{ width: "150px" }}
+                                        >
+                                            {listYear?.map((item, index) => (
+                                                <Option value={`${item._id}`} key={index}>{item.Name}</Option>
+                                            ))}
+                                        </Select>
+                                    </Form.Item>
+                                </Space>
                                 <Form.Item hidden name={[index, "EmployeeId"]} initialValue={user._id}>
                                 </Form.Item>
                             </div>
-                            <Button type='primary' htmlType='submit' key={index}>Phát phiếu</Button>
+                            <Button type='primary' htmlType='submit' name={`${user._id}`} key={user._id} onClick={() => handleClick(Number(user._id)!)}>Phát phiếu</Button>
                         </Card>
-                    </Form>
-                </Badge.Ribbon>
-            ))}
+                    </Badge.Ribbon>
+                ))
+                }
+            </Form>
+            <Pagination onChange={onChangePaginate} pageSize={ListUser?.results.length} className='mt-4 float-end' defaultCurrent={1} total={ListUser?.results.length * ListUser?.pagination.pages.length} />
         </div >
     )
 }
