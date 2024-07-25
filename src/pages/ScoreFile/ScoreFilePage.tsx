@@ -217,6 +217,7 @@ const ScoreFilePage = () => {
         IsActive: item.IsActive,
         Status: item.Status,
         Score: item.Score,
+        ScoreFileDetails: item.ScoreFileDetails
     }))
     // nút filter
     const onChange: TableProps<IScoreFile>['onChange'] = (pagination, filters, sorter, extra) => {
