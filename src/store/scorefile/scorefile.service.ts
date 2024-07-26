@@ -9,7 +9,6 @@ const scoreFileApi = createApi({
         baseUrl: BASE_URL,
         prepareHeaders: (headers) => {
             const token = Cookies.get('Countryside');
-            console.log(token)
             if (token) {
                 headers.set('Authorization', `${token}`);
             }
