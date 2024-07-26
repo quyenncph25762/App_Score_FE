@@ -5,12 +5,13 @@ import { IUser } from '../store/users/user.interface';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLoginApiMutation } from '../store/auth/auth.service';
 import { toast } from 'react-toastify';
-
+import { useCookies } from 'react-cookie';
 
 const LoginPage = () => {
     const [form] = Form.useForm();
     const [onLogin] = useLoginApiMutation()
     const navigate = useNavigate()
+    const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
     const onFinish = async (values: IUser) => {
         try {
             const { UserName, Password } = values
@@ -20,6 +21,7 @@ const LoginPage = () => {
                 DistrictId: 1
             }
             const results = await onLogin(NewValues)
+            setCookie("Countryside", results?.data?.token)
             if (results.error) {
                 toast.error("Tài khoản hoặc mật khẩu không chính xác")
                 return
@@ -32,6 +34,9 @@ const LoginPage = () => {
         }
 
     };
+    useEffect(() => {
+
+    }, [])
     useEffect(() => {
         form.setFieldsValue({
             password: "",

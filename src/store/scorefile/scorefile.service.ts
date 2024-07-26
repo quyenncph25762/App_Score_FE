@@ -11,7 +11,7 @@ const scoreFileApi = createApi({
     endpoints: (builder) => ({
         // fetchAll
         fetchAllScoreFile: builder.query<IScoreFile[], void>({
-            query: () => `/scoreFile/all`,
+            query: () => `/get-scorefile`,
             providesTags: ["scorefiles"]
         }),
         // tao phieu cham

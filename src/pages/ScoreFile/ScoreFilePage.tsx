@@ -85,6 +85,7 @@ const ScoreFilePage = () => {
 
     // role api & slice
     const { data: listScoreFileApi, isLoading: isLoadingScoreFile, isFetching: isFetchingScoreFile, isError: isErrorScoreFile, isSuccess: isSuccessScoreFile } = useFetchAllScoreFileQuery()
+    console.log(listScoreFileApi)
     // lay 1 role
     const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyFetchOneScoreFileQuery()
     const listScoreFileReducer = useSelector((state: RootState) => state)

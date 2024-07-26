@@ -11,7 +11,7 @@ const authApi = createApi({
     tagTypes: ["auth"],
     endpoints: (builder) => ({
         // login
-        loginApi: builder.mutation<IAuth[], IAuth>({
+        loginApi: builder.mutation<IAuth, IAuth>({
             query: (body) => ({
                 method: "POST",
                 url: "/login",
