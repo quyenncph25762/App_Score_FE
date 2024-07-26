@@ -1,11 +1,20 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "../../config/configApi";
 import { IScoreFile } from "./scofile.interface";
-
+import { RootState } from "..";
+import Cookies from 'js-cookie';
 const scoreFileApi = createApi({
     reducerPath: "scorefile",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        prepareHeaders: (headers) => {
+            const token = Cookies.get('Countryside');
+            console.log(token)
+            if (token) {
+                headers.set('Authorization', `${token}`);
+            }
+            return headers;
+        },
     }),
     tagTypes: ["scorefiles"],
     endpoints: (builder) => ({

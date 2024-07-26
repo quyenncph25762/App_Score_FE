@@ -14,6 +14,8 @@ const LoginPage = () => {
     const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
     const onFinish = async (values: IUser) => {
         try {
+            const expiryDate = new Date();
+            expiryDate.setTime(expiryDate.getTime() + (60 * 60 * 1000));
             const { UserName, Password } = values
             const NewValues = {
                 UserName: UserName,
@@ -21,7 +23,7 @@ const LoginPage = () => {
                 DistrictId: 1
             }
             const results = await onLogin(NewValues)
-            setCookie("Countryside", results?.data?.token)
+            setCookie("Countryside", results?.data?.token, { expires: expiryDate })
             if (results.error) {
                 toast.error("Tài khoản hoặc mật khẩu không chính xác")
                 return
