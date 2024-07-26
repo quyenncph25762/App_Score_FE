@@ -16,6 +16,7 @@ import { useFetchAllYearQuery } from '../../store/year/year.service'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { listUserFilterByAddressSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice'
+import { useCreateScoreFileMutation } from '../../store/scorefile/scorefile.service'
 const { Option } = Select;
 
 // const OPTIONS = ['Apples', 'Nails', 'Bananas', 'Helicopters'];
@@ -45,6 +46,8 @@ const SearchInfomation = () => {
     const [form] = Form.useForm();
     // id cua nguoi phat phieu
     const [id, setId] = useState<number>(0)
+    // nut them phieu cham
+    const [onAddScoreFile] = useCreateScoreFileMutation()
     // tao 1 state để lưu gia tri search
     const [nameSearch, setNameSearch] = useState<string>("")
     const navigate = useNavigate()
@@ -95,7 +98,7 @@ const SearchInfomation = () => {
         if (id) {
             const arrValues = Object.values(values)
             // loc ra co gia tri
-            const filterValuesNotUndefine = arrValues.filter((value) => value.ObjectId !== undefined && value.yearId !== undefined)
+            const filterValuesNotUndefine = arrValues.filter((value) => value.ObjectId !== undefined && value.YearId !== undefined)
             if (filterValuesNotUndefine.length === 0) {
                 return Swal.fire({
                     icon: "error",
@@ -110,11 +113,15 @@ const SearchInfomation = () => {
                 confirmButtonText: "Xác nhận",
                 cancelButtonText: "Hủy",
                 icon: "question",
-            }).then((results) => {
+            }).then(async (results) => {
                 if (results.isConfirmed) {
                     // Loc ra id nhan vao phat phieu
                     const filterUser = filterValuesNotUndefine.filter((user) => user.EmployeeId === id)
-                    console.log(filterUser)
+                    console.log(filterUser[0])
+                    const results = await onAddScoreFile(filterUser[0])
+                    if (results.error) {
+                        return toast.error(`Phát phiếu không thành công`)
+                    }
                     toast.success(`Phát phiếu thành công`)
                     form.resetFields()
                 }
@@ -140,7 +147,7 @@ const SearchInfomation = () => {
                     onChange={handleDistrictByProvince}
                 >
                     {provinces?.map((item, index) => (
-                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
+                        <Option value={`${item._id}`} key={item._id}>{item.Name}</Option>
                     ))}
                 </Select>
                 {/* district */}
@@ -150,13 +157,13 @@ const SearchInfomation = () => {
                     optionFilterProp="children"
                 >
                     {districts?.map((item, index) => (
-                        <Option value={`${item._id}`} key={index}>{item.Name}</Option>
+                        <Option value={`${item._id}`} key={item._id}>{item.Name}</Option>
                     ))}
                 </Select>
             </Space>
             <Form
                 form={form}
-                name={`form`}
+                name="form"
                 layout="vertical"
                 style={{
                     width: "100%",
@@ -168,7 +175,7 @@ const SearchInfomation = () => {
                 className="mx-auto"
             >
                 {listUserReducer?.map((user, index) => (
-                    <Badge.Ribbon text={`${user.FullName}`} color="green" key={index}>
+                    <Badge.Ribbon text={`${user.FullName}`} color="green" key={user._id}>
                         <Card key={user._id} title={`${user.Customer}`} className='mt-8' size="small">
                             <div className="flex flex-col">
                                 <Space>
@@ -181,12 +188,13 @@ const SearchInfomation = () => {
                                             style={{ width: "300px" }}
 
                                         >
-                                            {ListObjectAPI?.map((item, index) => (
-                                                <Option value={`${item._id}`} key={index}>{item.NameObject}</Option>
+                                            {/* <p>{}</p> */}
+                                            {ListObjectAPI?.map((item) => (
+                                                <Option value={`${item._id}`} key={item._id} disabled={item.ApartmentId !== user.ApartmentId}>{item.NameObject}</Option>
                                             ))}
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item label="Năm" name={[index, "yearId"]} >
+                                    <Form.Item label="Năm" name={[index, "YearId"]} >
                                         <Select
                                             showSearch
                                             placeholder="Chọn số năm"
@@ -200,6 +208,7 @@ const SearchInfomation = () => {
                                     </Form.Item>
                                 </Space>
                                 <Form.Item hidden name={[index, "EmployeeId"]} initialValue={user._id}>
+                                    <Input></Input>
                                 </Form.Item>
                             </div>
                             <Button type='primary' htmlType='submit' name={`${user._id}`} key={user._id} onClick={() => handleClick(Number(user._id)!)}>Phát phiếu</Button>

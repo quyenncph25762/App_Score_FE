@@ -14,6 +14,15 @@ const scoreFileApi = createApi({
             query: () => `/scoreFile/all`,
             providesTags: ["scorefiles"]
         }),
+        // tao phieu cham
+        createScoreFile: builder.mutation<IScoreFile[], IScoreFile>({
+            query: (scorefile) => ({
+                method: "POST",
+                body: scorefile,
+                url: `create-scorefile`
+            }),
+            invalidatesTags: ["scorefiles"]
+        }),
         // fetchOne
         fetchOneScoreFile: builder.query<IScoreFile, number>({
             query: (id) => `/getOne-scoreFile/${id}`,
@@ -39,5 +48,5 @@ const scoreFileApi = createApi({
     })
 })
 
-export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation } = scoreFileApi
+export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation } = scoreFileApi
 export default scoreFileApi
