@@ -1,7 +1,7 @@
 import React, { Dispatch, useEffect, useState } from 'react'
 import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, LoadingOutlined, StarOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, StarOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -16,7 +16,7 @@ import { IRole } from '../../store/role/role.interface';
 import { useAddRoleMutation, useFetchAllRoleQuery, useLazyFetchOneRoleQuery, useRemoveRoleToTrashByCheckboxMutation, useRemoveRoleToTrashMutation, useUpdateRoleMutation } from '../../store/role/role.service';
 import { fetchAllRoleSlice, searchRoleSlice } from '../../store/role/roleSlice';
 import { IScoreFile } from '../../store/scorefile/scofile.interface';
-import { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery } from '../../store/scorefile/scorefile.service';
+import { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useLazyGetScoreFileByFieldQuery } from '../../store/scorefile/scorefile.service';
 import { fetchAllScoreFileSlice } from '../../store/scorefile/scoreFileSlice';
 import { useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
 
@@ -87,8 +87,9 @@ const ScoreFilePage = () => {
     const { data: listScoreFileApi, isLoading: isLoadingScoreFile, isFetching: isFetchingScoreFile, isError: isErrorScoreFile, isSuccess: isSuccessScoreFile } = useFetchAllScoreFileQuery()
     console.log(listScoreFileApi)
     // lay 1 role
-    const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyFetchOneScoreFileQuery()
-    const listScoreFileReducer = useSelector((state: RootState) => state)
+    // const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyFetchOneScoreFileQuery()
+    const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyGetScoreFileByFieldQuery()
+    const listScoreFileReducer = useSelector((state: RootState) => state.scoreFileSlice.scorefiles)
     // useEffect khi co loi
     useEffect(() => {
         if (isErrorFetchOneScorefile) {
@@ -120,10 +121,10 @@ const ScoreFilePage = () => {
     };
     // show modal cap nhat
     const showModalGetOne = (id: number) => {
+        setOpenUpdate(true);
         if (id) {
             trigger(id)
         }
-        setOpenUpdate(true);
     };
     const handleOkUpdate = () => {
         setOpenUpdate(false);
@@ -155,34 +156,46 @@ const ScoreFilePage = () => {
     // column
     const columns: ColumnsType<IScoreFile> = [
         {
+            title: 'STT',
+            dataIndex: 'key',
+        },
+        {
             title: 'Tên Phiếu',
-            dataIndex: 'Name',
+            dataIndex: 'NameScoreTemp',
         },
         {
             title: 'Năm',
-            dataIndex: 'Note',
+            dataIndex: 'NameYear',
         },
         {
             title: 'Áp dụng',
-            dataIndex: 'IsActive',
+            render: (_, value: IScoreFile) => (
+                <p>{value.IsActive ? <Badge status="processing" /> : <Badge status="default" />}</p>
+            )
         },
         {
             title: 'Hành động',
             key: 'action',
-            render: (value: IScoreFile) => (
+            render: (_, value: IScoreFile) => (
                 <Space size="middle" className='flex justify-start'>
-                    <Tooltip title="Chấm điểm" color={'yellow'} key={'yellow'}>
-                        <Link to={`/scorefile/${value._id}`}>
-                            <StarOutlined className='text-xl text-yellow-400' />
-                        </Link>
-                    </Tooltip>
-                    <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
+                    {!value.IsActive ?
+                        <Tooltip title="Xác nhận" color={'green'}>
+                            <CheckSquareOutlined className='text-xl text-green-400' onClick={() => handleApprove(value._id!)} />
+                        </Tooltip>
+                        :
+                        <Tooltip title="Chấm điểm" color={'yellow'}>
+                            <Link to={`/scorefile/${value._id}`}>
+                                <HighlightOutlined className='text-xl text-yellow-500' />
+                            </Link>
+                        </Tooltip>
+                    }
+                    {value.IsActive === true && value.Status > 0 ? <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
                         <EyeFilled className='text-xl text-green-400' onClick={() => showModalGetOne(value._id!)} />
-                    </Tooltip>
+                    </Tooltip> : ""}
 
                     <Popconfirm
                         title="Xóa vai trò"
-                        description={`Bạn có chắc muốn xóa: ${value.NameScoretemp}`}
+                        description={`Bạn có chắc muốn xóa: ${value.NameScoreTemp}`}
                         onConfirm={() => confirmDelete(value._id!)}
                         okText="Yes"
                         cancelText="No"
@@ -196,6 +209,9 @@ const ScoreFilePage = () => {
             )
         },
     ];
+    const handleApprove = (id: number) => {
+        console.log(id)
+    }
     // xoa vao thung rac
     const confirmDelete = async (id?: number) => {
         try {
@@ -210,13 +226,14 @@ const ScoreFilePage = () => {
         }
     }
     // data 
-    const data: IScoreFile[] = listScoreFile.map((item, index) => ({
+    const data: IScoreFile[] = listScoreFileReducer.map((item, index) => ({
         key: index + 1,
-        Code: item.NameScoretemp,
+        Code: item.Code,
         _id: item._id,
-        NameScoretemp: item.NameScoretemp,
+        NameScoreTemp: item.NameScoreTemp,
         IsActive: item.IsActive,
         Status: item.Status,
+        NameYear: item.NameYear,
         Score: item.Score,
         ScoreFileDetails: item.ScoreFileDetails
     }))

@@ -1,13 +1,16 @@
+import { ICriteria } from "../criteria/criteria.interface"
 import { IScoreFileDetail } from "../scorefileDetail/scorefileDetail.interface"
 
 export interface IScoreFile {
     _id?: number
     ScoreTempId?: number
-    NameScoretemp: string
+    NameScoreTemp: string
+    NameYear: string
     Code: string
     Score: number
     Status: number
     IsActive: boolean
+    Criteria?: ICriteria[]
     ScoreFileDetails: IScoreFileDetail[]
 }
 

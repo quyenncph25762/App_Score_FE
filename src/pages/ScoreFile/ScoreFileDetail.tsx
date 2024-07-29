@@ -3,9 +3,12 @@ import type { CheckboxProps, FormInstance, RadioChangeEvent, TableColumnsType } 
 import { Button, Checkbox, Form, Input, Radio, Space, Table, Tabs } from 'antd';
 import { useDispatch } from 'react-redux';
 import { useLazyFetchOneScoreTempQuery } from '../../store/scoretemp/scoretemp.service';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
 import { ICriteria } from '../../store/criteria/criteria.interface';
+import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
+import { useLazyGetScoreFileByFieldQuery } from '../../store/scorefile/scorefile.service';
 
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 const onChange: CheckboxProps['onChange'] = (e) => {
@@ -96,9 +99,9 @@ const CriteriaTable: React.FC<{ criteria: ICriteria; form: FormInstance, index: 
                 </Form.Item>
             )
         },
-        {
-            title: 'Không tính',
-        },
+        // {
+        //     title: 'Không tính',
+        // },
     ];
     return <Table
         columns={columns}
@@ -110,27 +113,33 @@ const CriteriaTable: React.FC<{ criteria: ICriteria; form: FormInstance, index: 
 }
 const ScoreFileDetail = () => {
     const dispatch: Dispatch<any> = useDispatch()
+    const { id } = useParams()
     const [form] = Form.useForm()
     const navigate = useNavigate()
     // lay 1 scoretemp
-    const [triggerScoreTemp, { data: listScoreTemp, isLoading: loadingScoreTemp, isError: errorScoreTemp }] = useLazyFetchOneScoreTempQuery()
-    console.log(listScoreTemp)
-    const [listCriteriaDetail, setListCriteriaDetail] = useState<ICriteriaDetail[]>([])
+    // const [triggerScoreTemp, { data: listScoreTemp, isLoading: loadingScoreTemp, isError: errorScoreTemp }] = useLazyFetchOneScoreTempQuery()
+    const [trigger, { data: listCriteria, isSuccess: isSuccessFetchOneCriteria, isError: isErrorFetchOneCriteria, isLoading: isLoadingCriteria }] = useLazyGetScoreFileByFieldQuery()
+    // const [listCriteriaDetail, setListCriteriaDetail] = useState<ICriteriaDetail[]>([])
     useEffect(() => {
-        triggerScoreTemp(13)
-    }, [])
+        if (id) {
+            trigger(Number(id))
+        }
+    }, [id])
     useEffect(() => {
-        if (errorScoreTemp) {
+        console.log(listCriteria)
+    }, [listCriteria])
+    useEffect(() => {
+        if (isErrorFetchOneCriteria) {
             navigate("/err500")
             return
         }
-    }, [errorScoreTemp])
+    }, [isErrorFetchOneCriteria])
 
     const [tabPosition, setTabPosition] = useState<TabPosition>('top');
     const changeTabPosition = (e: RadioChangeEvent) => {
         setTabPosition(e.target.value);
     };
-    // const dataSource: ICriteriaDetail[] = listScoreTemp?.Criteria.map((scoretemp, index) => ({
+    // const dataSource: ICriteriaDetail[] = listCriteria?.Criteria.map((scoretemp, index) => ({
     //     key: index + 1,
     //     _id: scoretemp._id,
     //     ScoreTempId: scoretemp.ScoreTempId,
@@ -146,10 +155,23 @@ const ScoreFileDetail = () => {
         return Object.values(obj);
     };
     const handleFinish = (values: ICriteriaDetail) => {
-        const valuesArr = convertObjectToArray(values)
-        const newCode = randomCode()
-        const newObject = { ScoreTempId: listScoreTemp._id, Status: 1, Score: 100, IsActive: 1, Code: newCode, EmployeeId: 2, listScoreFileDetail: valuesArr }
-        console.log(newObject)
+        // const valuesArr = convertObjectToArray(values)
+        // const newCode = randomCode()
+        // const newObject = { ScoreTempId: listScoreTemp._id, Status: 1, Score: 100, IsActive: 1, Code: newCode, EmployeeId: 2, listScoreFileDetail: valuesArr }
+        // Swal.fire({
+        //     title: "Xác nhận Nộp phiếu ?",
+        //     showCancelButton: true,
+        //     text: "Sau khi nộp phiếu sẽ không thể sửa lại phiếu chấm.",
+        //     confirmButtonColor: "#1677ff",
+        //     confirmButtonText: "Xác nhận",
+        //     cancelButtonText: "Hủy",
+        //     icon: "question",
+        // }).then((results) => {
+        //     if (results.isConfirmed) {
+        //         console.log(newObject)
+        //         toast.success("Xóa thành công!")
+        //     }
+        // })
     };
     function randomCode() {
         const characCode = "ABCDEGHIKLNMIOUXZ";
@@ -165,18 +187,18 @@ const ScoreFileDetail = () => {
     }
     return (
         <div>
-            {loadingScoreTemp ? <div>loading data...</div> : ""}
-            <h1 className='my-4 font-semibold text-[16px]'>{listScoreTemp?.Name}</h1>
+            {isLoadingCriteria ? <div>loading data...</div> : ""}
+            <h1 className='my-4 font-semibold text-[16px]'>{listCriteria?.NameScoreTemp}</h1>
             <Form form={form} onFinish={handleFinish}>
                 <Tabs
                     tabPosition='top'
-                    items={listScoreTemp?.Criteria.map((criteria, index) => ({
+                    items={listCriteria?.Criteria.map((criteria, index) => ({
                         label: `${criteria.Name}`,
                         key: String(index + 1),
                         children: <CriteriaTable criteria={criteria} form={form} index={index} />,
                     }))}
                 />
-                <Button type="primary" htmlType="submit">Submit</Button>
+                <Button type="primary" htmlType="submit" className='mt-3'>Nộp phiếu</Button>
             </Form>
         </div>
     )

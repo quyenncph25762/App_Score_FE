@@ -62,6 +62,7 @@ const ApproveInformation = () => {
         Swal.fire({
             title: "Xác nhận duyệt ?",
             showCancelButton: true,
+            text: "Sau khi duyệt phiếu , phiếu sẽ được gửi lên đơn vị cao hơn ",
             confirmButtonColor: "#1677ff",
             confirmButtonText: "Xác nhận",
             cancelButtonText: "Hủy",

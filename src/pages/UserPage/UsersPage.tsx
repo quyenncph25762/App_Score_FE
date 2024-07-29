@@ -393,6 +393,7 @@ const UsersPage = () => {
             const password = "123456";
             // Tạo đối tượng mới với ApartmentId đã chuyển đổi
             const newValues = { ...values, Password: password };
+
             const results = await onAddUser(newValues)
             if (results.error) {
                 message.error(`Thêm thất bại , vui lòng thử lại!`);
@@ -422,6 +423,7 @@ const UsersPage = () => {
     const onFinishUpdate = async (values: IUser) => {
         try {
             if (getOneUser) {
+                console.log({ _id: getOneUser._id, ...values })
                 const results = await onUpdateUser({ _id: getOneUser._id, ...values })
                 if (results.error) {
                     message.error(`Cập nhật thất bại , vui lòng thử lại!`);

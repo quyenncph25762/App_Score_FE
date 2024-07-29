@@ -7,19 +7,18 @@ const scoreFileApi = createApi({
     reducerPath: "scorefile",
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,
-        prepareHeaders: (headers) => {
-            const token = Cookies.get('Countryside');
-            if (token) {
-                headers.set('Authorization', `${token}`);
-            }
-            return headers;
-        },
+        credentials: "include"
     }),
     tagTypes: ["scorefiles"],
     endpoints: (builder) => ({
         // fetchAll
         fetchAllScoreFile: builder.query<IScoreFile[], void>({
             query: () => `/get-scorefile`,
+            providesTags: ["scorefiles"]
+        }),
+        // get scorefile By Employee field
+        getScoreFileByField: builder.query<IScoreFile, number>({
+            query: (id) => `/${id}/get-one-scorefile-employee-field`,
             providesTags: ["scorefiles"]
         }),
         // tao phieu cham
@@ -33,7 +32,7 @@ const scoreFileApi = createApi({
         }),
         // fetchOne
         fetchOneScoreFile: builder.query<IScoreFile, number>({
-            query: (id) => `/getOne-scoreFile/${id}`,
+            query: (id) => `/${id}/getOne-scoreFile`,
             providesTags: ["scorefiles"]
         }),
         // xoa vao thung rac
@@ -56,5 +55,5 @@ const scoreFileApi = createApi({
     })
 })
 
-export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation } = scoreFileApi
+export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation, useLazyGetScoreFileByFieldQuery } = scoreFileApi
 export default scoreFileApi
