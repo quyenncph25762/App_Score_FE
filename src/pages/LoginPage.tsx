@@ -2,20 +2,17 @@ import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { Button, Form, Input, Radio } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { IUser } from '../store/users/user.interface';
-import { Link, useNavigate } from 'react-router-dom';
+import { json, Link, useNavigate } from 'react-router-dom';
 import { useLoginApiMutation } from '../store/auth/auth.service';
 import { toast } from 'react-toastify';
-import { useCookies } from 'react-cookie';
+import SetCookies from '../hooks/SetCookies';
 
 const LoginPage = () => {
     const [form] = Form.useForm();
     const [onLogin] = useLoginApiMutation()
     const navigate = useNavigate()
-    const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
     const onFinish = async (values: IUser) => {
         try {
-            const expiryDate = new Date();
-            expiryDate.setTime(expiryDate.getTime() + (60 * 60 * 1000));
             const { UserName, Password } = values
             const NewValues = {
                 UserName: UserName,
@@ -23,11 +20,11 @@ const LoginPage = () => {
                 DistrictId: 1
             }
             const results = await onLogin(NewValues)
-            setCookie("Countryside", results?.data?.token, { expires: expiryDate })
             if (results.error) {
                 toast.error("Tài khoản hoặc mật khẩu không chính xác")
                 return
             }
+            SetCookies("Countryside", results.data.token)
             toast.success("Đăng nhập thành công!")
             navigate("/")
         } catch (error) {

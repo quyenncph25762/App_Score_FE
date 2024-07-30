@@ -36,9 +36,6 @@ const ScoreFileTable = (props: IProps) => {
             title: 'Chỉ tiêu',
             dataIndex: 'Target',
             align: 'center',
-            render: (_, value: IScoreFileDetail) => (
-                <p className='font-semibold text-sm'>{123}</p>
-            )
         },
         {
             title: 'Tỉ lệ %',

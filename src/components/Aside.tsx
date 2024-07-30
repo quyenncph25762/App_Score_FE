@@ -24,7 +24,7 @@ import { IUser } from '../store/users/user.interface';
 import { toast } from 'react-toastify';
 import { Alert } from 'antd';
 import Marquee from 'react-fast-marquee';
-import { useCookies } from 'react-cookie';
+import RemoveCookies from '../hooks/RemoveCookies';
 const { Header, Sider, Content } = Layout;
 const { Option } = Select
 type MenuItem = Required<MenuProps>["items"][number];
@@ -77,7 +77,7 @@ const Aside = () => {
     const [form] = Form.useForm();
     // formChangePass
     const [formChangePass] = Form.useForm()
-    const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
+    // const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
 
     // modal
     const [open, setOpen] = useState(false);
@@ -170,8 +170,7 @@ const Aside = () => {
         gapList: 4
     }
     const handleLogout = async () => {
-        console.log(cookies)
-        removeCookie('Countryside');
+        RemoveCookies("Countryside")
         toast.success("Đăng xuất thành công!");
         navigate("/login");
     };

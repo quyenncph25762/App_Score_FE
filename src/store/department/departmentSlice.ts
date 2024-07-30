@@ -24,7 +24,6 @@ const departmentSlice = createSlice({
         },
         searchDepartmentSlice: (state: IDepartmentState, actions: PayloadAction<IDepartmentSearchState>) => {
             const nameTerm = actions.payload.searchTerm.toLocaleLowerCase().trim()
-            console.log(nameTerm)
             const departmentFilter = actions.payload.departments.filter((department) => department.IsDeleted === 0 && stringToSlug(department.Name).toLocaleLowerCase().trim().includes(nameTerm))
             state.departments = departmentFilter
         },

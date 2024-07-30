@@ -60,6 +60,8 @@ const SearchInfomation = () => {
     const listUserReducer = useSelector((state: RootState) => state.userSlice.users)
     // tim kiem
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
+        toast.warning("Hiện chức năng đang phát triển")
+        return
         setNameSearch(value)
         triggerListUser({ page: 1, searchName: value })
     };
@@ -77,6 +79,8 @@ const SearchInfomation = () => {
     // loc theo thanh pho , huyen
     const handleDistrictByProvince = (IdProvince: number) => {
         if (IdProvince) {
+            toast.warning("Hiện chức năng đang phát triển")
+            return
             dispatch(listUserFilterByAddressSlice({ provinceId: IdProvince, districtId: undefined, users: ListUser?.results }))
             triggerDistrict(IdProvince)
         }
@@ -117,11 +121,10 @@ const SearchInfomation = () => {
                 if (results.isConfirmed) {
                     // Loc ra id nhan vao phat phieu
                     const filterUser = filterValuesNotUndefine.filter((user) => user.EmployeeId === id)
-                    console.log(filterUser[0])
-                    return
+
                     const results = await onAddScoreFile(filterUser[0])
                     if (results.error) {
-                        return toast.error(`Phát phiếu không thành công`)
+                        return toast.error(`Phát phiếu không thành công do năm của phiếu không khớp với phiếu`)
                     }
                     toast.success(`Phát phiếu thành công`)
                     form.resetFields()
@@ -129,6 +132,7 @@ const SearchInfomation = () => {
             })
         }
     }
+    console.log(`listUserReducer:`, listUserReducer)
     return (
         <div>
             <div className="flex gap-2">
@@ -140,7 +144,6 @@ const SearchInfomation = () => {
             <Search onSearch={onSearch} placeholder="Hãy nhập vào đây ..." enterButton="Tìm kiếm" size="large" />
             <Space className='mt-4'>
                 <p>Lọc theo:</p>
-                {/* province */}
                 <Select
                     showSearch
                     placeholder="Tìm kiếm tỉnh"
@@ -151,7 +154,6 @@ const SearchInfomation = () => {
                         <Option value={`${item._id}`} key={item._id}>{item.Name}</Option>
                     ))}
                 </Select>
-                {/* district */}
                 <Select
                     showSearch
                     placeholder="Tìm kiếm huyện"
@@ -195,7 +197,7 @@ const SearchInfomation = () => {
                                             ))}
                                         </Select>
                                     </Form.Item>
-                                    <Form.Item label="Năm" name={[index, "YearId"]} >
+                                    <Form.Item label="Năm phiếu chấm" name={[index, "YearId"]} >
                                         <Select
                                             showSearch
                                             placeholder="Chọn số năm"

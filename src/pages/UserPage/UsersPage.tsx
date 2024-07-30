@@ -305,7 +305,7 @@ const UsersPage = () => {
                     <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
                         <EditFilled className='text-xl text-yellow-400 cursor-pointer' onClick={() => showModalUpdate(value._id!)} />
                     </Tooltip>
-                    <Popconfirm
+                    {/* <Popconfirm
                         title={`Xóa tải khoản: ${value.Customer}`}
                         onConfirm={() => confirmDelete(value._id!)}
                         okText="Yes"
@@ -315,7 +315,7 @@ const UsersPage = () => {
                         <Tooltip title="Xóa" color={'red'} key={'red'}>
                             <DeleteFilled className='text-xl text-red-500' />
                         </Tooltip>
-                    </Popconfirm>
+                    </Popconfirm> */}
                 </Space>
             )
         },
@@ -365,6 +365,8 @@ const UsersPage = () => {
 
     // nút xóa tất cả
     const handleDeleteAll = async (listUser: IUser[]) => {
+        toast.warning("Hiện chức năng đang phát triển")
+        return
         if (listUser.length > 0) {
             const listUserId = listUser.map((user) => user._id)
             Swal.fire({
@@ -509,11 +511,11 @@ const UsersPage = () => {
             {isLoadingUserAPI || isLoadingApartmentApi || isLoadingRole || isLoadingInfo ? <div>loading data...</div> : ""}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí người dùng</h3>
-                <div className="iconDelete-title">
+                {/* <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
                         <Link to={`/users/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
-                </div>
+                </div> */}
                 {isFetchingUser && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             {/* modal them moi nguoi dung */}

@@ -21,7 +21,7 @@ const objectSlice = createSlice({
             state.objects = actions.payload.filter((object) => object.IsDeleted === 1)
         },
         searchObjectSlice: (state: IObjectState, actions: PayloadAction<ISearchState>) => {
-            const nameTerm = actions.payload.searchTerm.toLocaleLowerCase()
+            const nameTerm = stringToSlug(actions.payload.searchTerm).toLocaleLowerCase()
             const listObjectFilter = actions.payload.objects.filter((object) => object.IsDeleted === 0 && object.NameObject && stringToSlug(object.NameObject).toLowerCase().includes(nameTerm))
             state.objects = listObjectFilter
         }

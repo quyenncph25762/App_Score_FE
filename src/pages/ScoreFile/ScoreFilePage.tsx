@@ -1,7 +1,7 @@
 import React, { Dispatch, useEffect, useState } from 'react'
-import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, Tooltip } from 'antd';
+import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, TableColumnsType, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, StarOutlined } from '@ant-design/icons';
+import { CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -19,7 +19,10 @@ import { IScoreFile } from '../../store/scorefile/scofile.interface';
 import { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useLazyGetScoreFileByFieldQuery } from '../../store/scorefile/scorefile.service';
 import { fetchAllScoreFileSlice } from '../../store/scorefile/scoreFileSlice';
 import { useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
-
+import { useIsActiveScoreFileMutation } from '../../store/scorefile/scorefile.service';
+import { ICriteria } from '../../store/criteria/criteria.interface';
+import { IScoreFileDetail } from '../../store/scorefileDetail/scorefileDetail.interface';
+import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
     const values = Form.useWatch([], form);
@@ -67,12 +70,12 @@ const ScoreFilePage = () => {
     const navigate = useNavigate()
     // modal state 
     const [open, setOpen] = useState(false);
-    // modal cap nhat
-    const [openUpdate, setOpenUpdate] = useState(false);
     // state checked
     const [checkStrictly, setCheckStrictly] = useState(false);
     // listDeparment
     const [listScoreFile, setScoreFile] = useState<IScoreFile[]>([])
+    // nut duyet scorefile
+    const [onActive] = useIsActiveScoreFileMutation()
     // form
     const [form] = Form.useForm()
     // form update
@@ -85,7 +88,6 @@ const ScoreFilePage = () => {
 
     // role api & slice
     const { data: listScoreFileApi, isLoading: isLoadingScoreFile, isFetching: isFetchingScoreFile, isError: isErrorScoreFile, isSuccess: isSuccessScoreFile } = useFetchAllScoreFileQuery()
-    console.log(listScoreFileApi)
     // lay 1 role
     // const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyFetchOneScoreFileQuery()
     const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyGetScoreFileByFieldQuery()
@@ -105,33 +107,12 @@ const ScoreFilePage = () => {
     }, [isSuccessScoreFile, listScoreFileApi, dispatch])
     // useEffect khi co getOneDeparrtment
     // modal
-    // show modal them
-    const showModal = () => {
-        form.setFieldsValue({
-            IsDeleted: false
-        })
-        setOpen(true);
-    };
-    const handleOk = () => {
-        setOpen(false);
-    };
-    const handleCancel = () => {
-        setOpen(false);
-        form.resetFields()
-    };
     // show modal cap nhat
     const showModalGetOne = (id: number) => {
-        setOpenUpdate(true);
+        setOpen(true);
         if (id) {
             trigger(id)
         }
-    };
-    const handleOkUpdate = () => {
-        setOpenUpdate(false);
-    };
-    const handleCancelUpdate = () => {
-        setOpenUpdate(false);
-        formUpdate.resetFields()
     };
     // nút checkbox
     const rowSelection: TableRowSelection<IScoreFile> = {
@@ -178,7 +159,8 @@ const ScoreFilePage = () => {
             key: 'action',
             render: (_, value: IScoreFile) => (
                 <Space size="middle" className='flex justify-start'>
-                    {!value.IsActive ?
+                    {/* neu chua cham thi hien */}
+                    {value.Status !== 1 && (!value.IsActive ?
                         <Tooltip title="Xác nhận" color={'green'}>
                             <CheckSquareOutlined className='text-xl text-green-400' onClick={() => handleApprove(value._id!)} />
                         </Tooltip>
@@ -187,12 +169,16 @@ const ScoreFilePage = () => {
                             <Link to={`/scorefile/${value._id}`}>
                                 <HighlightOutlined className='text-xl text-yellow-500' />
                             </Link>
-                        </Tooltip>
-                    }
-                    {value.IsActive === true && value.Status > 0 ? <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
+                        </Tooltip>)}
+
+                    {/* neu cham roi thi hien gui phieu cham */}
+                    {value.Status === 1 && <Tooltip title="Gửi phiếu lên" color={'yellow'}>
+                        <SendOutlined className='text-xl text-yellow-400' onClick={() => handleSendTo(value._id!)} />
+                    </Tooltip>}
+                    {/* xem hien trang */}
+                    {value.IsActive && value.Status > 0 ? <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
                         <EyeFilled className='text-xl text-green-400' onClick={() => showModalGetOne(value._id!)} />
                     </Tooltip> : ""}
-
                     <Popconfirm
                         title="Xóa vai trò"
                         description={`Bạn có chắc muốn xóa: ${value.NameScoreTemp}`}
@@ -209,8 +195,53 @@ const ScoreFilePage = () => {
             )
         },
     ];
+    // func gui phieu
+    const handleSendTo = (id: number) => {
+        Swal.fire({
+            title: "Xác nhận gửi phiếu lên cấp cao hơn ?",
+            showCancelButton: true,
+            confirmButtonColor: "#1677ff",
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+            icon: "question",
+        }).then(async (results) => {
+            try {
+                if (results.isConfirmed) {
+                    // const resultsApi = await onActive(id)
+                    // if (resultsApi.error) {
+                    //     return toast.error("Lỗi khi duyệt phiếu!")
+                    // }
+                    toast.warning("Chức năng hiện đang phát triển")
+                }
+            } catch (error) {
+                return toast.error(error)
+            }
+        })
+    }
+    // func duyet
     const handleApprove = (id: number) => {
-        console.log(id)
+        Swal.fire({
+            title: "Xác nhận duyệt ?",
+            showCancelButton: true,
+            text: "Sau khi duyệt phiếu , thì sẽ tiến hành chấm phiếu",
+            confirmButtonColor: "#1677ff",
+            confirmButtonText: "Xác nhận",
+            cancelButtonText: "Hủy",
+            icon: "question",
+        }).then(async (results) => {
+            try {
+                if (results.isConfirmed) {
+                    const resultsApi = await onActive(id)
+                    if (resultsApi.error) {
+                        return toast.error("Lỗi khi duyệt phiếu!")
+                    }
+                    toast.success("Đã duyệt phiếu thành công!")
+                }
+            } catch (error) {
+                return toast.error(error)
+            }
+        })
+
     }
     // xoa vao thung rac
     const confirmDelete = async (id?: number) => {
@@ -265,9 +296,55 @@ const ScoreFilePage = () => {
             })
         }
     }
+    console.log(getOneScorefile)
+    // Table
+    const columnsPrewView: TableColumnsType<ICriteria> = [
+
+        {
+            title: 'Tên tiêu chí',
+            dataIndex: 'Name',
+            width: 400
+        },
+
+    ];
+    const expandedRowRender = (record: ICriteria) => {
+        const columns: ColumnsType<IScoreFileDetail | ICriteriaDetail> = [
+            { title: "Tên tiêu chí", dataIndex: "Name", key: "Name", width: 700 },
+            { title: 'Chỉ tiêu', dataIndex: 'Target', key: 'Target' },
+            { title: 'Tỷ lệ %', dataIndex: 'IsTypePercent', key: 'IsTypePercent', render: (_, value: IScoreFileDetail) => value.TypePercentValue ? value.TypePercentValue : '' },
+            { title: 'Tổng số', dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', render: (_, value: IScoreFileDetail) => value.TypeTotalValue ? value.TypeTotalValue : '' },
+            { title: 'Hiện trạng', dataIndex: 'IsCurrentStatusType', key: 'IsCurrentStatusType', render: (_, value: IScoreFileDetail) => value.CurrentStatusValue ? value.CurrentStatusValue === 1 ? <p className='text-green-500 font-semibold'>Đạt</p> : value.TypePercentValue : <p className='text-red-500 font-semibold'>Không đạt</p> },
+        ];
+        return (
+            <Table
+                bordered
+                columns={columns}
+                dataSource={record.listCriteria}
+                pagination={false}
+                rowKey="detailId"
+            />
+        );
+    };
+    console.log(getOneScorefile)
+    const dataPreviews: ICriteria[] = getOneScorefile?.Criteria.map((scoretemp, index) => ({
+        key: index + 1,
+        _id: scoretemp._id,
+        ScoreTempId: scoretemp.ScoreTempId,
+        Name: scoretemp.Name,
+        FieldId: scoretemp.FieldId,
+        NameScoreTemp: scoretemp.NameScoreTemp,
+        listCriteria: scoretemp.listCriteria
+    }));
     return (
         <div>
-
+            <Modal
+                title={<p>Chi tiết phiếu chấm: {getOneScorefile?.NameScoreTemp}</p>}
+                width={1200}
+                open={open}
+                onCancel={() => setOpen(false)}
+            >
+                <Table columns={columnsPrewView} expandable={{ expandedRowRender }} dataSource={dataPreviews} bordered pagination={false} />
+            </Modal>
             {isLoadingScoreFile && <div>loading data...</div>}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí số liệu</h3>

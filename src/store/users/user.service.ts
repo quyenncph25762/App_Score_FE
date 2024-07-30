@@ -18,7 +18,7 @@ const usersApi = createApi({
         // xoa vao thung rac
         removeUser: builder.mutation<IIsDeleted[], IIsDeleted>({
             query: ({ id, ...user }) => ({
-                url: `/users/${id}`,
+                url: `/delete-employee`,
                 method: "PATCH",
                 body: user
             }),

@@ -118,8 +118,6 @@ const ScoreTempUpdate = () => {
         try {
             // return
             if (id) {
-                console.log(values)
-                return
                 const results = await onUpdate({ _id: Number(id), ...values })
                 if (results.error) {
                     message.error(`Cập nhật thất bại , vui lòng thử lại!`);

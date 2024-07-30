@@ -16,6 +16,23 @@ const scoreFileApi = createApi({
             query: () => `/get-scorefile`,
             providesTags: ["scorefiles"]
         }),
+        // cham diem
+        updateScoreFile: builder.mutation({
+            query: (data) => ({
+                method: "PATCH",
+                body: data,
+                url: `/update-scorefile`
+            }),
+            invalidatesTags: ["scorefiles"]
+        }),
+        // duyet phieu cham
+        isActiveScoreFile: builder.mutation<IScoreFile, number>({
+            query: (id) => ({
+                url: `/${id}/update-active-scorefile`,
+                method: "PATCH"
+            }),
+            invalidatesTags: ["scorefiles"]
+        }),
         // get scorefile By Employee field
         getScoreFileByField: builder.query<IScoreFile, number>({
             query: (id) => `/${id}/get-one-scorefile-employee-field`,
@@ -55,5 +72,5 @@ const scoreFileApi = createApi({
     })
 })
 
-export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation, useLazyGetScoreFileByFieldQuery } = scoreFileApi
+export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation, useLazyGetScoreFileByFieldQuery, useIsActiveScoreFileMutation, useUpdateScoreFileMutation } = scoreFileApi
 export default scoreFileApi

@@ -224,32 +224,31 @@ const ObjectPage = () => {
         console.log('params', pagination, filters, sorter, extra);
     };
     // nút xóa tất cả
-    const handleDeleteAll = async (listObject: IObject[]) => {
-        if (listObject.length > 0) {
-            const listObjectId = listObject.map((object) => object._id)
-            Swal.fire({
-                title: "Xác nhận xóa mục đã chọn ?",
-                showCancelButton: true,
-                confirmButtonColor: "#1677ff",
-                confirmButtonText: "Xác nhận",
-                cancelButtonText: "Hủy",
-                icon: "question",
-            }).then(async (results) => {
-                if (results.isConfirmed) {
-                    const form: IIsDeleted = {
-                        IsDeleted: true
-                    }
-                    for (const id of listObjectId) {
-                        await onDelete({ id: id, ...form })
-                    }
-                    toast.success("Xóa thành công!")
-                }
-            })
-        }
-    }
+    // const handleDeleteAll = async (listObject: IObject[]) => {
+    //     if (listObject.length > 0) {
+    //         const listObjectId = listObject.map((object) => object._id)
+    //         Swal.fire({
+    //             title: "Xác nhận xóa mục đã chọn ?",
+    //             showCancelButton: true,
+    //             confirmButtonColor: "#1677ff",
+    //             confirmButtonText: "Xác nhận",
+    //             cancelButtonText: "Hủy",
+    //             icon: "question",
+    //         }).then(async (results) => {
+    //             if (results.isConfirmed) {
+    //                 const form: IIsDeleted = {
+    //                     IsDeleted: true
+    //                 }
+    //                 for (const id of listObjectId) {
+    //                     await onDelete({ id: id, ...form })
+    //                 }
+    //                 toast.success("Xóa thành công!")
+    //             }
+    //         })
+    //     }
+    // }
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
         if (value) {
-            dispatch(getAllObjectSlice(listObjectApi))
             dispatch(searchObjectSlice({ searchTerm: value, objects: listObjectReducer }))
         } else {
             dispatch(getAllObjectSlice(listObjectApi))
@@ -275,27 +274,26 @@ const ObjectPage = () => {
     }
     // submit update phòng ban
     const onFinishUpdate = async (values: IObject) => {
-        try {
-            if (getOneObject) {
-                const results = await onUpdate({ _id: getOneObject._id, ...values })
-                if (results.error) {
-                    message.error(`Thêm thất bại , vui lòng thử lại!`);
-                    return
-                }
-                message.success(`Đã sửa thành công`);
-                formUpdate.resetFields()
-                setOpenUpdate(false);
-            }
-        } catch (error) {
-            console.log(error)
-        }
+        // try {
+        //     if (getOneObject) {
+        //         const results = await onUpdate({ _id: getOneObject._id, ...values })
+        //         if (results.error) {
+        //             message.error(`Thêm thất bại , vui lòng thử lại!`);
+        //             return
+        //         }
+        //         message.success(`Đã sửa thành công`);
+        //         formUpdate.resetFields()
+        //         setOpenUpdate(false);
+        //     }
+        // } catch (error) {
+        //     console.log(error)
+        // }
     }
     return (
         <div>
-
             {isLoadingObject && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> loading data...</div>}
             {/* modal them */}
-            <Modal
+            {/* <Modal
                 title="Thêm đối tượng"
                 open={open}
                 width={800}
@@ -364,9 +362,9 @@ const ObjectPage = () => {
                         <SubmitButton form={form} />
                     </Space>
                 </Form>
-            </Modal>
+            </Modal> */}
             {/* modal update */}
-            <Modal
+            {/* <Modal
                 title="Cập nhật đối tượng"
                 open={openUpdate}
                 width={800}
@@ -433,23 +431,23 @@ const ObjectPage = () => {
                         <SubmitButtonUpdate form={formUpdate} />
                     </Space>
                 </Form>
-            </Modal>
+            </Modal> */}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí đối tượng</h3>
-                <div className="iconDelete-title">
+                {/* <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
                         <Link to={`/object/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
-                </div>
+                </div> */}
                 {isFetchingObject && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
                 <Space className='mb-3'>
-                    <Button type='primary' danger onClick={() => handleDeleteAll(listObject)}>Xóa tất cả</Button>
+                    {/* <Button type='primary' danger onClick={() => handleDeleteAll(listObject)}>Xóa tất cả</Button> */}
                     <Search placeholder="Tìm kiếm đối tượng ..." className='w-[300px]' onSearch={onSearch} enterButton />
                     <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
-                <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>
+                {/* <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button> */}
             </div>
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
         </div>

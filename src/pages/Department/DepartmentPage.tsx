@@ -250,6 +250,7 @@ const DepartmentPage = () => {
     }
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
         if (value) {
+            console.log(value)
             dispatch(searchDepartmentSlice({ searchTerm: value, departments: listDepartmentApi }))
         } else {
             dispatch(fetchAllDepartmentSlice(listDepartmentApi))
@@ -260,42 +261,42 @@ const DepartmentPage = () => {
     }
     // submit add phòng ban
     const onFinish = async (values: IDepartment) => {
-        try {
-            const results = await onAdd(values)
-            if (results.error) {
-                message.error(`Thêm thất bại , vui lòng thử lại!`);
-                return
-            }
-            message.success(`Đã thêm thành công phòng: ${values.Name}`);
-            form.resetFields()
-            setOpen(false);
-        } catch (error) {
-            console.log(error)
-        }
+        // try {
+        //     const results = await onAdd(values)
+        //     if (results.error) {
+        //         message.error(`Thêm thất bại , vui lòng thử lại!`);
+        //         return
+        //     }
+        //     message.success(`Đã thêm thành công phòng: ${values.Name}`);
+        //     form.resetFields()
+        //     setOpen(false);
+        // } catch (error) {
+        //     console.log(error)
+        // }
     }
     // submit update phòng ban
-    const onFinishUpdate = async (values: IDepartment) => {
-        try {
-            if (getOneDepartment) {
-                const results = await onUpdate({ _id: getOneDepartment._id, ...values })
-                if (results.error) {
-                    message.error(`Thêm thất bại , vui lòng thử lại!`);
-                    return
-                }
-                message.success(`Đã sửa thành công`);
-                formUpdate.resetFields()
-                setOpenUpdate(false);
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    // const onFinishUpdate = async (values: IDepartment) => {
+    //     try {
+    //         if (getOneDepartment) {
+    //             const results = await onUpdate({ _id: getOneDepartment._id, ...values })
+    //             if (results.error) {
+    //                 message.error(`Thêm thất bại , vui lòng thử lại!`);
+    //                 return
+    //             }
+    //             message.success(`Đã sửa thành công`);
+    //             formUpdate.resetFields()
+    //             setOpenUpdate(false);
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // }
     return (
         <div>
 
             {isLoadingDepartment && <div>loading data...</div>}
             {/* modal them */}
-            <Modal
+            {/* <Modal
                 title="Thêm lĩnh vực"
                 open={open}
                 width={800}
@@ -363,9 +364,9 @@ const DepartmentPage = () => {
                         <SubmitButton form={form} />
                     </Space>
                 </Form>
-            </Modal>
+            </Modal> */}
             {/* modal update */}
-            <Modal
+            {/* <Modal
                 title="Cập nhật lĩnh vực"
                 open={openUpdate}
                 width={800}
@@ -432,24 +433,33 @@ const DepartmentPage = () => {
                         <SubmitButtonUpdate form={formUpdate} />
                     </Space>
                 </Form>
-            </Modal>
+            </Modal> */}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí lĩnh vực</h3>
-                <div className="iconDelete-title">
+                {/* <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
                         <Link to={`/department/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
-                </div>
+                </div> */}
+
                 {isFetchingDepartment && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             <div className="flex justify-between">
+                <Space className='mb-3'>
+                    {/* <Button type='primary' danger onClick={() => handleDeleteAll(listObject)}>Xóa tất cả</Button> */}
+                    <Search placeholder="Tìm kiếm lĩnh vực ..." className='w-[300px]' onSearch={onSearch} enterButton />
+                    <Button onClick={() => handleReset()}>reset</Button>
+                </Space>
+                {/* <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button> */}
+            </div>
+            {/* <div className="flex justify-between">
                 <Space className='mb-3'>
                     <Button type='primary' danger onClick={() => handleDeleteAll(listDepartment)}>Xóa tất cả</Button>
                     <Search placeholder="Tìm kiếm tên lĩnh vực ..." className='w-[300px]' onSearch={onSearch} enterButton />
                     <Button onClick={() => handleReset()}>reset</Button>
                 </Space>
                 <Button type='primary' className='mb-3' onClick={() => showModal()}>Thêm mới</Button>
-            </div>
+            </div> */}
             <Table columns={columns} rowSelection={{ ...rowSelection, checkStrictly }} dataSource={data} bordered onChange={onChange} />
         </div>
     )

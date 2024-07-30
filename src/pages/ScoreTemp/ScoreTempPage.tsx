@@ -17,6 +17,7 @@ import { ICriteria } from '../../store/criteria/criteria.interface';
 import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
 
 
+
 const ScoreTempPage = () => {
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
@@ -24,6 +25,7 @@ const ScoreTempPage = () => {
     const [onRemoveByCheckbox] = useRemoveScoreTempByCheckboxMutation()
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listScoreTemp, setScoreTemp] = useState<IScoreTemp[]>([])
+
     // modal xem chi tiet
     const [open, setOpen] = React.useState<boolean>(false);
     const [loading, setLoading] = React.useState<boolean>(true);

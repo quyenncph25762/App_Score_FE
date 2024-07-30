@@ -69,11 +69,13 @@ const ApproveInformation = () => {
             icon: "question",
         }).then((results) => {
             if (results.isConfirmed) {
-                toast.success("Xóa thành công!")
+                toast.warning("Hiện tính năng đang phát triển")
             }
         })
     };
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
+        toast.warning("Hiện chức năng đang phát triển")
+        return
         if (value) {
             dispatch(fetchAllScoreTempSlice(listScoreTempApi))
             dispatch(searchScoreTempSlice({ searchName: value, scoreTemps: listScoreTempApi }))
