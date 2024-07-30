@@ -179,6 +179,11 @@
   padding-left: 0;
 }
 
+.hide-header-column .ant-table-thead>tr>th {
+  display: none;
+  /* Ẩn tiêu đề của cột đầu tiên */
+}
+
 @keyframes animate {
   0% {
     transform: translateY(0) rotate(0deg);

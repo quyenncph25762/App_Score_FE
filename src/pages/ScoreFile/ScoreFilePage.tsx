@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect, useState } from 'react'
+import React, { Dispatch, useEffect, useRef, useState } from 'react'
 import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, TableColumnsType, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
 import { CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
@@ -296,24 +296,30 @@ const ScoreFilePage = () => {
             })
         }
     }
-    console.log(getOneScorefile)
-    // Table
+    // Table con
     const columnsPrewView: TableColumnsType<ICriteria> = [
-
         {
             title: 'Tên tiêu chí',
             dataIndex: 'Name',
-            width: 400
+            width: 700,
+            render: (_, value: ICriteria) => (
+                <p className='font-semibold'>{value.Name}</p>
+            )
         },
-
+        { title: 'Chỉ tiêu', width: 150 },
+        { title: 'Tỷ lệ %', width: 80 },
+        { title: 'Tổng số', width: 80 },
+        { title: 'Hiện trạng', width: 80 },
     ];
     const expandedRowRender = (record: ICriteria) => {
         const columns: ColumnsType<IScoreFileDetail | ICriteriaDetail> = [
-            { title: "Tên tiêu chí", dataIndex: "Name", key: "Name", width: 700 },
-            { title: 'Chỉ tiêu', dataIndex: 'Target', key: 'Target' },
-            { title: 'Tỷ lệ %', dataIndex: 'IsTypePercent', key: 'IsTypePercent', render: (_, value: IScoreFileDetail) => value.TypePercentValue ? value.TypePercentValue : '' },
-            { title: 'Tổng số', dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', render: (_, value: IScoreFileDetail) => value.TypeTotalValue ? value.TypeTotalValue : '' },
-            { title: 'Hiện trạng', dataIndex: 'IsCurrentStatusType', key: 'IsCurrentStatusType', render: (_, value: IScoreFileDetail) => value.CurrentStatusValue ? value.CurrentStatusValue === 1 ? <p className='text-green-500 font-semibold'>Đạt</p> : value.TypePercentValue : <p className='text-red-500 font-semibold'>Không đạt</p> },
+            { dataIndex: "Name", key: "Name", width: 700 },
+            { dataIndex: 'Target', key: 'Target', width: 150 },
+            {
+                dataIndex: 'IsTypePercent', key: 'IsTypePercent', width: 80, render: (_, value: IScoreFileDetail) => value.TypePercentValue ? value.TypePercentValue : ''
+            },
+            { dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', width: 80, render: (_, value: IScoreFileDetail) => value.TypeTotalValue ? value.TypeTotalValue : '' },
+            { dataIndex: 'IsCurrentStatusType', key: 'IsCurrentStatusType', width: 80, render: (_, value: IScoreFileDetail) => value.CurrentStatusValue ? value.CurrentStatusValue === 1 ? <p className='text-green-500 font-semibold'>Đạt</p> : value.TypePercentValue : <p className='text-red-500 font-semibold'>Không đạt</p> },
         ];
         return (
             <Table
@@ -322,10 +328,10 @@ const ScoreFilePage = () => {
                 dataSource={record.listCriteria}
                 pagination={false}
                 rowKey="detailId"
+                className="hide-header-column"
             />
         );
     };
-    console.log(getOneScorefile)
     const dataPreviews: ICriteria[] = getOneScorefile?.Criteria.map((scoretemp, index) => ({
         key: index + 1,
         _id: scoretemp._id,
@@ -335,15 +341,31 @@ const ScoreFilePage = () => {
         NameScoreTemp: scoretemp.NameScoreTemp,
         listCriteria: scoretemp.listCriteria
     }));
+
     return (
         <div>
             <Modal
-                title={<p>Chi tiết phiếu chấm: {getOneScorefile?.NameScoreTemp}</p>}
+                title={<p>Chi tiết phiếu chấm: {getOneScorefile?.NameScoreTemp} </p>}
                 width={1200}
                 open={open}
                 onCancel={() => setOpen(false)}
             >
-                <Table columns={columnsPrewView} expandable={{ expandedRowRender }} dataSource={dataPreviews} bordered pagination={false} />
+                <Table
+                    columns={columnsPrewView}
+                    expandable={{
+                        expandedRowRender,
+                        defaultExpandAllRows: true,
+                        expandRowByClick: true,
+                        // expandIcon: () => (
+                        //     <></>
+                        // )
+                        // showExpandColumn: false
+                    }}
+                    dataSource={dataPreviews}
+                    bordered
+                    pagination={false}
+                    rowKey="key"
+                />
             </Modal>
             {isLoadingScoreFile && <div>loading data...</div>}
             <div className="flex items-center gap-2">
