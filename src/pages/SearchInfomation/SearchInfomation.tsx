@@ -118,6 +118,7 @@ const SearchInfomation = () => {
                     // Loc ra id nhan vao phat phieu
                     const filterUser = filterValuesNotUndefine.filter((user) => user.EmployeeId === id)
                     console.log(filterUser[0])
+                    return
                     const results = await onAddScoreFile(filterUser[0])
                     if (results.error) {
                         return toast.error(`Phát phiếu không thành công`)

@@ -15,6 +15,7 @@ import { useLazyFetchOneScoreTempQuery, useUpdateScoreTempMutation } from '../..
 import { useFetchAllYearQuery } from '../../store/year/year.service';
 import { useLazyFetchAllCriteriaByScoreTempIdQuery } from '../../store/criteria/criteria.service';
 import { useLazyFetchAllCriteriaDetailByCriteriaQuery } from '../../store/criteriaDetail/criteriaDetail.service';
+import { IScoreTemp } from '../../store/scoretemp/scoretemp.interface';
 
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
@@ -96,7 +97,7 @@ const ScoreTempUpdate = () => {
                 ObjectId: getOneScoreTemp.ObjectId,
                 Description: getOneScoreTemp.Description,
                 YearId: getOneScoreTemp.YearId,
-                Criteria: getOneScoreTemp.Criteria,
+                Criteria: getOneScoreTemp.Criteria[0]._id !== null ? getOneScoreTemp.Criteria : [],
             })
         }
     }, [getOneScoreTemp])
@@ -113,12 +114,13 @@ const ScoreTempUpdate = () => {
         setCheckedCurrentStatus(!checkedCurrentStatus);
     };
     // submit add phiếu chấm
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: IScoreTemp) => {
         try {
             // return
             if (id) {
                 console.log(values)
-                const results = await onUpdate({ _id: id, ...values })
+                return
+                const results = await onUpdate({ _id: Number(id), ...values })
                 if (results.error) {
                     message.error(`Cập nhật thất bại , vui lòng thử lại!`);
                     return
@@ -303,67 +305,61 @@ const ScoreTempUpdate = () => {
                                         </Col>
                                     </Row>
                                     {/* Tiêu chí chi tiết */}
-                                    <Form.Item
-                                        label="Tiêu chí chi tiết"
-                                        name="criteriaDetailName"
 
-                                    >
-                                        <Form.List name={[field.name, 'listCriteria']}>
-                                            {(subFields, subOpt) => (
-                                                <div style={{ display: 'flex', flexDirection: 'column', rowGap: 16, marginTop: "10px" }}>
-                                                    {subFields.map((subField) => (
-                                                        <Row gutter={24} key={subField.key}>
-                                                            <p></p>
-                                                            {/* Nội dung tiêu chí */}
-                                                            <Col span={7}>
-                                                                <Form.Item label="Nội dung tiêu chí" name={[subField.name, 'Name']}>
-                                                                    <TextArea placeholder="Nội dung"></TextArea>
-                                                                </Form.Item>
-                                                            </Col>
-                                                            {/* chỉ tiêu */}
-                                                            <Col span={3}>
-                                                                <Form.Item label="Chỉ tiêu" name={[subField.name, 'Target']}>
-                                                                    <Input placeholder="Chỉ tiêu đạt" />
-                                                                </Form.Item>
-                                                            </Col>
-                                                            {/* tỉ lệ % */}
-                                                            <Col span={3}>
-                                                                <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} valuePropName="checked" initialValue={false}>
-                                                                    <Checkbox>Cho phép nhập</Checkbox>
-                                                                </Form.Item>
-                                                            </Col>
-                                                            {/* Tổng số */}
-                                                            <Col span={3}>
-                                                                <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} valuePropName="checked" initialValue={false}>
-                                                                    <Checkbox>Cho phép nhập</Checkbox>
-                                                                </Form.Item>
-                                                            </Col>
-                                                            {/* Hiện trạng */}
-                                                            <Col span={3}>
-                                                                <div className="pb-[8px]"> Hiện trạng <Tooltip title="Khi hiện trạng không cho phép nhập thì sẽ tích đạt hay không đạt" >
-                                                                    <QuestionCircleOutlined style={{ cursor: "pointer", color: "#1677ff", fontSize: "18px", marginLeft: "8px" }} />
-                                                                </Tooltip></div>
-                                                                <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked" initialValue={false}>
-                                                                    <Checkbox >Cho phép nhập</Checkbox>
-                                                                </Form.Item>
-                                                            </Col>
+                                    <Form.List name={[field.name, 'listCriteria']}>
+                                        {(subFields, subOpt) => (
+                                            <div style={{ display: 'flex', flexDirection: 'column', rowGap: 16, marginTop: "10px" }}>
+                                                {subFields.map((subField) => (
+                                                    <Row gutter={24} key={subField.key}>
+                                                        {/* Nội dung tiêu chí */}
+                                                        <Col span={7}>
+                                                            <Form.Item label="Nội dung tiêu chí" name={[subField.name, 'Name']}>
+                                                                <TextArea placeholder="Nội dung"></TextArea>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        {/* chỉ tiêu */}
+                                                        <Col span={3}>
+                                                            <Form.Item label="Chỉ tiêu" name={[subField.name, 'Target']}>
+                                                                <Input placeholder="Chỉ tiêu đạt" />
+                                                            </Form.Item>
+                                                        </Col>
+                                                        {/* tỉ lệ % */}
+                                                        <Col span={3}>
+                                                            <Form.Item label="Tỉ lệ (%)" name={[subField.name, 'IsTypePercent']} valuePropName="checked" initialValue={false}>
+                                                                <Checkbox>Cho phép nhập</Checkbox>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        {/* Tổng số */}
+                                                        <Col span={3}>
+                                                            <Form.Item label="Tổng số" name={[subField.name, 'IsTypeTotal']} valuePropName="checked" initialValue={false}>
+                                                                <Checkbox>Cho phép nhập</Checkbox>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        {/* Hiện trạng */}
+                                                        <Col span={3}>
+                                                            <div className="pb-[8px]"> Hiện trạng <Tooltip title="Khi hiện trạng không cho phép nhập thì sẽ tích đạt hay không đạt" >
+                                                                <QuestionCircleOutlined style={{ cursor: "pointer", color: "#1677ff", fontSize: "18px", marginLeft: "8px" }} />
+                                                            </Tooltip></div>
+                                                            <Form.Item label="" name={[subField.name, 'IsCurrentStatusType']} valuePropName="checked" initialValue={false}>
+                                                                <Checkbox >Cho phép nhập</Checkbox>
+                                                            </Form.Item>
+                                                        </Col>
 
-                                                            <Col span={3} className='flex items-center justify-center'>
-                                                                <Button type="dashed" onClick={() => {
-                                                                    subOpt.remove(subField.name);
-                                                                }} danger>
-                                                                    Xóa bỏ
-                                                                </Button>
-                                                            </Col>
-                                                        </Row >
-                                                    ))}
-                                                    <Button type="dashed" onClick={() => subOpt.add()} block>
-                                                        + Thêm chi tiết tiêu chí
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </Form.List>
-                                    </Form.Item>
+                                                        <Col span={3} className='flex items-center justify-center'>
+                                                            <Button type="dashed" onClick={() => {
+                                                                subOpt.remove(subField.name);
+                                                            }} danger>
+                                                                Xóa bỏ
+                                                            </Button>
+                                                        </Col>
+                                                    </Row >
+                                                ))}
+                                                <Button type="dashed" onClick={() => subOpt.add()} block>
+                                                    + Thêm chi tiết tiêu chí
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </Form.List>
                                 </Card>
                             ))}
                             <Button type="primary" onClick={() => add()} block>

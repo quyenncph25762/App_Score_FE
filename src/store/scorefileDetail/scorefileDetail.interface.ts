@@ -8,6 +8,9 @@ export interface IScoreFileDetail {
     TypePercentValue: number
     TypeTotalValue: number
     CurrentStatusValue: number
+    IsCurrentStatusType?: boolean
+    IsTypePercent?: boolean
+    IsTypeTotal?: boolean
 }
 
 export interface IScoreFileDetailState {
