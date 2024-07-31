@@ -184,6 +184,10 @@
   /* Ẩn tiêu đề của cột đầu tiên */
 }
 
+/* .ant-table-expanded-row ant-table-expanded-row-level-1 {
+  display: block !important;
+} */
+
 @keyframes animate {
   0% {
     transform: translateY(0) rotate(0deg);

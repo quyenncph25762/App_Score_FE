@@ -9,7 +9,7 @@ const infoEmployeeApi = createApi({
     }),
     tagTypes: ["infoEmployees"],
     endpoints: (builder) => ({
-        fetchInfoEmployeeByEmployeeId: builder.query<IInfoEmployee[], string>({
+        fetchInfoEmployeeByEmployeeId: builder.query<IInfoEmployee[], number>({
             query: (id) => `/${id}/get-all-field-employee`,
             providesTags: ["infoEmployees"]
         })

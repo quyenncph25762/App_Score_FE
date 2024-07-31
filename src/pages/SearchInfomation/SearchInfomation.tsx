@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
 import { listUserFilterByAddressSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice'
 import { useCreateScoreFileMutation } from '../../store/scorefile/scorefile.service'
+import CheckoutFuntion from '../../hooks/funtions/Checkout'
 const { Option } = Select;
 
 // const OPTIONS = ['Apples', 'Nails', 'Bananas', 'Helicopters'];
@@ -42,6 +43,8 @@ const { Option } = Select;
 //     );
 // };
 const SearchInfomation = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const [form] = Form.useForm();
     // id cua nguoi phat phieu

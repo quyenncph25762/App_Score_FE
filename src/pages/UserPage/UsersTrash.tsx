@@ -9,11 +9,9 @@ import { ArrowLeftOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/ic
 import { ColumnsType } from 'antd/es/table'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store'
-import { useLazyFetchListUserQuery, useRevertUserMutation } from '../../store/users/user.service'
+import { useFetchListUserFromTrashQuery, useLazyFetchListUserQuery, useRevertUserAllMutation, useRevertUserMutation } from '../../store/users/user.service'
 import { TableRowSelection } from 'antd/es/table/interface'
 import { Link } from 'react-router-dom'
-import { IDepartment } from '../../store/department/department.interface'
-import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted'
 import { useLazyFetchAllWardQuery } from '../../store/wards/ward.service'
 
 const UsersTrash = () => {
@@ -21,15 +19,17 @@ const UsersTrash = () => {
     const [listUser, setListUser] = useState<IUser[]>([])
     const [checkStrictly, setCheckStrictly] = useState(false);
     // goi list user tu redux-toolkit
-    const [triggerUser, { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi }] = useLazyFetchListUserQuery()
+    const { data: ListUserAPI, isError: isErrorListUser, isFetching: isFetchingUser, isLoading: isLoadingUserAPI, isSuccess: isSuccessUserApi } = useFetchListUserFromTrashQuery()
+    console.log(ListUserAPI)
     const [triggerWard, { data: wards, isError: isErrorWards }] = useLazyFetchAllWardQuery()
+    // revert
     const [onRevert] = useRevertUserMutation()
+    // revertAll
+    const [onRevertAll] = useRevertUserAllMutation()
     if (isErrorListUser || isErrorWards) {
         console.log("Lỗi không call được dữ liệu từ server!")
         return
     }
-    // danh sach list user tu redux
-    const listUserReducer = useSelector((state: RootState) => state.userSlice?.users)
     // nút checkbox
     const rowSelection: TableRowSelection<IUser> = {
         onChange: (selectedRowKeys, selectedRows) => {
@@ -49,12 +49,6 @@ const UsersTrash = () => {
             // console.log(selected, selectedRows, changeRows);
         },
     };
-    // dispatch vao redux
-    useEffect(() => {
-        if (ListUserAPI?.results.length > 0) {
-            dispatch(listUsersTrashSlice(ListUserAPI))
-        }
-    }, [isSuccessUserApi, ListUserAPI])
     // column
     const columns: ColumnsType<IUser> = [
         {
@@ -107,12 +101,9 @@ const UsersTrash = () => {
             )
         },
     ];
-    const confirmRevert = async (id?: string) => {
+    const confirmRevert = async (id?: number) => {
         if (id) {
-            const form: IIsDeleted = {
-                IsDeleted: false
-            }
-            const results = await onRevert({ id: id, ...form })
+            const results = await onRevert(id)
             if (results.error) {
                 toast.error("Khôi phục thất bại!")
                 return
@@ -121,7 +112,7 @@ const UsersTrash = () => {
         }
     }
     // data 
-    const data: IUser[] = listUserReducer.map((user, index) => ({
+    const data: IUser[] = ListUserAPI?.map((user, index) => ({
         key: index + 1,
         _id: user._id,
         Email: user.Email,
@@ -160,11 +151,13 @@ const UsersTrash = () => {
                     icon: "question",
                 }).then(async (results) => {
                     if (results.isConfirmed) {
-                        const form = {
-                            IsDeleted: false
-                        }
+                        const arrId: number[] = []
                         for (const id of listUserId) {
-                            await onRevert({ id: id, ...form })
+                            arrId.push(Number(id))
+                        }
+                        const resultsRevert = await onRevertAll(arrId)
+                        if (resultsRevert.error) {
+                            return toast.error("Khôi phục thành công!")
                         }
                         toast.success("Khôi phục thành công!")
                     }

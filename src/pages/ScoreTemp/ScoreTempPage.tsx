@@ -191,17 +191,23 @@ const ScoreTempPage = () => {
         {
             title: 'Tên tiêu chí',
             dataIndex: 'Name',
-            width: 400
+            width: 700,
+            render: (_, value: ICriteria) => (
+                <p className='font-semibold'>{value.Name}</p>
+            )
         },
-
+        { title: 'Chỉ tiêu', width: 150 },
+        { title: 'Tỷ lệ %', width: 80 },
+        { title: 'Tổng số', width: 80 },
+        { title: 'Hiện trạng', width: 80 },
     ];
     const expandedRowRender = (record: ICriteria) => {
         const columns: ColumnsType<ICriteriaDetail> = [
-            { title: "Tên tiêu chí", dataIndex: "Name", key: "Name" },
-            { title: 'Chỉ tiêu', dataIndex: 'Target', key: 'Target' },
-            { title: 'Tỷ lệ %', dataIndex: 'IsTypePercent', key: 'IsTypePercent', render: value => value ? 'Cho nhập' : 'Không nhập' },
-            { title: 'Tổng số', dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', render: value => value ? 'Cho nhập' : 'Không nhập' },
-            { title: 'Hiện trạng', dataIndex: 'IsCurrentStatusType', key: 'IsCurrentStatusType', render: value => value ? 'Cho nhập' : 'Không nhập' },
+            { dataIndex: "Name", key: "Name", width: 700 },
+            { dataIndex: 'Target', key: 'Target', width: 150 },
+            { dataIndex: 'IsTypePercent', key: 'IsTypePercent', width: 80, render: value => value ? 'Cho nhập' : 'Không nhập' },
+            { dataIndex: 'IsTypeTotal', key: 'IsTypeTotal', width: 80, render: value => value ? 'Cho nhập' : 'Không nhập' },
+            { dataIndex: 'IsCurrentStatusType', width: 80, key: 'IsCurrentStatusType', render: value => value ? 'Cho nhập' : 'Không nhập' },
         ];
         return (
             <Table
@@ -210,6 +216,7 @@ const ScoreTempPage = () => {
                 dataSource={record.listCriteria}
                 pagination={false}
                 rowKey="detailId"
+                className="hide-header-column"
             />
         );
     };
@@ -231,7 +238,7 @@ const ScoreTempPage = () => {
                 open={open}
                 onCancel={() => setOpen(false)}
             >
-                <Table columns={columnsPrewView} expandable={{ expandedRowRender }} dataSource={dataPreviews} bordered pagination={false} />
+                <Table columns={columnsPrewView} expandable={{ expandedRowRender, expandRowByClick: true, defaultExpandAllRows: true }} dataSource={dataPreviews} bordered pagination={false} />
             </Modal>
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí phiếu chấm</h3>

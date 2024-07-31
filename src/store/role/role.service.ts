@@ -7,7 +7,8 @@ import { IId } from "../interface/_id/id.interface";
 const roleApi = createApi({
     reducerPath: "roles",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        credentials: "include"
     }),
     tagTypes: ["roles"],
     endpoints: (builder) => ({

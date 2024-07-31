@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { IPaginateUser, IUser } from "./user.interface";
 import { BASE_URL } from "../../config/configApi";
 import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
+import { IId } from "../interface/_id/id.interface";
 
 const usersApi = createApi({
     reducerPath: "employees",
@@ -14,27 +15,47 @@ const usersApi = createApi({
             query: ({ page, searchName }) => `/getAllEmployee?page=${page}&searchName=${searchName}`,
             providesTags: ["employees"]
         }),
+        fetchListUserFromTrash: builder.query<IUser[], void>({
+            query: () => `/trash-employee`,
+            providesTags: ["employees"]
+        }),
 
         // xoa vao thung rac
-        removeUser: builder.mutation<IIsDeleted[], IIsDeleted>({
-            query: ({ id, ...user }) => ({
-                url: `/delete-employee`,
+        removeUser: builder.mutation<IUser, number>({
+            query: (id) => ({
+                url: `/${id}/delete-employee`,
+                method: "PATCH"
+            }),
+            invalidatesTags: ["employees"]
+        }),
+        // xoa nhieu vao thung rac
+        removeUserAll: builder.mutation<number[], number[]>({
+            query: (arrId) => ({
+                url: `/delete-all-selected-employee`,
                 method: "PATCH",
-                body: user
+                body: arrId
             }),
             invalidatesTags: ["employees"]
         }),
         // khoi khuc
-        revertUser: builder.mutation<IIsDeleted[], IIsDeleted>({
-            query: ({ id, ...user }) => ({
-                url: `/users/${id}`,
+        revertUser: builder.mutation<IUser[], number>({
+            query: (id) => ({
+                url: `/${id}/restore-employee`,
+                method: "PATCH"
+            }),
+            invalidatesTags: ["employees"]
+        }),
+        // khoi khuc
+        revertUserAll: builder.mutation<number[], number[]>({
+            query: (arrId) => ({
+                url: `/restore-all-selected-employee`,
                 method: "PATCH",
-                body: user
+                body: arrId
             }),
             invalidatesTags: ["employees"]
         }),
         // lay 1 user
-        fetchOneUser: builder.query<IUser, string>({
+        fetchOneUser: builder.query<IUser, number>({
             query: (id) => `/${id}/getOne-Employee`,
             providesTags: ["employees"]
         }),
@@ -68,5 +89,5 @@ const usersApi = createApi({
     })
 })
 
-export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation } = usersApi;
+export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation, useFetchListUserFromTrashQuery, useRemoveUserAllMutation, useRevertUserAllMutation } = usersApi;
 export default usersApi;

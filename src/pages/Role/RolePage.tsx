@@ -15,6 +15,7 @@ import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
 import { IRole } from '../../store/role/role.interface';
 import { useAddRoleMutation, useFetchAllRoleQuery, useLazyFetchOneRoleQuery, useRemoveRoleToTrashByCheckboxMutation, useRemoveRoleToTrashMutation, useUpdateRoleMutation } from '../../store/role/role.service';
 import { fetchAllRoleSlice, searchRoleSlice } from '../../store/role/roleSlice';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -59,6 +60,8 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
     );
 };
 const RolePage = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     // modal state 

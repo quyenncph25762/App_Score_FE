@@ -7,6 +7,7 @@ import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import Search, { SearchProps } from 'antd/es/input/Search';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 
 interface DataType {
     key: React.Key;
@@ -17,6 +18,8 @@ interface DataType {
     english: number;
 }
 const Criteria = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listCriteria, setCriteria] = useState<DataType[]>([])
     // nút checkbox

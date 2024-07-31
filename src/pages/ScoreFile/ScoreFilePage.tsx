@@ -23,6 +23,7 @@ import { useIsActiveScoreFileMutation } from '../../store/scorefile/scorefile.se
 import { ICriteria } from '../../store/criteria/criteria.interface';
 import { IScoreFileDetail } from '../../store/scorefileDetail/scorefileDetail.interface';
 import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
     const values = Form.useWatch([], form);
@@ -66,6 +67,8 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
     );
 };
 const ScoreFilePage = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     // modal state 

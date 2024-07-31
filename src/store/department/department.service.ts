@@ -6,7 +6,8 @@ import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 const departmentApi = createApi({
     reducerPath: "departments",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        credentials: "include"
     }),
     tagTypes: ["departments"],
     endpoints: (builder) => ({

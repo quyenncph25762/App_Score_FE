@@ -14,6 +14,7 @@ import { useAddObjectMutation, useFetchAllObjectQuery, useLazyFetchOneObjectQuer
 import { IObject } from '../../store/object/object.interface';
 import { getAllObjectSlice, searchObjectSlice } from '../../store/object/objectSlice';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -58,6 +59,8 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
     );
 };
 const ObjectPage = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     // modal state 

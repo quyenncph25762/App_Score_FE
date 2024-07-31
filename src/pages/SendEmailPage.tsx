@@ -1,9 +1,10 @@
 import { ArrowLeftOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { Button, Form, Input, Radio, Tooltip } from 'antd';
+import { Button, Form, Input, message, Radio, Tooltip } from 'antd';
 import React, { useState } from 'react';
 import { IUser } from '../store/users/user.interface';
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom"
+
 const SendEmailPage = () => {
     const [form] = Form.useForm();
     const navigate = useNavigate()
@@ -14,6 +15,9 @@ const SendEmailPage = () => {
             console.log(error)
         }
     };
+    const handleSendMail = () => {
+        return message.warning(`Tính năng hiện đang phát triển`);
+    }
     return (
         <>
             <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
@@ -72,7 +76,7 @@ const SendEmailPage = () => {
                                             <Input placeholder="abc@gmail.com" />
                                         </Form.Item>
                                         <div className="relative">
-                                            <Button type='primary'>Gửi</Button>
+                                            <Button onClick={() => handleSendMail()} type='primary'>Gửi</Button>
                                         </div>
                                     </div>
                                 </div>

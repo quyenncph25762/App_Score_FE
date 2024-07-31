@@ -18,6 +18,7 @@ import { useLazyFetchOneScoreFileQuery } from '../../store/scorefile/scorefile.s
 import { IScoreFile } from '../../store/scorefile/scofile.interface';
 import { DownOutlined } from '@ant-design/icons';
 import { useLazyFetchAllCriteriaByScoreTempIdQuery } from '../../store/criteria/criteria.service';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 const { Option } = Select;
 interface ExpandedDataType {
     key: React.Key;
@@ -30,6 +31,8 @@ const items = [
     { key: '2', label: 'Action 2' },
 ];
 const ApproveInformation = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     const [isModalOpen, setIsModalOpen] = useState(false)

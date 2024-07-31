@@ -8,9 +8,9 @@ import Swal from 'sweetalert2';
 import { toast, ToastContainer } from 'react-toastify';
 import { RcFile, UploadChangeParam, UploadFile, UploadProps } from 'antd/es/upload';
 import { SearchProps } from 'antd/es/input/Search';
-import { useAddUserMutation, useLazyFetchListUserQuery, useLazyFetchOneUserQuery, useRemoveUserMutation, useUpdateUserMutation } from '../../store/users/user.service';
+import { useAddUserMutation, useLazyFetchListUserQuery, useLazyFetchOneUserQuery, useRemoveUserAllMutation, useRemoveUserMutation, useUpdateUserMutation } from '../../store/users/user.service';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteUserSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice';
+import { deleteUserAllSlice, deleteUserSlice, listUserSearchSlice, listUsersSlice } from '../../store/users/userSlice';
 import { RootState } from '../../store';
 import { IUser } from '../../store/users/user.interface';
 import { useFetchAllProvinceQuery } from '../../store/province/province.service';
@@ -27,6 +27,8 @@ import { useFetchAllRoleQuery } from '../../store/role/role.service';
 import Item from 'antd/es/list/Item';
 import { useLazyFetchInfoEmployeeByEmployeeIdQuery } from '../../store/infoEmployee/infoEmployee.service';
 import { IInfoEmployee } from '../../store/infoEmployee/infoEmployee.interface';
+import randomCode from '../../hooks/funtions/RandomCode';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 const { Option } = Select;
 const { Search } = Input;
 
@@ -75,18 +77,6 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
 };
 
 
-function randomCode() {
-    const characCode = "ABCDEGHIKLNMIOUXZ";
-    let result = '';
-    const length = 6
-    const characCodeLength = characCode.length
-    for (let i = 0; i < length; i++) {
-        const locationCode = Math.floor(Math.random() * characCodeLength)
-        const code = characCode[locationCode]
-        result += code
-    }
-    return result
-}
 function randomUserName() {
     const characCode = "1234567890";
     let result = 'USER';
@@ -102,6 +92,8 @@ function randomUserName() {
 
 
 const UsersPage = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     // truyen props tu app
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
@@ -136,11 +128,15 @@ const UsersPage = () => {
     // lay 1 user theo id
     // ondelete user
     const [onDeleteUser] = useRemoveUserMutation()
+    // ondelete user
+    const [onDeleteUserAll] = useRemoveUserAllMutation()
     // onadd user
     const [onAddUser] = useAddUserMutation()
     // onUpdate user
     const [onUpdateUser] = useUpdateUserMutation()
-    // 
+    // state apartmentId de an tinh huuyen xa (huyen thi khong duoc chon xa)
+    const [apartmentId, setApartmentId] = useState<number>(null)
+    // checkbox
     const [checkStrictly, setCheckStrictly] = useState(false);
     const [listUser, setListUser] = useState<IUser[]>([])
     // state luu ten search
@@ -196,8 +192,22 @@ const UsersPage = () => {
             })
             triggerDistrict(getOneUser.CityId)
             triggerWard(getOneUser.DistrictId)
+            setApartmentId(Number(getOneUser.ApartmentId))
         }
     }, [isSuccessGetOneUser, getOneUser, listInfoEmployee])
+    // useEffect(() => {
+    //     if (apartmentId !== 3) {
+    //         formUpdate.setFieldsValue({
+    //             WardId: undefined,
+    //         })
+    //     }
+    //     if (apartmentId === 1) {
+    //         formUpdate.setFieldsValue({
+    //             DistrictId: undefined,
+    //             WardId: undefined,
+    //         })
+    //     }
+    // }, [apartmentId])
 
     // nút checkbox
     const rowSelection: TableRowSelection<IUser> = {
@@ -245,7 +255,7 @@ const UsersPage = () => {
         form.resetFields()
     };
     // show Modal update
-    const showModalUpdate = (id: string) => {
+    const showModalUpdate = (id: number) => {
         if (id) {
             // trigger getOneEmployee
             trigger(id)
@@ -305,7 +315,7 @@ const UsersPage = () => {
                     <Tooltip title="Chỉnh sửa" color={'yellow'} key={'yellow'}>
                         <EditFilled className='text-xl text-yellow-400 cursor-pointer' onClick={() => showModalUpdate(value._id!)} />
                     </Tooltip>
-                    {/* <Popconfirm
+                    <Popconfirm
                         title={`Xóa tải khoản: ${value.Customer}`}
                         onConfirm={() => confirmDelete(value._id!)}
                         okText="Yes"
@@ -315,17 +325,14 @@ const UsersPage = () => {
                         <Tooltip title="Xóa" color={'red'} key={'red'}>
                             <DeleteFilled className='text-xl text-red-500' />
                         </Tooltip>
-                    </Popconfirm> */}
+                    </Popconfirm>
                 </Space>
             )
         },
     ];
-    const confirmDelete = async (id?: string) => {
+    const confirmDelete = async (id?: number) => {
         if (id) {
-            const form: IIsDeleted = {
-                IsDeleted: true
-            }
-            const results = await onDeleteUser({ id: id, ...form })
+            const results = await onDeleteUser(id)
             if (results.error) {
                 toast.error("Xóa thất bại!")
                 return
@@ -365,8 +372,6 @@ const UsersPage = () => {
 
     // nút xóa tất cả
     const handleDeleteAll = async (listUser: IUser[]) => {
-        toast.warning("Hiện chức năng đang phát triển")
-        return
         if (listUser.length > 0) {
             const listUserId = listUser.map((user) => user._id)
             Swal.fire({
@@ -378,11 +383,14 @@ const UsersPage = () => {
                 icon: "question",
             }).then(async (results) => {
                 if (results.isConfirmed) {
-                    const form: IIsDeleted = {
-                        IsDeleted: true
-                    }
+                    const arrId: number[] = []
                     for (const id of listUserId) {
-                        await onDeleteUser({ id: id, ...form })
+                        arrId.push(id)
+                    }
+                    const resultsDelete = await onDeleteUserAll(arrId)
+                    dispatch(deleteUserAllSlice(arrId))
+                    if (resultsDelete.error) {
+                        return toast.error("Xóa không thành công!")
                     }
                     toast.success("Xóa thành công!")
                 }
@@ -395,10 +403,11 @@ const UsersPage = () => {
             const password = "123456";
             // Tạo đối tượng mới với ApartmentId đã chuyển đổi
             const newValues = { ...values, Password: password };
-
+            console.log(newValues)
+            return
             const results = await onAddUser(newValues)
             if (results.error) {
-                message.error(`Thêm thất bại , vui lòng thử lại!`);
+                message.error(`Email hoặc tên đăng nhập đã tồn tại!`);
                 return
             }
             message.success(`Đã thêm thành công người dùng: ${values.FullName}`);
@@ -467,6 +476,7 @@ const UsersPage = () => {
     // loc theo thanh pho , huyen
     const handleDistrictByProvince = (IdProvince: number) => {
         if (IdProvince) {
+            form.setFieldsValue({ DistrictId: null, WardId: null });
             triggerDistrict(IdProvince)
         }
     }
@@ -506,16 +516,31 @@ const UsersPage = () => {
         label: apartment.Name,
         value: apartment._id
     }))
+    const handleApartmentId = (value: any) => {
+        // console.log(value.target.value)
+        const valueApartment = value.target.value
+        if (valueApartment !== 3) {
+            form.setFieldsValue({ WardId: null });
+            formUpdate.setFieldsValue({ WardId: null });
+        }
+        if (valueApartment === 1) {
+            formUpdate.setFieldsValue({ DistrictId: null, WardId: null });
+            form.setFieldsValue({ DistrictId: null, WardId: null });
+        }
+        if (valueApartment > 0) {
+            setApartmentId(value.target.value)
+        }
+    }
     return (
         <div className=''>
             {isLoadingUserAPI || isLoadingApartmentApi || isLoadingRole || isLoadingInfo ? <div>loading data...</div> : ""}
             <div className="flex items-center gap-2">
                 <h3 className='text-title mb-0'>Quản lí người dùng</h3>
-                {/* <div className="iconDelete-title">
+                <div className="iconDelete-title">
                     <Tooltip title="Thùng rác của bạn" color='red'>
                         <Link to={`/users/trash`}><DeleteOutlined color='red' /></Link>
                     </Tooltip>
-                </div> */}
+                </div>
                 {isFetchingUser && <div> <Spin indicator={<LoadingOutlined spin />} size="small" /> Update data ...</div>}
             </div>
             {/* modal them moi nguoi dung */}
@@ -569,7 +594,7 @@ const UsersPage = () => {
                                     <Form.Item label="Cấp tài khoản" name="ApartmentId" rules={[
                                         { required: true, message: '* Không được để trống' },
                                     ]}>
-                                        <Radio.Group options={radioApartmentsAdd}>
+                                        <Radio.Group onChange={handleApartmentId} options={radioApartmentsAdd}>
                                         </Radio.Group>
                                     </Form.Item>
                                 </Col>
@@ -767,14 +792,14 @@ const UsersPage = () => {
                         </Col>
                         {/* district */}
                         <Col span={8}>
-                            <Form.Item name="DistrictId" label="Huyện" rules={[
-                                { required: true, message: '* Không được để trống' }
-                            ]}>
+                            <Form.Item name="DistrictId" label="Huyện">
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
                                     optionFilterProp="children"
                                     onChange={handleWardByDistrictId}
+                                    disabled={apartmentId === 1 ? true : false}
+
                                 >
                                     {districts?.map((item, index) => (
                                         <Option value={`${item._id}`} key={index}>{item.Name}</Option>
@@ -784,13 +809,12 @@ const UsersPage = () => {
                         </Col>
                         {/* ward */}
                         <Col span={8}>
-                            <Form.Item name="WardId" label="Xã" rules={[
-                                { required: true, message: '* Không được để trống' }
-                            ]}>
+                            <Form.Item name="WardId" label="Xã">
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm xã"
                                     optionFilterProp="children"
+                                    disabled={apartmentId !== 3 ? true : false}
                                 >
                                     {wards?.map((item, index) => (
                                         <Option value={`${item._id}`} key={index}>{item.Name}</Option>
@@ -844,7 +868,7 @@ const UsersPage = () => {
                                     <Form.Item label="Cấp tài khoản" name="ApartmentId" rules={[
                                         { required: true, message: '* Không được để trống' },
                                     ]}>
-                                        <Radio.Group options={radioApartmentsUpdate}>
+                                        <Radio.Group onChange={handleApartmentId} options={radioApartmentsUpdate}>
 
                                         </Radio.Group>
                                     </Form.Item>
@@ -1046,29 +1070,27 @@ const UsersPage = () => {
                         </Col>
                         {/* district */}
                         <Col span={8}>
-                            <Form.Item name="DistrictId" label="Huyện" rules={[
-                                { required: true, message: '* Không được để trống' }
-                            ]}>
+                            <Form.Item name="DistrictId" label="Huyện">
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm huyện"
                                     optionFilterProp="children"
                                     onChange={handleWardByDistrictId}
                                     options={selectDistricts}
+                                    disabled={apartmentId === 1 ? true : false}
                                 >
                                 </Select>
                             </Form.Item>
                         </Col>
                         {/* ward */}
                         <Col span={8}>
-                            <Form.Item name="WardId" label="Xã" rules={[
-                                { required: true, message: '* Không được để trống' }
-                            ]}>
+                            <Form.Item name="WardId" label="Xã">
                                 <Select
                                     showSearch
                                     placeholder="Tìm kiếm xã"
                                     optionFilterProp="children"
                                     options={selectWards}
+                                    disabled={apartmentId !== 3 ? true : false}
                                 >
                                 </Select>
                             </Form.Item>

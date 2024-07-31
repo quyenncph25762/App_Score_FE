@@ -6,7 +6,8 @@ import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 const criteriaApi = createApi({
     reducerPath: "criteria",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        credentials: "include"
     }),
     tagTypes: ["criteria"],
     endpoints: (builder) => ({

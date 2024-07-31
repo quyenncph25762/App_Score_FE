@@ -6,7 +6,8 @@ import { IIsDeleted } from "../interface/IsDeleted/IsDeleted";
 const objectApi = createApi({
     reducerPath: "objects",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        credentials: "include"
     }),
     tagTypes: ["objects"],
     endpoints: (builer) => ({

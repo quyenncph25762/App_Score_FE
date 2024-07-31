@@ -39,8 +39,11 @@ const userSlice = createSlice({
             state.users = actions.payload.results
             state.pagination = actions.payload.pagination;
         },
-        deleteUserSlice: (state: IUserState, actions: PayloadAction<string>) => {
+        deleteUserSlice: (state: IUserState, actions: PayloadAction<number>) => {
             state.users = state.users.filter((user) => user._id !== actions.payload)
+        },
+        deleteUserAllSlice: (state: IUserState, actions: PayloadAction<number[]>) => {
+            state.users = state.users.filter((user) => !actions.payload.includes(user._id))
         },
         listUsersTrashSlice: (state: IUserState, actions: PayloadAction<IPaginateUser>) => {
             state.users = actions.payload.results
@@ -63,5 +66,5 @@ const userSlice = createSlice({
     })
 })
 
-export const { listUsersSlice, deleteUserSlice, listUsersTrashSlice, listUserSearchSlice, listUserFilterByAddressSlice } = userSlice.actions
+export const { listUsersSlice, deleteUserSlice, listUsersTrashSlice, listUserSearchSlice, listUserFilterByAddressSlice, deleteUserAllSlice } = userSlice.actions
 export default userSlice.reducer

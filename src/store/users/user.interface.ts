@@ -1,5 +1,5 @@
 export interface IUser {
-    _id?: string
+    _id?: number
     FullName: string
     Code: string
     IsActive: boolean

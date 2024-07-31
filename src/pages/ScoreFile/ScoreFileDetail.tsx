@@ -10,10 +10,13 @@ import { toast } from 'react-toastify';
 import { useLazyGetScoreFileByFieldQuery, useUpdateScoreFileMutation } from '../../store/scorefile/scorefile.service';
 import ScoreFileTable from './ScoreFileTable';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 
 type TabPosition = 'left' | 'right' | 'top' | 'bottom';
 
 const ScoreFileDetail = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const { id } = useParams()
     const [form] = Form.useForm()

@@ -16,6 +16,7 @@ import TextArea from 'antd/es/input/TextArea';
 import Error500 from '../Error500';
 import { useRemoveUserMutation } from '../../store/users/user.service';
 import { IIsDeleted } from '../../store/interface/IsDeleted/IsDeleted';
+import CheckoutFuntion from '../../hooks/funtions/Checkout';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -60,6 +61,8 @@ const SubmitButtonUpdate = ({ form }: { form: FormInstance }) => {
     );
 };
 const DepartmentPage = () => {
+    // funtion kiem tra xem nguoi dung dang nhap chua ?
+    CheckoutFuntion()
     const dispatch: Dispatch<any> = useDispatch()
     const navigate = useNavigate()
     // modal state 

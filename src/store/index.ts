@@ -20,6 +20,7 @@ import criteriaDetailApi from './criteriaDetail/criteriaDetail.service'
 import yearAPI from './year/year.service'
 import scoreFileApi from './scorefile/scorefile.service'
 import scoreFileSlice from './scorefile/scoreFileSlice'
+import statisticApi from './statistic/statistic.service'
 
 
 export const store = configureStore({
@@ -54,6 +55,8 @@ export const store = configureStore({
         [yearAPI.reducerPath]: yearAPI.reducer,
         // scorefile
         [scoreFileApi.reducerPath]: scoreFileApi.reducer,
+        // statistics
+        [statisticApi.reducerPath]: statisticApi.reducer,
         // user
         userSlice: userSlice,
         // department
@@ -83,7 +86,8 @@ export const store = configureStore({
             criteriaApi.middleware,
             criteriaDetailApi.middleware,
             yearAPI.middleware,
-            scoreFileApi.middleware
+            scoreFileApi.middleware,
+            statisticApi.middleware
         ),
 })
 

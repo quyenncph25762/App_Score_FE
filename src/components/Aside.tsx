@@ -63,7 +63,7 @@ const SubmitButtonChangePass = ({ form }: { form: FormInstance }) => {
 
     return (
         <Button type="primary" htmlType="submit" disabled={!submittable} className='bg-blue-500'>
-            Thêm
+            Đổi mật khẩu
         </Button>
     );
 };
@@ -186,7 +186,8 @@ const Aside = () => {
     // onsubmit ChangPass
     const onFinish = async (values: IUser) => {
         try {
-            console.log(values)
+            message.warning(`Tính năng hiện đang phát triển`);
+            return
             message.success(`Đã thêm thành công người dùng`);
             // sau khi them xong thi reset value
             form.resetFields()
@@ -464,7 +465,7 @@ const Aside = () => {
                     banner
                     message={
                         <Marquee pauseOnHover gradient={false}>
-                            Hê hê hê <SmileOutlined className='ml-2' />
+                            Hệ thống đang chạy trên phiên bản thử nghiệm
                         </Marquee>
                     }
                 />
