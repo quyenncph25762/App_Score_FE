@@ -6,7 +6,7 @@ import { json, Link, useNavigate } from 'react-router-dom';
 import { useLoginApiMutation } from '../store/auth/auth.service';
 import { toast } from 'react-toastify';
 import SetCookies from '../hooks/SetCookies';
-
+import sha256 from 'crypto-js/sha256';
 const LoginPage = () => {
     const [form] = Form.useForm();
     const [onLogin] = useLoginApiMutation()
@@ -14,9 +14,11 @@ const LoginPage = () => {
     const onFinish = async (values: IUser) => {
         try {
             const { UserName, Password } = values
+            var hashedPassword = sha256(Password).toString()
+
             const NewValues = {
                 UserName: UserName,
-                Password: Password,
+                Password: hashedPassword,
                 DistrictId: 1
             }
             const results = await onLogin(NewValues)
@@ -24,6 +26,9 @@ const LoginPage = () => {
                 toast.error("Tài khoản hoặc mật khẩu không chính xác")
                 return
             }
+            const { customer, name, roleId, avatar } = results.data
+            const userLocal: any = { customer: customer, fullName: name, roleId: roleId, avatar: avatar }
+            localStorage.setItem("userLocal", JSON.stringify(userLocal))
             SetCookies("Countryside", results.data.token)
             toast.success("Đăng nhập thành công!")
             navigate("/")

@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import Search, { SearchProps } from 'antd/es/input/Search'
 import FormItem from 'antd/es/form/FormItem'
-import { useLazyFetchListUserQuery } from '../../store/users/user.service'
+import { useLazyFetchListAdminByToScoreFileQuery, useLazyFetchListUserQuery } from '../../store/users/user.service'
 import { IUser } from '../../store/users/user.interface'
 import Swal from 'sweetalert2'
 import { toast } from 'react-toastify'
@@ -19,29 +19,6 @@ import { listUserFilterByAddressSlice, listUserSearchSlice, listUsersSlice } fro
 import { useCreateScoreFileMutation } from '../../store/scorefile/scorefile.service'
 import CheckoutFuntion from '../../hooks/funtions/Checkout'
 const { Option } = Select;
-
-// const OPTIONS = ['Apples', 'Nails', 'Bananas', 'Helicopters'];
-// const SubmitButton = ({ form }: { form: FormInstance }) => {
-//     const [submittable, setSubmittable] = React.useState(false);
-//     const values = Form.useWatch([], form);
-
-//     React.useEffect(() => {
-//         form?.validateFields({ validateOnly: true }).then(
-//             () => {
-//                 setSubmittable(true);
-//             },
-//             () => {
-//                 setSubmittable(false);
-//             },
-//         );
-//     }, [values]);
-
-//     return (
-//         <Button type="primary" htmlType="submit" disabled={!submittable} className='bg-blue-500 mt-3 max-w-[200px] mb-4'>
-//             Tiến hành phát phiếu
-//         </Button>
-//     );
-// };
 const SearchInfomation = () => {
     // funtion kiem tra xem nguoi dung dang nhap chua ?
     CheckoutFuntion()
@@ -56,11 +33,13 @@ const SearchInfomation = () => {
     const navigate = useNavigate()
     // api object
     const { data: ListObjectAPI, isError: isErrorListObject, isFetching: isFetchingObject, isLoading: isLoadingObjectAPI, isSuccess: isSuccessObjectApi } = useFetchAllObjectQuery()
+
     // api User
-    const [triggerListUser, { data: ListUser, isLoading: LoadingListUser, isFetching: FetchingListUser, isError: ErrorListUser, isSuccess: isSuccessUser }] = useLazyFetchListUserQuery()
+    const [triggerListUser, { data: ListUser, isLoading: LoadingListUser, isFetching: FetchingListUser, isError: ErrorListUser, isSuccess: isSuccessUser }] = useLazyFetchListAdminByToScoreFileQuery()
     // api year
     const { data: listYear, isLoading: LoadingYear, isFetching: FetchingYear, isError: ErrorYear } = useFetchAllYearQuery()
     const listUserReducer = useSelector((state: RootState) => state.userSlice.users)
+
     // tim kiem
     const onSearch: SearchProps['onSearch'] = (value, _e, info) => {
         toast.warning("Hiện chức năng đang phát triển")
@@ -124,13 +103,20 @@ const SearchInfomation = () => {
                 if (results.isConfirmed) {
                     // Loc ra id nhan vao phat phieu
                     const filterUser = filterValuesNotUndefine.filter((user) => user.EmployeeId === id)
-
-                    const results = await onAddScoreFile(filterUser[0])
-                    if (results.error) {
-                        return toast.error(`Phát phiếu không thành công do năm của phiếu không khớp với phiếu`)
+                    if (filterUser.length > 0) {
+                        const results = await onAddScoreFile(filterUser[0])
+                        if (results.error) {
+                            return toast.error(`Phát phiếu không thành công do năm của phiếu không khớp với phiếu`)
+                        }
+                        toast.success(`Phát phiếu thành công`)
+                        form.resetFields()
+                    } else {
+                        return Swal.fire({
+                            icon: "error",
+                            title: "Lỗi khi phát phiếu",
+                            text: "Hãy chọn đối tượng phát phiếu và năm của phiếu !",
+                        });
                     }
-                    toast.success(`Phát phiếu thành công`)
-                    form.resetFields()
                 }
             })
         }

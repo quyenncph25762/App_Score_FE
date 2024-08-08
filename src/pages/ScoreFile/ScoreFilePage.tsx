@@ -1,7 +1,7 @@
 import React, { Dispatch, useEffect, useRef, useState } from 'react'
 import { Badge, Button, Col, Form, FormInstance, Input, message, Modal, Popconfirm, Result, Row, Space, Spin, Switch, Table, TableColumnsType, Tooltip } from 'antd';
 import type { ColumnsType, TableProps } from 'antd/es/table';
-import { CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, CheckSquareOutlined, CrownOutlined, DeleteFilled, DeleteOutlined, EditFilled, EyeFilled, HighlightOutlined, LoadingOutlined, SendOutlined, StarOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { TableRowSelection } from 'antd/es/table/interface';
 import Swal from 'sweetalert2';
@@ -16,7 +16,7 @@ import { IRole } from '../../store/role/role.interface';
 import { useAddRoleMutation, useFetchAllRoleQuery, useLazyFetchOneRoleQuery, useRemoveRoleToTrashByCheckboxMutation, useRemoveRoleToTrashMutation, useUpdateRoleMutation } from '../../store/role/role.service';
 import { fetchAllRoleSlice, searchRoleSlice } from '../../store/role/roleSlice';
 import { IScoreFile } from '../../store/scorefile/scofile.interface';
-import { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useLazyGetScoreFileByFieldQuery } from '../../store/scorefile/scorefile.service';
+import { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useLazyGetScoreFileByFieldQuery, useSendToDistrictMutation } from '../../store/scorefile/scorefile.service';
 import { fetchAllScoreFileSlice } from '../../store/scorefile/scoreFileSlice';
 import { useRemoveScoreTempToTrashMutation } from '../../store/scoretemp/scoretemp.service';
 import { useIsActiveScoreFileMutation } from '../../store/scorefile/scorefile.service';
@@ -24,6 +24,7 @@ import { ICriteria } from '../../store/criteria/criteria.interface';
 import { IScoreFileDetail } from '../../store/scorefileDetail/scorefileDetail.interface';
 import { ICriteriaDetail } from '../../store/criteriaDetail/criteriaDetail.interface';
 import CheckoutFuntion from '../../hooks/funtions/Checkout';
+import { IUserLocal } from '../../store/interface/userLocal/userLocal.interface';
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
     const values = Form.useWatch([], form);
@@ -77,23 +78,22 @@ const ScoreFilePage = () => {
     const [checkStrictly, setCheckStrictly] = useState(false);
     // listDeparment
     const [listScoreFile, setScoreFile] = useState<IScoreFile[]>([])
+    // useState luu userLocal vao 
+    const [userSignin, setUserSignin] = useState<IUserLocal>()
     // nut duyet scorefile
     const [onActive] = useIsActiveScoreFileMutation()
-    // form
-    const [form] = Form.useForm()
-    // form update
-    const [formUpdate] = Form.useForm()
+    // nut gui len (isSend)
+    const [handleIsSend] = useSendToDistrictMutation()
     // nut xoa
     const [onDelete] = useRemoveScoreTempToTrashMutation()
     // nut xoa nhieu
     const [onDeleteByCheckBox] = useRemoveRoleToTrashByCheckboxMutation()
     // setValue mac dinh cho form add
-
     // role api & slice
     const { data: listScoreFileApi, isLoading: isLoadingScoreFile, isFetching: isFetchingScoreFile, isError: isErrorScoreFile, isSuccess: isSuccessScoreFile } = useFetchAllScoreFileQuery()
-    // lay 1 role
-    // const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyFetchOneScoreFileQuery()
+    // lay tat ca tieu chi theo scorefile (moi tai khoan cham theo field)
     const [trigger, { data: getOneScorefile, isSuccess: isSuccessFetchOneScorefile, isError: isErrorFetchOneScorefile }] = useLazyGetScoreFileByFieldQuery()
+    // reducer listScoreFile
     const listScoreFileReducer = useSelector((state: RootState) => state.scoreFileSlice.scorefiles)
     // useEffect khi co loi
     useEffect(() => {
@@ -109,6 +109,16 @@ const ScoreFilePage = () => {
         }
     }, [isSuccessScoreFile, listScoreFileApi, dispatch])
     // useEffect khi co getOneDeparrtment
+
+    // useEffect khi lan dau vao trang
+    useEffect(() => {
+        // lay tu trong localstorage
+        const userLocal = JSON.parse(localStorage.getItem("userLocal"))
+        // neu co thi moi set vao state
+        if (userLocal) {
+            setUserSignin(userLocal)
+        }
+    }, [])
     // modal
     // show modal cap nhat
     const showModalGetOne = (id: number) => {
@@ -175,11 +185,22 @@ const ScoreFilePage = () => {
                         </Tooltip>)}
 
                     {/* neu cham roi thi hien gui phieu cham */}
-                    {value.Status === 1 && <Tooltip title="Gửi phiếu lên" color={'yellow'}>
-                        <SendOutlined className='text-xl text-yellow-400' onClick={() => handleSendTo(value._id!)} />
-                    </Tooltip>}
+                    {/* Chấm rồi thì mới active box này */}
+                    {value.Status === 1 ?
+                        // chi co admin moi co the thuc hien dc thao tac
+                        userSignin?.roleId === 1 && <>
+                            {value.IsSend === 0 ? <Tooltip title="Gửi phiếu lên" color={'yellow'}>
+                                <SendOutlined className='text-xl text-yellow-400' onClick={() => handleSendTo(value._id!)} />
+                            </Tooltip>
+                                :
+                                // neu gui roi thi hien icon gui thanh cong
+                                <Tooltip title={`Gửi thành công`} color={'#1677ff'}>
+                                    <CheckCircleOutlined className='text-xl text-[#1677ff] cursor-pointer' />
+                                </Tooltip>}
+                        </>
+                        : ""}
                     {/* xem hien trang */}
-                    {value.IsActive && value.Status > 0 ? <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
+                    {value.IsActive && value.Status !== 0 ? <Tooltip title="Xem hiện trạng" color={'green'} key={'green'}>
                         <EyeFilled className='text-xl text-green-400' onClick={() => showModalGetOne(value._id!)} />
                     </Tooltip> : ""}
                     <Popconfirm
@@ -210,11 +231,11 @@ const ScoreFilePage = () => {
         }).then(async (results) => {
             try {
                 if (results.isConfirmed) {
-                    // const resultsApi = await onActive(id)
-                    // if (resultsApi.error) {
-                    //     return toast.error("Lỗi khi duyệt phiếu!")
-                    // }
-                    toast.warning("Chức năng hiện đang phát triển")
+                    const results = await handleIsSend(id)
+                    if (results.error) {
+                        return toast.error("Gửi phiếu thất bại")
+                    }
+                    toast.success("Đã gửi phiếu thành công")
                 }
             } catch (error) {
                 return toast.error(error)
@@ -269,6 +290,7 @@ const ScoreFilePage = () => {
         Status: item.Status,
         NameYear: item.NameYear,
         Score: item.Score,
+        IsSend: item.IsSend,
         ScoreFileDetails: item.ScoreFileDetails
     }))
     // nút filter

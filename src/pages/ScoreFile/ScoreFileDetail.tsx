@@ -46,6 +46,7 @@ const ScoreFileDetail = () => {
         return Object.values(obj);
     };
     const handleFinish = (values: ICriteriaDetail) => {
+        // chuyển values object thành array
         const valuesArr = convertObjectToArray(values)
         const newCode = randomCode()
         const newObject = { scoreFileId: id, Status: 1, Code: newCode, listScoreFileDetail: valuesArr }
@@ -85,7 +86,6 @@ const ScoreFileDetail = () => {
         }
         return result
     }
-    console.log(`listCriteria:`, listCriteria)
     return (
         <div>
             {isLoadingCriteria ? <div>loading data...</div> : ""}

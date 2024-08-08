@@ -7,14 +7,22 @@ import { IId } from "../interface/_id/id.interface";
 const usersApi = createApi({
     reducerPath: "employees",
     baseQuery: fetchBaseQuery({
-        baseUrl: BASE_URL
+        baseUrl: BASE_URL,
+        credentials: "include"
     }),
     tagTypes: ["employees"],
     endpoints: (builder) => ({
+        // lay ra tat ca user
         fetchListUser: builder.query<IPaginateUser, { page: number, searchName: string }>({
             query: ({ page, searchName }) => `/getAllEmployee?page=${page}&searchName=${searchName}`,
             providesTags: ["employees"]
         }),
+        // lay ra tat ca admin de phat phieu cham
+        fetchListAdminByToScoreFile: builder.query<IPaginateUser, { page: number, searchName: string }>({
+            query: ({ page, searchName }) => `/get-employee-to-create-scorefile?page=${page}&searchName=${searchName}`,
+            providesTags: ["employees"]
+        }),
+        // lay ra tat ca user trong thung rac
         fetchListUserFromTrash: builder.query<IUser[], void>({
             query: () => `/trash-employee`,
             providesTags: ["employees"]
@@ -89,5 +97,5 @@ const usersApi = createApi({
     })
 })
 
-export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation, useFetchListUserFromTrashQuery, useRemoveUserAllMutation, useRevertUserAllMutation } = usersApi;
+export const { useLazyFetchListUserQuery, useRemoveUserMutation, useAddUserMutation, useLazyFetchOneUserQuery, useUpdateUserMutation, useRevertUserMutation, useFetchListUserFromTrashQuery, useRemoveUserAllMutation, useRevertUserAllMutation, useLazyFetchListAdminByToScoreFileQuery } = usersApi;
 export default usersApi;

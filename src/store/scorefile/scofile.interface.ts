@@ -8,8 +8,9 @@ export interface IScoreFile {
     NameYear: string
     Code: string
     Score: number
-    Status: number
+    Status: boolean | number
     IsActive: boolean
+    IsSend: boolean | number
     Criteria?: ICriteria[]
     ScoreFileDetails: IScoreFileDetail[]
 }

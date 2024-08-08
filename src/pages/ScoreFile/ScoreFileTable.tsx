@@ -36,6 +36,7 @@ const ScoreFileTable = (props: IProps) => {
             title: 'Chỉ tiêu',
             dataIndex: 'Target',
             align: 'center',
+
         },
         {
             title: 'Tỉ lệ %',
@@ -46,7 +47,7 @@ const ScoreFileTable = (props: IProps) => {
                     <Form.Item
                         name={[value._id, 'TypePercentValue']}
                         key={value._id}
-                        initialValue={""}
+                        initialValue={value?.TypePercentValue}
                     >
                         <Input placeholder='Nhập tỉ lệ % đạt được' />
                     </Form.Item>
@@ -66,7 +67,7 @@ const ScoreFileTable = (props: IProps) => {
                     <Form.Item
                         name={[value._id, 'TypeTotalValue']}
                         key={value._id}
-                        initialValue={""}
+                        initialValue={value?.TypeTotalValue}
                     >
                         <Input placeholder='Nhập tổng số' />
                     </Form.Item>
@@ -87,14 +88,14 @@ const ScoreFileTable = (props: IProps) => {
                     <Form.Item
                         name={[value._id, 'CurrentStatusValue']}
                         key={value._id}
-                        initialValue={""}
+                        initialValue={value?.CurrentStatusValue}
                     >
                         <Input placeholder='Nhập hiện trạng' />
                     </Form.Item>
                 ) : <Form.Item
                     name={[value._id, 'CurrentStatusValue']}
                     key={value._id}
-                    initialValue={false}
+                    initialValue={value?.CurrentStatusValue}
                     valuePropName="checked"
                 >
                     <Checkbox key={value._id}>Đạt</Checkbox>

@@ -25,6 +25,7 @@ import { toast } from 'react-toastify';
 import { Alert } from 'antd';
 import Marquee from 'react-fast-marquee';
 import RemoveCookies from '../hooks/RemoveCookies';
+import { IUserLocal } from '../store/interface/userLocal/userLocal.interface';
 const { Header, Sider, Content } = Layout;
 const { Option } = Select
 type MenuItem = Required<MenuProps>["items"][number];
@@ -67,24 +68,33 @@ const SubmitButtonChangePass = ({ form }: { form: FormInstance }) => {
         </Button>
     );
 };
+
+
 const Aside = () => {
     // user state
     const [user, setUser] = useState<string>();
     const [color, setColor] = useState();
     const [gap, setGap] = useState();
+    const [userSignin, setUserSignin] = useState<IUserLocal>()
     const navigate = useNavigate()
     // form tai khoan cua toi
     const [form] = Form.useForm();
     // formChangePass
     const [formChangePass] = Form.useForm()
     // const [cookies, setCookie, removeCookie] = useCookies(['Countryside']);
-
     // modal
     const [open, setOpen] = useState(false);
     // modal thay doi mat khau
     const [openChangePass, setOpenChangePass] = useState(false);
     // 
     const [collapsed, setCollapsed] = useState(false);
+
+    useEffect(() => {
+        const userLocal = JSON.parse(localStorage.getItem("userLocal"))
+        if (userLocal) {
+            setUserSignin(userLocal)
+        }
+    }, [])
     // item nav
     const sideBaritems: MenuItem[] = [
         getItem(<Link to={"/"}>Dashboard</Link >, '1', <PieChartOutlined />),
@@ -164,25 +174,13 @@ const Aside = () => {
             key: '3',
         },
     ];
-    const userLocal = {
-        fullName: "Quyền",
-        colorList: '#f56a00',
-        gapList: 4
-    }
     const handleLogout = async () => {
         RemoveCookies("Countryside")
         toast.success("Đăng xuất thành công!");
         navigate("/login");
     };
     // user
-    useEffect(() => {
-        if (userLocal) {
-            const nameFirstCharacter: string = userLocal.fullName.charAt(0)
-            if (nameFirstCharacter) {
-                setUser(nameFirstCharacter)
-            }
-        }
-    }, [userLocal])
+
     // onsubmit ChangPass
     const onFinish = async (values: IUser) => {
         try {
@@ -450,12 +448,21 @@ const Aside = () => {
                             height: 64,
                         }}
                     />
+
                     <Dropdown className='mr-10' menu={{ items: dropdownItems }} trigger={['click']}>
                         <a onClick={(e) => e.preventDefault()}>
                             <Space>
-                                <Avatar style={{ backgroundColor: color, verticalAlign: 'middle' }} size="large" gap={gap}>
+                                <ul className='leading-none text-right mr-2'>
+                                    <li className='font-semibold'>{userSignin?.customer}</li>
+                                    <li className='mt-2'>{userSignin?.fullName}</li>
+                                </ul>
+                                {/* kiem tra xem co avatar khong , neu khong thi de avatar capybara */}
+                                {userSignin?.avatar ? <Avatar src={userSignin?.avatar} style={{ backgroundColor: color, verticalAlign: 'middle' }} size="large" gap={gap}>
                                     {user}
-                                </Avatar>
+                                </Avatar> : <Avatar src="https://www.rainforest-alliance.org/wp-content/uploads/2021/06/capybara-square-1.jpg.optimal.jpg" style={{ backgroundColor: color, verticalAlign: 'middle' }} size="large" gap={gap}>
+                                    {user}
+                                </Avatar>}
+
                             </Space>
                         </a>
                     </Dropdown>

@@ -60,7 +60,7 @@ const scoreFileApi = createApi({
             }),
             invalidatesTags: ["scorefiles"]
         }),
-        // xoa vao thung rac
+        // cập nhật phiếu chấm
         updateScoreFileById: builder.mutation<IScoreFile[], IScoreFile>({
             query: ({ _id, ...data }) => ({
                 url: "/update-scoreFile/" + _id,
@@ -69,8 +69,16 @@ const scoreFileApi = createApi({
             }),
             invalidatesTags: ["scorefiles"]
         }),
+        // send to district
+        sendToDistrict: builder.mutation<IScoreFile, number>({
+            query: (idScoreFile) => ({
+                method: "GET",
+                url: `/${idScoreFile}/create-scorefile-for-district`
+            }),
+            invalidatesTags: ["scorefiles"]
+        })
     })
 })
 
-export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation, useLazyGetScoreFileByFieldQuery, useIsActiveScoreFileMutation, useUpdateScoreFileMutation } = scoreFileApi
+export const { useFetchAllScoreFileQuery, useLazyFetchOneScoreFileQuery, useRemoveOneScoreFileMutation, useUpdateScoreFileByIdMutation, useCreateScoreFileMutation, useLazyGetScoreFileByFieldQuery, useIsActiveScoreFileMutation, useUpdateScoreFileMutation, useSendToDistrictMutation } = scoreFileApi
 export default scoreFileApi

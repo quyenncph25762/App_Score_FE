@@ -31,7 +31,7 @@ import randomCode from '../../hooks/funtions/RandomCode';
 import CheckoutFuntion from '../../hooks/funtions/Checkout';
 const { Option } = Select;
 const { Search } = Input;
-
+import sha256 from 'crypto-js/sha256';
 
 const SubmitButton = ({ form }: { form: FormInstance }) => {
     const [submittable, setSubmittable] = React.useState(false);
@@ -401,10 +401,9 @@ const UsersPage = () => {
     const onFinish = async (values: IUser) => {
         try {
             const password = "123456";
+            var hashedPassword = sha256(password).toString()
             // Tạo đối tượng mới với ApartmentId đã chuyển đổi
-            const newValues = { ...values, Password: password };
-            console.log(newValues)
-            return
+            const newValues = { ...values, Password: hashedPassword };
             const results = await onAddUser(newValues)
             if (results.error) {
                 message.error(`Email hoặc tên đăng nhập đã tồn tại!`);
@@ -434,6 +433,8 @@ const UsersPage = () => {
     const onFinishUpdate = async (values: IUser) => {
         try {
             if (getOneUser) {
+                console.log(values)
+                return
                 console.log({ _id: getOneUser._id, ...values })
                 const results = await onUpdateUser({ _id: getOneUser._id, ...values })
                 if (results.error) {
